@@ -48,6 +48,13 @@
    **커밋 전 체크**: 이번 작업으로 오래된 CLAUDE.md·TODO.md·docs/ 없는지 확인 후 커밋.
 5. **문서 작성 규칙**: [docs/meta/writing-guide.md](./docs/meta/writing-guide.md) 확인. 일회성 보고서 금지.
 6. **병렬 서브 에이전트 위임**: 독립 작업이고 완료 기준 명확할 때만. 위임 전 사용자 승인. model="sonnet" 기본.
+7. **서브 에이전트 보고 누적 감시 + 영속화**:
+   - 매 회 서브 에이전트 보고의 **Out-of-scope spotted** 와 **Late-discovered docs** 항목을 main 컨텍스트에 누적.
+   - 3건 이상 또는 같은 영역 2건 이상이면 사용자에게 "정리/보강 제안" 형태로 surface.
+   - 사용자 승인 시 `TODO.md` Backlog P2 에 적재 (세션 종료 시 휘발 방지):
+     - Out-of-scope → `T-XX cleanup: <영역>` (코드 정리 작업)
+     - Late-discovered → `T-XX docs: <인덱스/엔트리 보강 영역>` (가이드 보강 작업)
+   - 같은 Late-discovered 가 반복되면 그 자체가 `docs/meta/spec-locations.md` / ADR 제목 컨벤션 / CLAUDE.md entry point 결함의 신호 — 단순 추가가 아닌 *구조 개선* 으로 처리.
 
 ---
 

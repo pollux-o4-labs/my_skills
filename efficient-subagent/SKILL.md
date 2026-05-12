@@ -44,7 +44,8 @@ When you finish, respond with one message containing:
 1. **Files changed** — `path/to/file.py:42-55` form
 2. **Tests added or changed** — file::class/function
 3. **Out-of-scope issues spotted** — anything you noticed but deliberately did not touch (so the supervisor can decide)
-4. **Blockers** — if you couldn't finish, exactly where and why
+4. **Late-discovered docs** — guides/ADRs/specs you found mid-task or that the supervisor pointed you to, that *should have been visible* from the standard context-absorption order. Include the path and one phrase on what was missed. If nothing was missed, say `none`. This signals gaps in `docs/meta/spec-locations.md`, ADR titling, or the entry point — supervisor uses it to strengthen the guides.
+5. **Blockers** — if you couldn't finish, exactly where and why
 
 No self-introduction, no recap of what you understood, no "successfully implemented" framing. Result-only.
 
@@ -58,3 +59,4 @@ No self-introduction, no recap of what you understood, no "successfully implemen
 - *What*-explaining comments on well-named code
 - Self-recap or success-framing in the final message
 - Silently overriding the supervisor's request when conventions conflict — surface it instead
+- Omitting the **Late-discovered docs** field. If nothing was missed, write `none` explicitly — silence reads as forgotten, not perfect
