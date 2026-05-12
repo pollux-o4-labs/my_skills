@@ -53,15 +53,16 @@
 
 ## Agent skills
 
+> `setup-matt-pocock-skills` 가 추가하는 섹션들(Issue tracker / Triage labels / Domain docs)과 같은 `## Agent skills` 헤딩 아래 공존. 헤딩 두 개 만들지 말 것.
+
 ### Sub-agent discipline
 서브 에이전트 투입 전 `efficient-subagent` 스킬 로드. 브리핑 블록: [docs/meta/efficiency-feedback.md](./docs/meta/efficiency-feedback.md).
 
-### Plan lifecycle
-진행 중 결정은 `docs/plans/`에서 `update-plan` 스킬로 관리.
+### ADR status lifecycle
+`docs/adr/` 안 ADR은 `status:` 필드를 가짐 — 진행 중은 `proposed`, 굳어지면 `accepted`, 뒤집히면 `superseded by 000M`. 한 디렉토리에서 통합 관리, 별도 plans 레이어 없음.
 
-### Domain & decisions
-- **Domain glossary**: `CONTEXT.md`
-- **Architectural decisions**: `docs/adr/`
-- **In-flight decisions**: `docs/plans/`
-- **Key file index**: [docs/meta/spec-locations.md](./docs/meta/spec-locations.md)
-- **Docs rules**: [docs/meta/writing-guide.md](./docs/meta/writing-guide.md)
+### Key file index
+[docs/meta/spec-locations.md](./docs/meta/spec-locations.md) — 코드 탐색 전 먼저 확인.
+
+### Docs rules
+[docs/meta/writing-guide.md](./docs/meta/writing-guide.md) — 단일 진실 원천, 일회성 보고서 금지.

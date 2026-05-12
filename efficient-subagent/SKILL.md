@@ -14,8 +14,7 @@ Read in this order, once:
 
 1. **`CLAUDE.md` / `AGENTS.md`** at repo root — project structure, conventions, scripts.
 2. **`CONTEXT.md`** (or per-context `CONTEXT.md` files via `CONTEXT-MAP.md`) — domain glossary. Use these terms verbatim; do not invent synonyms.
-3. **`docs/adr/`** — decisions in the area you are touching. Skim titles; read in full any ADR whose subject overlaps your task.
-4. **`docs/plans/`** — active plans. If your task depends on an unresolved decision in a plan, surface that to the supervisor before proceeding.
+3. **`docs/adr/`** — decisions in the area you are touching. Skim titles; read in full any ADR whose subject overlaps your task. If an overlapping ADR has `status: proposed`, treat the area as in-flight — surface to the supervisor before changing decisions there.
 
 If you find a convention or ADR that *contradicts* the supervisor's request, report it back immediately — do not silently override either side.
 

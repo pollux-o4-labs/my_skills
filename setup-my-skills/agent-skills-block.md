@@ -1,3 +1,5 @@
+> These subsections coexist with any block produced by `setup-matt-pocock-skills` (Issue tracker / Triage labels / Domain docs). Merge under the same `## Agent skills` heading — do not create a second one. `Domain docs` from matt-pocock covers `CONTEXT.md` / `docs/adr/` consumer rules; the entry below adds the ADR write-side convention.
+
 ## Agent skills
 
 ### Sub-agent discipline
@@ -6,14 +8,14 @@ When spawning a sub-agent via the Agent tool, include in the prompt: "Load the `
 
 Reusable efficiency block for sub-agent prompts: `docs/meta/efficiency-feedback.md`.
 
-### Plan lifecycle
+### ADR status lifecycle
 
-In-flight decisions live in `docs/plans/*.md` using the canonical structure (decision table, done criteria, progress log). All edits to decision status, progress entries, and archival go through the `update-plan` skill — do not hand-edit ad-hoc.
+ADRs in `docs/adr/` carry a `status:` field — `proposed` while options are still being weighed, `accepted` once finalised, `superseded by 000M` when reversed. In-flight decisions live alongside finalised ones; no separate plans layer.
 
-### Domain & decisions
+### Key file index
 
-- **Domain glossary**: `CONTEXT.md` (single-context) or `CONTEXT-MAP.md` (multi-context). Sub-agents use these terms verbatim.
-- **Finalised architectural decisions**: `docs/adr/`.
-- **In-flight decisions**: `docs/plans/`. Graduate to ADRs on resolution.
-- **Key file index**: `docs/meta/spec-locations.md` — check here before searching the codebase.
-- **Docs rules**: `docs/meta/writing-guide.md` — single source of truth, no one-off reports.
+`docs/meta/spec-locations.md` — check here before searching the codebase.
+
+### Docs rules
+
+`docs/meta/writing-guide.md` — single source of truth, no one-off reports.
