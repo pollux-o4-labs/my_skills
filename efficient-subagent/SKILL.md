@@ -51,6 +51,21 @@ No self-introduction, no recap of what you understood, no "successfully implemen
 
 **Length**: under 200 words unless the supervisor specified otherwise. Supervisors read the result to pick the next action — verbosity hides the signal.
 
+## Model selection (supervisor 전용 — sub-agent 호출 시)
+
+Sub-agent를 spawn할 때 작업 난이도에 맞춰 `model` 인자를 **반드시** 명시한다.
+명시하지 않으면 parent 모델을 상속 — Opus 메인 세션이면 단순 조사도 Opus로 돌아 낭비된다.
+
+| 작업 유형 | model |
+|---|---|
+| 파일 위치 조회, glob/grep, 단순 listing | `haiku` |
+| 연구, 코드 리뷰, 룰 검증, 일반 구현 | `sonnet` ← 기본 |
+| 복잡한 다중 파일 설계, 아키텍처 추론 | `opus` |
+| 병렬 호출 (여러 sub-agent 동시) | 각 호출마다 개별 명시. 병렬이라고 자동 downgrade 안 됨 |
+| background / worktree isolation 호출 | 동일 룰 적용. 격리 여부와 모델 선택은 독립 |
+
+**판단 기준**: 결과물이 틀렸을 때 재시도 비용 < 처음부터 Opus 쓰는 비용이면 sonnet으로 내린다.
+
 ## Anti-patterns (do not do)
 
 - Out-of-scope cleanup or refactoring
