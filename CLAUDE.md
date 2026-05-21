@@ -7,3 +7,7 @@
 - 디렉토리명 = name (kebab-case), 진입점 = SKILL.md
 - 보조 문서는 스킬 디렉토리 안에 — 루트 오염 금지
 - setup-my-skills → efficient-subagent 의존관계 있음
+
+## 리뷰
+- `review/`는 다른 CLI가 이 스킬 저장소를 사용하며 발견한 불편점과 수정 제안을 모으는 저장소 공용 피드백 폴더
+- 리뷰는 `review/*.md`에 남기고, 어떤 CLI와 어떤 작업에서 나온 피드백인지 적기
