@@ -94,7 +94,8 @@ branch switch → <이름>. 실행 중 프로세스 있으면 재기동 필요. 
 | pytest / mock 으로 충분히 잡히는 영역 (순수 로직, 내부 helper, type fix, import, mock-able 통합) | **AI end-to-end** — sub-agent 자체 test + supervisor 회귀 확인만. supervisor 통보 |
 | 운영 UI / 외부 시스템 의존 / hardware / UX 시나리오 | **supervisor 직접 검증** — cwd 이동 + PR 실측 |
 
-Supervisor 는 middle-merge 안 떠나는 게 default. 진짜 필요한 PR (UI/hardware/알람 흐름) 만 cwd 이동.
+"middle-merge 안 떠나는 게 default" 는 idle 상태 (다른 작업·휴면) 의미.
+supervisor 검증 영역 PR 발생 시 cwd 잠깐 이동 = 자연 — 두 줄은 다른 상황을 다룬다.
 
 ## Middle-merge 통합 검증 패턴 (supervisor 전용)
 
@@ -116,7 +117,7 @@ Supervisor 는 middle-merge 안 떠나는 게 default. 진짜 필요한 PR (UI/h
 ```
 main
  └─ middle-merge (영구)
-     ├─ integration/<type>  ← root 공유. commit 타입별 bucket
+     ├─ integration/<type>  ← root 공유. commit 타입별 bucket. <type> = feat / refactor / docs / chore / test / perf 등 Conventional Commits prefix
      │   └─ <type>/<topic>  ← worktree isolation. 시행착오 sub-branch
      │       └─ fix/<sub>   ← worktree isolation
      ├─ mixed/<topic>       ← root 공유. cross-cutting 직속
@@ -133,8 +134,29 @@ main
 
 | 방향 | 방식 | 이유 |
 |---|---|---|
-| integration → middle-merge | merge commit | 시행착오 맥락 보존 |
+| sub-branch (`<type>/<topic>`, `fix/<sub>`) → integration | merge commit | 시행착오 맥락 보존 |
+| integration → middle-merge | merge commit | 통합 단위 명시 |
+| `fix/<topic>` (단독) → middle-merge | merge commit | sub-branch 와 동일. main squash 시 어차피 압축 |
 | middle-merge → main | squash 1 commit | main history 를 작업 단위 1 줄로 유지 |
+
+### Cross-cutting 판단 기준
+
+한 PR 이 commit type 2개 이상 손대면 cross-cutting:
+
+- docs + code 동시 변경
+- refactor + feat 동시
+- docs + refactor 동시
+
+처리: sub-agent 가 supervisor 에게 알림 → 동의 후 `mixed/<topic>` 직속 middle-merge (integration 우회).
+단일 commit type 안에 머무르면 일반 `integration/<type>` 사용.
+
+### 병렬 작업 머지 순서
+
+여러 integration 이 동시에 ready 상태일 때:
+
+1. 기본 기준: 파일 충돌 적은 순 (보통 docs → refactor → feat)
+2. dependency 있으면 dependency 순서 우선
+3. 최종 결정 = supervisor
 
 ### sub-agent 위임 시 브리핑 예시
 
