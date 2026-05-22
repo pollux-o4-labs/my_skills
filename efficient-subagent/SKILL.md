@@ -97,6 +97,23 @@ branch switch → <이름>. 실행 중 프로세스 있으면 재기동 필요. 
 "middle-merge 안 떠나는 게 default" 는 idle 상태 (다른 작업·휴면) 의미.
 supervisor 검증 영역 PR 발생 시 cwd 잠깐 이동 = 자연 — 두 줄은 다른 상황을 다룬다.
 
+### 4 layer 검증 chain (PR 흐름)
+
+원 작업자 sub-agent 의 PR 을 main supervisor 가 받으면 **즉시 사장에게 보내지 말 것**. code review sub-agent 위임 후 결과 종합 → 사장 검증 게이트.
+
+| Layer | 주체 | 책임 |
+|---|---|---|
+| 1 | 원 작업자 sub-agent | 코드 변경 + 자체 test + PR 생성 |
+| 2 | code review sub-agent | PR diff 객관 review — 보고와 실 변경 일치, scope, 로직, 부작용 점검 |
+| 3 | main supervisor | review 결과 종합 + 사장 보고 |
+| 4 | 사장 | 운영 실측 (cwd 이동 + 시나리오 확인) → 머지 |
+
+code review 위임 prompt 예시:
+- 입력: PR 번호 또는 branch 이름
+- 출력: 변경 file 매핑, scope 검토, 로직 점검, 부작용, OK / 정정 필요 판단
+
+main 이 직접 PR diff 모두 읽는 패턴 (= layer 2 우회) 금지 — 객관 review layer 확보 위해.
+
 ## Middle-merge 통합 검증 패턴 (supervisor 전용)
 
 단순 fix 포함 **모든 작업**에 사용한다. main 직접 PR 은 hotfix (긴급, 단발) 만 허용.
