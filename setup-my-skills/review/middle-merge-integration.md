@@ -83,7 +83,26 @@ main
 
 ---
 
-### 5. CLAUDE.md 협업 컨벤션 섹션 추가 템플릿
+### 5. 병렬 sub-agent 머지 순서 룰
+
+여러 integration/* 가 동시에 ready 상태일 때 supervisor 는 아래 기준으로 순서 결정:
+
+1. **기본**: 파일 충돌 적은 순 (보통 docs → refactor → feat)
+2. **dependency 있으면**: dependency 순서 우선
+3. **최종 결정**: supervisor
+
+sub-agent 가 스스로 순서를 정하지 않는다 — supervisor 에게 알림 후 대기.
+
+---
+
+### 5-b. fix/<topic> 단독 머지 방식
+
+`fix/<topic>` (단독, integration 우회) → middle-merge 방향은 **merge commit** 을 쓴다.
+sub-branch 와 동일 이유: middle-merge → main squash 시 어차피 압축되므로 merge commit 유지가 맥락 추적에 유리.
+
+---
+
+### 6. CLAUDE.md 협업 컨벤션 섹션 추가 템플릿
 
 새 프로젝트의 `CLAUDE.md` 에 아래 블록을 추가하도록 `setup-my-skills` 가 안내한다:
 
@@ -105,6 +124,7 @@ main
 1. `agent-skills-block.md` 에 "Branch 전략" 섹션 추가 (위 템플릿 포함).
 2. `claude-root-template.md` 의 협업 섹션에 sub-main 여부 결정 트리거 질문 추가.
 3. 온보딩 체크리스트에 "middle-merge branch 생성 여부 결정" 항목 추가.
+4. 병렬 sub-agent 머지 순서 룰 (§5) + fix/<topic> 머지 방식 (§5-b) 을 템플릿에 포함.
 
 ---
 
