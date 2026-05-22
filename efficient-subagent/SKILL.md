@@ -149,12 +149,25 @@ main
 
 ### 머지 방식
 
-| 방향 | 방식 | 이유 |
+| 방향 | gh CLI 명령 | 이유 |
 |---|---|---|
-| sub-branch (`<type>/<topic>`, `fix/<sub>`) → integration | merge commit | 시행착오 맥락 보존 |
-| integration → middle-merge | merge commit | 통합 단위 명시 |
-| `fix/<topic>` (단독) → middle-merge | merge commit | sub-branch 와 동일. main squash 시 어차피 압축 |
-| middle-merge → main | squash 1 commit | main history 를 작업 단위 1 줄로 유지 |
+| sub-branch (`<type>/<topic>`, `fix/<sub>`) → integration | `gh pr merge <N> --merge` | 시행착오 맥락 보존 |
+| integration → middle-merge | `gh pr merge <N> --merge` | 통합 단위 명시 |
+| `fix/<topic>` (단독) → middle-merge | `gh pr merge <N> --merge` | sub-branch 와 동일. main squash 시 어차피 압축 |
+| middle-merge → main | **`gh pr merge <N> --squash`** | main history 를 작업 단위 1 줄로 유지 |
+
+> **⚠️ gh CLI 머지 옵션 명시 의무**
+>
+> `gh pr merge <N>` 만 박으면 기본 `--merge` (merge commit) 모드가 된다.
+> middle-merge → main 머지 시 **반드시 `--squash` 명시**:
+>
+> ```powershell
+> gh pr merge <N> --squash    # ✅ middle-merge → main
+> gh pr merge <N> --merge     # ✅ integration → middle-merge, sub-branch → integration
+> ```
+>
+> 옵션 없이 박으면 main 에 merge commit chain 누적 → `git reset --hard` + force push 정정 비용 발생 (실제 사례).
+> merge 방식을 대화형으로 선택하려면 `gh pr merge <N>` (옵션 없이) 로 interactive prompt 사용.
 
 ### Cross-cutting 판단 기준
 
