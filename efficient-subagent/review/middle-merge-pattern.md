@@ -163,16 +163,16 @@ main squash 완료 = 기록 이전 완료. middle-merge 의 merge chain history 
 
 ## 언제 안 쓰나
 
-단순 1 PR fix 는 overhead 불필요 → main 직접.
+main 직접 PR 은 **hotfix (긴급, 단발) 만** 예외.
 
 | 상황 | 패턴 |
 |---|---|
-| 1 PR, 시행착오 없음, 회귀 위험 낮음 | main 직접 머지 |
-| 2개 이상 PR 연쇄 or 시행착오 예상 | middle-merge 사용 |
-| ADR amendment 반복 예상 | middle-merge 사용 |
-| hotfix (긴급, 단발) | main 직접 |
+| 시행착오·다회 PR 예상 | `integration/<type>` (middle-merge 직속) |
+| 단순 1 PR fix (시행착오 없음) | `fix/<topic>` (middle-merge 직속, integration 우회) |
+| cross-cutting (docs+code 등) | `mixed/<topic>` (middle-merge 직속) |
+| hotfix (긴급, 단발) | main 직접 (유일 예외) |
 
-판단 기준: **"이 작업이 1 PR 로 끝날 것 같은가?"** → Yes면 직접, No면 middle-merge.
+판단 기준: **"시행착오·다회 PR 이 예상되는가?"** → Yes면 `integration/<type>`, No면 `fix/<topic>`. 어느 쪽이든 middle-merge 직속 — main 직접 X.
 
 ---
 

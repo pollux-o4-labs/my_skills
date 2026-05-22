@@ -98,9 +98,9 @@ Supervisor 는 middle-merge 안 떠나는 게 default. 진짜 필요한 PR (UI/h
 
 ## Middle-merge 통합 검증 패턴 (supervisor 전용)
 
-여러 연쇄 PR 이 예상되거나 시행착오가 반복될 가능성이 있을 때 사용한다. 단순 1 PR fix 는 overhead 불필요 — main 직접.
+단순 fix 포함 **모든 작업**에 사용한다. main 직접 PR 은 hotfix (긴급, 단발) 만 허용.
 
-**판단 기준**: "이 작업이 1 PR 로 끝날 것 같은가?" → Yes면 main 직접, No면 middle-merge.
+**판단 기준**: "이 작업이 시행착오·다회 PR 이 예상되는가?" → Yes면 `integration/<type>`, No면 `fix/<topic>`. 둘 다 middle-merge 직속 — main 직접 X.
 
 ### Branch 수명
 
@@ -147,8 +147,8 @@ merge 방식 = merge commit (squash X)
 
 ### 언제 안 쓰나
 
-- 1 PR, 시행착오 없음, 회귀 위험 낮음 → main 직접
-- hotfix (긴급, 단발) → main 직접
+- hotfix (긴급, 단발) → main 직접 (유일 예외)
+- 그 외 모든 작업은 middle-merge 경유. 1 PR 도 `fix/<topic>` (middle-merge 직속, L123 참고)
 
 ## Anti-patterns (do not do)
 
