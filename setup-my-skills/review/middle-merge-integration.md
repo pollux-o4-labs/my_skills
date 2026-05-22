@@ -80,6 +80,12 @@ main
 
 ---
 
+### 5. Issue → Branch 자동 세팅
+
+issue tracker 사용 시 main supervisor 가 issue 발행 → middle-merge 하위 branch 자동 생성 → sub-agent 위임. 세부는 efficient-subagent SKILL.md 의 `Issue → Branch 자동 세팅 룰` 참고.
+
+---
+
 ### 6. 환경 구분 (단일 사용자 vs 다인 협업)
 
 | 환경 | 권장 패턴 |

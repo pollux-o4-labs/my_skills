@@ -175,6 +175,24 @@ main
 2. dependency 있으면 dependency 순서 우선
 3. 최종 결정 = supervisor
 
+### Issue → Branch 자동 세팅 룰 (supervisor 전용)
+
+issue 발행 시 main supervisor 가 자동으로 middle-merge 하위 branch 를 만든다 — sub-agent 발사 전 단계.
+
+| 작업 성격 | branch 이름 패턴 | base |
+|---|---|---|
+| 시행착오 다회 PR 예상 | `integration/<type>/<issue-N>` 예: `integration/feat/123` | middle-merge |
+| 단순 1 PR 예상 | `fix/<issue-topic>` 또는 `fix/<issue-N>` 예: `fix/123-emoji-encoding` | middle-merge |
+
+흐름:
+1. issue 발행 (사장 또는 AI)
+2. main supervisor 가 위 패턴으로 branch 생성 + push (또는 local 만)
+3. sub-agent 발사 시 그 branch 를 base 로 박음. sub-branch (`<type>/<topic>`) 는 그 안에서 만듦
+4. sub-agent PR target = issue branch (main X, middle-merge X 도 X)
+5. issue 완료 → issue branch → middle-merge merge commit
+
+issue 단위 = 1 integration branch 매핑 — 한 issue 의 모든 시행착오 PR 이 한 곳에 모임. middle-merge 로 가기 전 통합 검증 단위.
+
 ### sub-agent 위임 시 브리핑 예시
 
 ```
