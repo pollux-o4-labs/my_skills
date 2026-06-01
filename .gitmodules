@@ -1,0 +1,3 @@
+[submodule "md-ebook"]
+	path = md-ebook
+	url = https://github.com/pollux-o4/md2ebook.git
