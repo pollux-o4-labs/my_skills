@@ -7,21 +7,22 @@ description: Converts a Markdown document into a self-contained, offline book-re
 
 `.md` 한 편을 **오프라인 단일 HTML 책 리더**로 변환한다. 외부 라이브러리·CDN·빌드도구 0 — 폰에서도 파일 하나로 열린다. 내용/디자인이 분리돼 있어 내용만 갈아끼우면 된다.
 
-## 변환 (AI 개입 없이 스크립트만)
+## 변환 (둘 중 환경에 맞는 쪽)
 
+둘 다 `reader.html` 의 마크다운 블록만 입력 `.md` 로 바꿔 완성본 HTML 을 만든다. 결과물은 동일하다.
+
+**A. python 있으면 — 스크립트 한 줄 (빠름, 권장)**
 ```
 python build.py <문서.md> [출력.html]
 ```
+출력 경로 생략 시 `<문서>.html`. HTML 을 생성/편집하지 않으므로 토큰 0.
 
-- `reader.html`(템플릿)의 마크다운 블록만 입력 `.md` 로 교체해 완성본 HTML 을 만든다.
-- 출력 경로 생략 시 `<문서>.html` 로 저장.
-- **LLM 이 HTML 을 생성하거나 손댈 필요 없음 — 토큰 0.**
-- 예: `python build.py ../docs/research.md research.html`
+**B. python 없으면 — 마크다운 블록만 교체 (스킬 호출 시 기본 경로)**
+1. `reader.html` 을 출력 경로로 복사한다.
+2. 복사본의 `<script type="text/markdown" id="book-md"> … </script>` 블록 **안 내용만** 입력 `.md` 원문으로 통째 교체한다 (바깥 CSS/JS 는 건드리지 않는다).
+3. 본문에 리터럴 `</script>` 가 있으면 `<\/script>` 로 바꿔 넣는다 (reader 가 읽을 때 자동 원복).
 
-## 직접 편집 (스크립트 없이)
-
-`reader.html` 을 복사해 안의
-`<script type="text/markdown" id="book-md"> … </script>` 블록 내용만 갈아끼운다. 나머지는 건드리지 않는다.
+AI 가 스킬 호출을 받으면 A 를 시도하고, python 이 없으면 B 로 처리한다. 사람이 직접 할 때도 B 와 동일하다.
 
 ## 리더 기능 (런타임, reader.html 내장)
 
@@ -38,6 +39,6 @@ python build.py <문서.md> [출력.html]
 
 ## 안티패턴
 
-- 변환하겠다고 LLM 이 HTML 을 직접 쓰지 말 것 — `build.py` 만 실행.
+- 변환한다고 HTML(CSS/JS)을 새로 만들지 말 것 — `build.py` 실행, 또는 python 이 없으면 마크다운 블록만 교체(위 B).
 - `reader.html` 의 마크다운 블록 밖(CSS/JS)을 내용 교체용으로 수정하지 말 것.
 - 한 줄이면 끝날 메모를 굳이 책 리더로 만들지 말 것 — 긴 구조화 문서에 쓴다.
