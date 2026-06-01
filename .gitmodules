@@ -1,3 +1,6 @@
 [submodule "md-ebook"]
 	path = md-ebook
 	url = https://github.com/pollux-o4/md2ebook.git
+[submodule "show-me"]
+	path = show-me
+	url = https://github.com/pollux-o4/show-me.git
