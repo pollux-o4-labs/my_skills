@@ -7,9 +7,23 @@ Claude Code, Codex, Gemini CLI 공용 커스텀 스킬 레포. 각 스킬 동작
 ## 작업 규칙
 - 스킬 수정 전 해당 SKILL.md를 반드시 읽고 시작
 - 디렉토리명 = name (kebab-case), 진입점 = SKILL.md
+- **provenance 접두사**: AI가 세션 교훈에서 스스로 생성·승격한 스킬은 `AIL-` 접두사(AI-Learned, 예: `AIL-verify-against-reality`). 사용자가 의도적으로 넣은 스킬과 구분 — 나중에 리팩터·정리·신뢰도 판단 시 식별용. 새 교훈 스킬화 시 이 접두사를 붙인다.
+- **AIL 스킬 frontmatter**: `version`(semver, 수정 시 bump) + `metadata.provenance: AIL` + `metadata.platforms` 기입. description은 짧게(상시 로드 비용).
 - 보조 문서는 스킬 디렉토리 안에 — 루트 오염 금지
 - setup-my-skills → efficient-subagent 의존관계 있음
 - CLI 별 등록 경로와 전역 지침 파일 차이를 섞지 말고 대상 host 를 먼저 식별
+
+## 스킬 등록 경로 (host별 — 2026-07 실측)
+
+| Host | 경로 | 방식 | 주의 |
+|---|---|---|---|
+| Claude Code | `~/.claude/skills/<name>` | 이 repo로 **정션** | 즉시 반영 |
+| Codex | `~/.codex/skills/<name>` | `~/.agents/my_skills/<name>`로 정션 | `~/.agents/my_skills`는 GitHub **clone** — push 후 그쪽에서 `git pull` 해야 반영 |
+| Gemini CLI | `~/.gemini/skills/<name>` | 디렉토리 **복사본** | pull/정션 아님 → 방치 시 drift. 갱신 시 재복사 필요 |
+
+새 스킬 등록 시 세 host 모두 처리하고, repo에서 스킬 삭제 시 각 host의 정션·복사본도 제거(dangling 정션 방지).
+
+세 host 등록·재동기화는 통합 스크립트 `sync-skills/sync-skills.ps1` 로 일괄 처리한다(구 `~/.gemini/antigravity-cli/sync-skills.ps1` 대체). `-Host claude|codex|gemini`, `-Only <스킬명>`, `-WhatIf`(드라이런) 지원. Gemini 복사본 prune 은 `-PruneMirror` 명시 시에만 수행. 서브모듈 기반 스킬(md-ebook·show-me)은 이 스크립트가 건드리지 않는다.
 
 ## 서브모듈 — md-ebook (= md2ebook), show-me
 
