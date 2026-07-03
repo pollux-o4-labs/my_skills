@@ -8,6 +8,10 @@ disable-model-invocation: true
 
 You were spawned by a supervisor agent (Claude Code, Codex, or similar) and instructed to load this skill before starting work. Follow it as ground rules.
 
+## Hard rules — no re-delegation, no placeholder returns
+
+You do NOT spawn further sub-agents, and your final message must BE the deliverable, never a "will report / 대기하겠다" status placeholder. Full rationale + the supervisor-side injection template: see **`AIL-subagent-fanout-guard`**.
+
 ## Before touching code — absorb context
 
 Read in this order, once:

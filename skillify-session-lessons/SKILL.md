@@ -31,7 +31,10 @@ metadata:
 4. **중복 확인** — 기존 스킬·사용자 MEMORY·`lessons.md`에 이미 있나? 있으면 새로 만들지 말고 **통합/보강**.
 5. **초안 작성** — `SKILL.md`, 표준 섹션: **When to Use(구체 트리거 + 발동 금지) → Procedure(번호 절차) → Pitfalls(실제 함정) → Verification(체크리스트)**. description은 구체 트리거 문구를 담되 짧게(모든 스킬의 description이 상시 로드됨 — 길이가 곧 비용). frontmatter에 `version`(semver)과 `metadata.platforms`를 기입. 500줄/5000토큰 이내, 넘치면 `references/`로 분리.
 6. **실행-후-수정(execute-then-revise)** — 초안을 등록 전에 **세션의 원 문제(또는 유사 케이스)에 되돌려 적용**해 본다: 초안만 참조해 그 문제를 다시 풀 수 있는지 절차를 따라가 보고, 막히거나 빠진 단계·모호한 지시가 드러나면 초안을 수정한다. 검증 없이 등록된 스킬은 다음 세션에서 처음 실패한다. 이후 실제 사용에서 결함이 드러날 때마다 수정하고 `version`을 올린다.
-7. **Provenance 등록** — AI가 세션 교훈에서 생성한 스킬이면 **`AIL-` 접두사**(repo CLAUDE.md 규약). 디렉토리명 = name(kebab). repo에 디렉토리 생성 → 각 host 스킬 폴더로 심링크/정션 등록(대상 CLI 먼저 식별 — 등록 경로는 repo CLAUDE.md "스킬 등록 경로" 참조).
+7. **Provenance 등록** — AI가 세션 교훈에서 생성한 스킬이면 **`AIL-` 접두사**(repo CLAUDE.md 규약). 디렉토리명 = name(kebab). 정본은 소스 폴더(예: `Documents/my_skills/<name>`) 한 곳에만 두고, 각 host 스킬 폴더(`.claude/skills/`)엔 **링크만** 건다(단일 원본).
+   - **Windows 함정 — `ln -s`는 심링크 대신 복사본을 만든다**(MSYS 기본). 그러면 소스·등록본 2벌이 되어 이후 편집이 어긋난다. Windows에선 **junction**을 쓴다: `New-Item -ItemType Junction -Path <.claude/skills/링크> -Target <소스>` (또는 `mklink /J`). 관리자 권한 불필요.
+   - **링크 후 반드시 검증**: `Get-Item <링크>` 의 `LinkType`이 `Junction`/`SymbolicLink`인지(POSIX면 `readlink`) 확인. "real dir"로 나오면 복사된 것 → 지우고 다시 링크.
+   - **기존 스킬 편집 시**: 먼저 `.claude/skills/<name>`이 링크인지·어디를 가리키는지 확인하고 **정본(소스)을 수정**한다. 등록본을 직접 고치면 딴 복사본을 만지는 셈이 될 수 있다.
 8. **승인 게이트** — 확정 전 **사용자에게 초안(특히 description·트리거)을 보이고 승인**받는다. 사용자가 범위·전역/프로젝트 여부·이름을 정한다.
 
 ## Pitfalls (실제 함정)

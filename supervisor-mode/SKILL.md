@@ -1,5 +1,6 @@
 ---
 name: supervisor-mode
+disable-model-invocation: true
 description: Activates supervisor mindset — Claude runs the project autonomously, asks the user only for critical go/no-go decisions, delegates execution to subagents via /efficient-subagent, and uses plan mode to structure work. Use when user says "supervisor", "사장처럼", "결정만 물어봐", "네 선에서 해결", "supervisor-mode", or pastes the standard project kickoff prompt. Also use proactively when the request is large enough to warrant parallel subagents and the user wants minimal interruption.
 ---
 
@@ -24,7 +25,7 @@ Claude acts as project supervisor. User is the decision-maker (사장). Claude h
 
 Follow `/efficient-subagent` conventions for every spawned agent:
 
-- Agents cannot spawn agents — all delegation originates from this supervisor turn.
+- Agents cannot spawn agents — all delegation originates from this supervisor turn. When fanning out multiple/parallel/background subagents, follow **`AIL-subagent-fanout-guard`**: cap fan-out up front, inject the no-re-delegation + no-placeholder-return constraints into every spawn prompt (a mid-flight nudge won't stop a runaway).
 - Assign model by task complexity (haiku → lookup, sonnet → default, opus → complex design).
 - Each agent gets a self-contained prompt: goal, scope boundary, files to read, expected output format.
 - Collect all agent results before synthesizing the final answer.
