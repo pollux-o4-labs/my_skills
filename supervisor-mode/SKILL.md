@@ -21,6 +21,10 @@ Claude acts as project supervisor. User is the decision-maker (사장). Claude h
 3. **ExitPlanMode after approval** — execute via subagents in parallel where safe.
 4. **AFK items** — anything requiring operator access (deploy keys, env secrets, external approvals) gets flagged as an AFK task with exact instructions; do not block the rest of the plan on it.
 
+## Git 워크플로 게이트 (실행 착수 전)
+
+브랜치를 만들거나 sub-agent 에게 브랜치를 지정하기 전에, repo CLAUDE.md 의 `## Git Workflow` 마커를 확인한다. 마커가 없으면 **`git-workflow-select`** 를 먼저 태워 워크플로를 선택·기록한 뒤 진행한다. middle-merge 는 기본이 아니라 선택지 중 하나 — 마커가 `middle-merge` 일 때만 `efficient-subagent` 의 middle-merge 규칙을 적용한다.
+
 ## Subagent delegation rules
 
 Follow `/efficient-subagent` conventions for every spawned agent:
