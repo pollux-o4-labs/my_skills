@@ -1,5 +1,6 @@
 ---
 name: setup-my-skills
+disable-model-invocation: true
 description: Bootstrap a repo for the `efficient-subagent` skill — scaffold a slim `CLAUDE.md` structure (한국어), a `TODO.md` backlog with T-XX IDs, `docs/meta/` workflow guides, and an `## Agent skills` block carrying Sub-agent discipline rules + the ADR `status: proposed/accepted` convention. Designed to coexist with `setup-matt-pocock-skills`, which handles `CONTEXT.md` / `docs/adr/` consumer rules; the bodies of those files are created lazily by `grill-with-docs`, not pre-seeded here. Use when adding the skill to a new project.
 ---
 

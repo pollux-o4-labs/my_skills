@@ -6,11 +6,9 @@
 
   Hosts differ in registration mechanism (see CLAUDE.md "스킬 등록 경로" table):
 
-    Claude Code : junction  ~\.claude\skills\<name>  ->  <repo>\<name>
-    Codex       : junction  ~\.codex\skills\<name>   ->  ~\.agents\my_skills\<name>  (GitHub clone; pull first)
-    Gemini/agy  : COPY (physical dir) from the UNION of ~\.claude\skills (junctions
-                  resolved — includes Matt Pocock skills) and the my_skills repo
-                  (covers skills registered to gemini but not to claude, e.g. perso-organic)
+    Claude Code : curated source root at ~\.claude\skills
+    Codex       : junction  ~\.codex\skills\<name>   ->  personal skills activated in ~\.claude\skills
+    Gemini/agy  : COPY (physical dir) from ~\.claude\skills, with junctions resolved
 
   Gemini roots are NOT pruned by default (we cannot tell a stale copy from a skill
   installed by another tool). Pass -PruneMirror to delete gemini entries absent from
@@ -33,7 +31,7 @@
     pwsh -File sync-skills.ps1                 # sync all hosts
     pwsh -File sync-skills.ps1 -Host gemini    # one host only (claude|codex|gemini)
     pwsh -File sync-skills.ps1 -WhatIf         # dry run, no changes
-    pwsh -File sync-skills.ps1 -SkipPull       # don't `git pull` the codex clone
+    pwsh -File sync-skills.ps1 -SkipPull       # accepted for backward compatibility (no-op)
 
   Safe to run repeatedly (idempotent).
 #>
@@ -50,9 +48,12 @@ $ErrorActionPreference = 'Stop'
 # normalize -Only: `pwsh -File ... -Only a,b` arrives as one string "a,b" — split it
 $Only = @($Only | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 $RepoRoot     = Split-Path -Parent $PSScriptRoot                  # ...\my_skills
-$AgentsClone  = Join-Path $env:USERPROFILE '.agents\my_skills'    # GitHub clone Codex reads from
 $ClaudeSkills = Join-Path $env:USERPROFILE '.claude\skills'      # union root gemini mirrors
 $Home_        = $env:USERPROFILE
+$LegacyCodexSources = @(
+  $RepoRoot,
+  (Join-Path $env:USERPROFILE '.agents\my_skills')
+)
 
 # Skills whose gemini copy is refreshed ONLY when absent (submodule-backed; may hold unmerged WIP)
 $CopyOnlyIfMissing = @('md2ebook')
@@ -67,27 +68,34 @@ $NotSkills = @('.git','.claude','.playwright-mcp','.system','review','sync-skill
 # mode 'junction': dest\<name> -> source\<name> (source = physical root this host owns)
 # mode 'mirror-copy': dest\<name> = physical copy of resolved source\<name>
 $Hosts = @(
-  @{ name='claude'; dest=(Join-Path $Home_ '.claude\skills');                 source=$RepoRoot;     mode='junction' },
-  @{ name='codex';  dest=(Join-Path $Home_ '.codex\skills');                  source=$AgentsClone;  mode='junction' },
+  @{ name='claude'; dest=(Join-Path $Home_ '.claude\skills');                 source=$ClaudeSkills; mode='source-only' },
+  @{ name='codex';  dest=(Join-Path $Home_ '.codex\skills');                  source=$ClaudeSkills; mode='personal-junction'; legacySources=$LegacyCodexSources },
   # agy reads three roots; all must be physical copies (union source resolved per skill)
   @{ name='gemini'; dest=(Join-Path $Home_ '.gemini\skills');                 source=$ClaudeSkills; mode='mirror-copy' },
   @{ name='gemini'; dest=(Join-Path $Home_ '.gemini\antigravity-cli\skills'); source=$ClaudeSkills; mode='mirror-copy' },
   @{ name='gemini'; dest=(Join-Path $Home_ '.gemini\config\skills');          source=$ClaudeSkills; mode='mirror-copy' }
 )
 
-# Union source map for gemini: name -> physical dir. Claude entry wins; repo fills the rest.
-function Get-GeminiSourceMap {
+function Get-ResolvedSourceMap([string]$root) {
   $map = @{}
-  foreach ($d in (Get-ChildItem -Path $ClaudeSkills -Directory -Force -ErrorAction SilentlyContinue)) {
+  foreach ($d in (Get-ChildItem -Path $root -Directory -Force -ErrorAction SilentlyContinue)) {
     if ($d.Name -in $NotSkills) { continue }
     $p = Resolve-SkillDir $d
     if ($p -and (Test-Path (Join-Path $p 'SKILL.md'))) { $map[$d.Name] = $p }
   }
-  foreach ($d in (Get-ChildItem -Path $RepoRoot -Directory -Force -ErrorAction SilentlyContinue)) {
-    if ($d.Name -in $NotSkills -or $map.ContainsKey($d.Name)) { continue }
-    if (Test-Path (Join-Path $d.FullName 'SKILL.md')) { $map[$d.Name] = $d.FullName }
-  }
   return $map
+}
+
+function Select-PersonalSourceMap($map, [string]$repoRoot) {
+  $personal = @{}
+  $repoPrefix = $repoRoot.TrimEnd('\') + '\'
+  foreach ($name in $map.Keys) {
+    $src = $map[$name]
+    if ($src -and $src.StartsWith($repoPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+      $personal[$name] = $src
+    }
+  }
+  return $personal
 }
 
 function Get-SkillNames([string]$root) {
@@ -99,11 +107,15 @@ function Get-SkillNames([string]$root) {
 function Test-IsReparse($item) { return ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 }
 
 # A junction "belongs to" a source root iff its recorded target is a direct child of it.
-function Test-OwnedJunction($item, [string]$sourceRoot) {
+function Test-OwnedJunction($item, [string[]]$sourceRoots) {
   if (-not (Test-IsReparse $item)) { return $false }
   $t = $item.Target
   if (-not $t) { return $false }
-  return ((Split-Path -Parent $t).TrimEnd('\') -ieq $sourceRoot.TrimEnd('\'))
+  $parent = (Split-Path -Parent $t).TrimEnd('\')
+  foreach ($sourceRoot in $sourceRoots) {
+    if ($parent -ieq $sourceRoot.TrimEnd('\')) { return $true }
+  }
+  return $false
 }
 
 # Resolve a claude-skills entry (junction or plain dir) to its physical path.
@@ -115,21 +127,6 @@ function Resolve-SkillDir($item) {
   return $item.FullName
 }
 
-# --- optionally refresh the Codex clone -------------------------------------
-$needCodex = $Host_ -in @('all','codex')
-if ($needCodex -and -not $SkipPull) {
-  if (Test-Path (Join-Path $AgentsClone '.git')) {
-    Write-Host "==> git pull codex clone ($AgentsClone)" -ForegroundColor Cyan
-    if ($PSCmdlet.ShouldProcess($AgentsClone, 'git pull')) {
-      Push-Location $AgentsClone
-      try { git pull --ff-only 2>&1 | Write-Host } finally { Pop-Location }
-      if ($LASTEXITCODE -ne 0) { Write-Warning "git pull failed — codex skills may be stale (local changes in clone?)" }
-    }
-  } else {
-    Write-Warning "Codex clone not found at $AgentsClone — skipping pull. Codex skills may be stale."
-  }
-}
-
 # --- sync each configured host root -----------------------------------------
 foreach ($h in $Hosts) {
   if ($Host_ -ne 'all' -and $h.name -ne $Host_) { continue }
@@ -137,6 +134,11 @@ foreach ($h in $Hosts) {
   $dest   = $h.dest
   $source = $h.source
   $mode   = $h.mode
+  if ($mode -eq 'personal-junction') {
+    $ownedSources = @($h.legacySources | Where-Object { $_ })
+  } else {
+    $ownedSources = @($source) + @($h.legacySources | Where-Object { $_ })
+  }
 
   if (-not (Test-Path $source)) {
     Write-Warning "[$($h.name)] source missing: $source — skipped."
@@ -148,17 +150,26 @@ foreach ($h in $Hosts) {
     }
   }
 
-  if ($mode -eq 'mirror-copy') { $srcMap = Get-GeminiSourceMap; $wanted = @($srcMap.Keys) }
-  else                         { $wanted = @(Get-SkillNames $source) }
+  if ($mode -in @('junction','personal-junction','mirror-copy')) {
+    $srcMap = Get-ResolvedSourceMap $source
+    if ($mode -eq 'personal-junction') { $srcMap = Select-PersonalSourceMap $srcMap $RepoRoot }
+    $wanted = @($srcMap.Keys)
+  }
+  else {
+    $wanted = @(Get-SkillNames $source)
+  }
   if ($Only.Count -gt 0) { $wanted = @($wanted | Where-Object { $_ -in $Only }) }
   Write-Host "==> [$($h.name)/$mode] $dest  (<= $source, $($wanted.Count) skills)" -ForegroundColor Green
 
-  if ($mode -eq 'junction') {
+  if ($mode -eq 'source-only') {
+    Write-Host "    source-only: no changes; this root controls the active skill set." -ForegroundColor Gray
+  }
+  elseif ($mode -in @('junction','personal-junction')) {
     # 1) prune ONLY junctions this source owns (dangling, or skill removed from source).
     #    Plain dirs and junctions pointing elsewhere are other installers' property — leave them.
     Get-ChildItem -Path $dest -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object {
       $entry = $_
-      if (-not (Test-OwnedJunction $entry $source)) { return }
+      if (-not (Test-OwnedJunction $entry $ownedSources)) { return }
       if ($Only.Count -gt 0 -and $entry.Name -notin $Only) { return }
       $targetGone = -not (Test-Path $entry.Target)
       $notWanted  = $entry.Name -notin $wanted
@@ -173,12 +184,13 @@ foreach ($h in $Hosts) {
     }
     # 2) (re)create each wanted junction
     foreach ($name in $wanted) {
-      $src = Join-Path $source $name
+      $src = $srcMap[$name]
+      if (-not $src) { Write-Warning "    skip ${name}: source unresolved."; continue }
       $dst = Join-Path $dest   $name
       $existing = Get-Item $dst -ErrorAction SilentlyContinue
       if ($existing) {
         if ((Test-IsReparse $existing) -and ($existing.Target -ieq $src)) { continue }  # already correct
-        if (-not (Test-OwnedJunction $existing $source)) {
+        if (-not (Test-OwnedJunction $existing $ownedSources)) {
           Write-Warning "    skip ${name}: dest occupied by foreign entry ($($existing.Target ?? 'plain dir')) — resolve manually."
           continue
         }

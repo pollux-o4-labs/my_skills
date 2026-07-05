@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code 추천 스킬</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      padding: 48px 24px;
+      line-height: 1.6;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      margin-bottom: 52px;
+    }
+
+    /* ── Section ── */
+    .section { margin-bottom: 56px; }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .section-header h2 { font-size: 1.25rem; font-weight: 700; }
+
+    .section-header a {
+      font-size: 0.8rem;
+      color: #64748b;
+      text-decoration: none;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 1px;
+      transition: color .15s;
+    }
+    .section-header a:hover { color: #94a3b8; }
+
+    .section-desc {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    /* ── Install block ── */
+    .install {
+      background: #1e2432;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: #a5f3a0;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .install span.prompt { color: #4a5568; user-select: none; }
+
+    /* ── Principle cards (Karpathy) ── */
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
+
+    .card {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+
+    .card-num {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: #6366f1;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+
+    .card p { font-size: 0.85rem; color: #94a3b8; }
+
+    /* ── Skills table (Matt Pocock) ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 10px 14px;
+      color: #64748b;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      border-bottom: 1px solid #2d3748;
+    }
+
+    tbody tr { border-bottom: 1px solid #1e2432; }
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody td {
+      padding: 12px 14px;
+      vertical-align: top;
+    }
+
+    .skill-name {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.82rem;
+      color: #818cf8;
+      white-space: nowrap;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-top: 5px;
+    }
+
+    tbody td:last-child { color: #94a3b8; line-height: 1.55; }
+
+    /* ── Footer note ── */
+    .note {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid #1e2432;
+      font-size: 0.82rem;
+      color: #4a5568;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Claude Code 추천 스킬</h1>
+  <p class="subtitle">에이전트 코딩 품질과 워크플로우를 올려주는 두 스킬셋</p>
+
+  <!-- ── Karpathy ── -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Karpathy Guidelines</h2>
+      <a href="https://github.com/multica-ai/andrej-karpathy-skills" target="_blank">multica-ai/andrej-karpathy-skills ↗</a>
+    </div>
+    <p class="section-desc">
+      Andrej Karpathy가 관찰한 LLM 코딩 실수 패턴에서 도출된 4가지 행동 원칙.<br>
+      Claude 자체 행동을 교정하는 가드레일 — 레포에 설치하면 항상 적용.
+    </p>
+
+    <div class="install">
+      <span class="prompt">$</span>
+      npx skills@latest add multica-ai/andrej-karpathy-skills -g
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-num">01</div>
+        <h3>Think Before Coding</h3>
+        <p>가정을 숨기지 말고 먼저 드러낸다. 해석이 여러 개면 골라서 진행하지 않고 사용자에게 제시한다.</p>
+      </div>
+      <div class="card">
+        <div class="card-num">02</div>
+        <h3>Simplicity First</h3>
+        <p>요청한 것만 구현. 200줄이 50줄이 될 수 있으면 다시 짠다. 추측성 추상화, 미래 대비 코드 금지.</p>
+      </div>
+      <div class="card">
+        <div class="card-num">03</div>
+        <h3>Surgical Changes</h3>
+        <p>내가 바꾼 것만 건드린다. 주변 코드 개선, 무관한 리팩터링 금지. 모든 변경 라인은 요청에서 역추적 가능해야 한다.</p>
+      </div>
+      <div class="card">
+        <div class="card-num">04</div>
+        <h3>Goal-Driven Execution</h3>
+        <p>검증 기준을 먼저 정의하고 루프를 돈다. "작동하게 해줘"가 아니라 "이 테스트를 통과시켜줘".</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Matt Pocock ── -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Matt Pocock Skills</h2>
+      <a href="https://github.com/mattpocock/skills" target="_blank">mattpocock/skills ↗</a>
+    </div>
+    <p class="section-desc">
+      레포 단위 에이전트 워크플로우 세팅. 이슈 트래커·트리아지·TDD·아키텍처 개선까지 커버.<br>
+      <code style="font-size:.8rem;color:#6366f1">/setup-matt-pocock-skills</code> 한 번 실행 후 아래 스킬들이 레포 컨텍스트를 자동 인식.
+    </p>
+
+    <div class="install">
+      <span class="prompt">$</span>
+      npx skills@latest add mattpocock/skills -g
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>스킬</th>
+          <th>설명</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="skill-name">/setup-matt-pocock-skills</div>
+            <span class="badge">선행 필수</span>
+          </td>
+          <td>이슈 트래커(GitHub / GitLab / 로컬 마크다운), 트리아지 라벨 어휘, 도메인 문서 위치를 레포에 등록. 나머지 스킬 쓰기 전 한 번만 실행.</td>
+        </tr>
+        <tr>
+          <td><div class="skill-name">/to-prd</div></td>
+          <td>대화 맥락을 PRD로 변환해 이슈 트래커에 게시. 유저 인터뷰 없이 현재 컨텍스트에서 바로 합성.</td>
+        </tr>
+        <tr>
+          <td><div class="skill-name">/to-issues</div></td>
+          <td>PRD나 계획을 독립 실행 가능한 이슈 단위로 분해. 수직 슬라이스(트레이서 불릿) 방식으로 나눠 에이전트가 바로 집어갈 수 있게.</td>
+        </tr>
+        <tr>
+          <td><div class="skill-name">/triage</div></td>
+          <td>들어온 이슈를 상태 머신으로 분류. needs-triage → needs-info → ready-for-agent → ready-for-human → wontfix 흐름.</td>
+        </tr>
+        <tr>
+          <td><div class="skill-name">/diagnose</div></td>
+          <td>재현 → 최소화 → 가설 → 계측 → 수정 → 회귀 테스트 순서로 버그 진단. 빠른 피드백 루프 구축이 핵심.</td>
+        </tr>
+        <tr>
+          <td><div class="skill-name">/tdd</div></td>
+          <td>Red-Green-Refactor 루프. 공개 인터페이스 기반 통합 테스트 우선, 구현 내부를 직접 테스트하는 안티패턴 방지.</td>
+        </tr>
+        <tr>
+          <td><div class="skill-name">/improve-codebase-architecture</div></td>
+          <td>얕은 모듈을 깊은 모듈로 리팩터링할 포인트를 찾아줌. 테스트 가능성과 AI 탐색성 향상이 목표.</td>
+        </tr>
+        <tr>
+          <td><div class="skill-name">/zoom-out</div></td>
+          <td>모르는 코드 영역에서 한 레이어 위로 올라가 관련 모듈 전체 맵을 보여줌.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="note">
+    Karpathy는 Claude 자체 행동 교정 / Matt Pocock은 레포별 워크플로우 연결 — 같이 쓰면 시너지.
+  </p>
+
+</div>
+</body>
+</html>
