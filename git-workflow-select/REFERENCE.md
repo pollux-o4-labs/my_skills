@@ -51,7 +51,7 @@ gh pr merge <N> --squash --delete-branch   # 하루 내 통합
 
 ## middle-merge
 
-**구조·머지·isolation·issue 세팅 일체 `efficient-subagent` 스킬 참조.** 여기서 중복하지 않는다 — 요약도 두지 않는다. 요약은 원본과 반드시 drift 하므로.
+**구조·머지·isolation·issue 세팅 일체 `middle-merge` 스킬 참조.** 여기서 중복하지 않는다 — 요약도 두지 않는다. 요약은 원본과 반드시 drift 하므로. (서브에이전트 운영 규율은 `efficient-subagent`.)
 
 ---
 
@@ -82,5 +82,5 @@ gh pr merge <N> --squash --delete-branch   # 하루 내 통합
 
 - 선택일: 2026-07-05
 - 근거: 서브에이전트 병렬 대작업, main history 청결 필요
-- 상세 규칙: `efficient-subagent` 스킬 (middle-merge 선택 시)
+- 상세 규칙: `middle-merge` 스킬 (middle-merge 선택 시)
 ```
