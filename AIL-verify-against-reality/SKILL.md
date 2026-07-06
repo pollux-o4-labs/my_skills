@@ -1,7 +1,7 @@
 ---
 name: AIL-verify-against-reality
-description: 코드·테스트는 통과하는데 실제 환경에선 여전히 깨질 때의 진단 규율 — 수정 코드를 다시 파기 전에 낡은 중간 계층(캐시·테스트 대역 divergence·버전 그림자·미재빌드)을 실측으로 배제한다. "고쳤는데 그대로"·재빌드해도 변화 없음·상태 전환 UI 검증 시 발동.
-version: 1.1.0
+description: Diagnostic discipline for when a result looks wrong — before digging back into the target code, rule out (a) stale intermediate layers between code and reality (cache, test-double divergence, version shadow, un-rebuilt artifacts) and (b) your own command / measurement method itself, by measuring rather than assuming. Fires on "I fixed it but nothing changed", "rebuilt and still the same", a command result that looks off, or verifying state-transition UI.
+version: 1.2.0
 metadata:
   provenance: AIL
   platforms: [claude-code, codex, gemini-cli]
@@ -9,43 +9,45 @@ metadata:
 
 # Verify Against Reality
 
-수정이 코드·테스트에선 되는데 실제에서 안 되면, 버그는 **수정 코드가 아니라 코드와 실제 사이의 "낡거나 어긋난 중간 계층"에 있을 확률이 높다.** 수정을 다시 파기 전에 그 계층부터 배제한다.
+If a fix works in code and tests but not in reality, the bug is **usually not in the fixed code — it's in a "stale or mismatched intermediate layer" between the code and reality.** Rule that layer out before re-digging the fix. And if the result itself looks strange, suspect **your own command or measurement** before you suspect the target.
 
-## When to Use (트리거)
+## When to Use
 
-- "코드는 고쳤는데 실제에선 그대로"라는 보고를 받았을 때
-- 테스트·대역(sandbox/mock)은 통과하는데 실환경에서 깨질 때
-- 재설치·리로드·재배포·재빌드했는데 변화가 안 보일 때
-- 상태 전환(전/후, hover, 포커스 등) UI를 구현·검증할 때
+- You get a report of "I fixed the code but reality is unchanged".
+- Tests / doubles (sandbox, mock) pass but the real environment breaks.
+- You reinstalled / reloaded / redeployed / rebuilt but see no change.
+- You're building or verifying state-transition UI (before/after, hover, focus, etc.).
 
-**발동 금지**: 실환경에서 재현되는 명백한 로직 버그(테스트도 같이 실패) — 그건 코드를 고친다. 이 스킬은 "테스트는 통과인데 실제만 깨짐"의 불일치 상황 전용.
+**Do NOT use** for a plain logic bug that reproduces in the real environment (tests fail too) — just fix the code. This skill is for the *mismatch* case: tests pass but only reality breaks.
 
 ## Procedure
 
-0. **가설이 아니라 측정으로 배제** — 각 용의 계층마다 "이 계층이 범인이면 X를 재면 Y가 나와야 한다"는 예측을 세우고 **실측으로 반증**한다. 그럴듯한 가설을 믿고 코드를 고치지 말 것 — 이 부류 버그에선 측정이 가설을 뒤집는 일이 잦다.
-1. **staleness부터 배제 — 실제가 정말 최신 코드를 보고 있나?**
-   - **캐시**: 어떤 캐시 계층(클라이언트·중간 프록시·CDN·임베디드 뷰 등)이 옛 자원을 서빙하나? 식별자가 안 바뀌면 캐시가 안 깨진다 → 콘텐츠 해시/타임스탬프 등 **버전과 무관한 cache-bust 키**로 강제 갱신.
-   - **버전 그림자**: 더 높은 옛 버전이 남아 새(낮은) 버전을 가리나? 다수 버전이 공존할 때 런타임이 "가장 높은 버전"을 로드하는 함정 → 옛 상위 버전 제거 또는 최상위로 bump.
-   - **미재빌드**: 소스는 고쳤는데 산출물(번들·바이너리·캐시된 컴파일)이 재생성 안 됐나? 산출물 mtime/해시 확인.
-2. **테스트 대역이 실제를 재현하나** — sandbox·mock·stub·스테이징이 실제의 **알려진 동작을 재현하는지 먼저 대조**한다. 손으로 복제한 설정·픽스처는 반드시 drift한다 → 설정·수치는 새로 지어내지 말고 **이미 튜닝된 실제 값을 단일 출처로 재사용**(복제 금지). 상호작용 검증도 마찬가지 — 합성 이벤트(`dispatchEvent` 등 프로그램 발화)가 아니라 **실제 입력 경로**(진짜 클릭·키입력, Playwright/computer-use 등)로 재현한다. 대역이 현실을 재현 못 하면 그 대역은 변경을 검증할 자격이 없다.
-3. **기능 통과 ≠ 시각 정합** — 상태 전환 UI는 "무엇이 보이나"(논리 상태)만 보지 말고, 두 상태의 **크기·위치·간격을 정량 실측**해 정합을 확인한다. 스크린샷 육안도 병행.
-4. **이중 검증** — 대역(빠른 실측) + 실제 환경(육안). **대역만 믿지 말 것.**
+0. **Rule out by measuring, not hypothesizing — but first, is it your command/measurement?** For each suspect layer, form a prediction ("if this layer is the culprit, measuring X yields Y") and **disprove it by measurement**. Don't fix code on a plausible hypothesis. **And before the target code, check "did I run the command correctly / is my measurement faithful?"** — self-test the harness on a known answer (e.g. does `false` report failure?) and measure through the same path the real consumer uses.
+1. **Rule out staleness first — is reality actually seeing the latest code?**
+   - **Cache**: is some cache layer (client, proxy, CDN, embedded view) serving the old asset? If the identifier doesn't change, the cache never busts → force refresh with a **version-independent cache-bust key** (content hash / timestamp).
+   - **Version shadow**: is a higher old version masking the new (lower) one? When multiple versions coexist, the runtime may load "the highest" → remove the old higher version or bump above it.
+   - **Un-rebuilt artifact**: source fixed but the output (bundle, binary, cached compile) not regenerated? Check the artifact's mtime/hash.
+2. **Does the test double reproduce reality?** — first check that the sandbox / mock / stub / staging **reproduces reality's known behavior**. Hand-cloned config/fixtures always drift → don't invent config/values, **reuse the already-tuned real value from a single source** (no cloning). Same for interaction checks — reproduce via the **real input path** (actual click/keypress, Playwright / computer-use), not synthetic events (`dispatchEvent` and other programmatic firing). A double that can't reproduce reality isn't qualified to verify the change.
+3. **Feature-passing ≠ visual correctness** — for state-transition UI, don't just check "what's visible" (logical state); **quantitatively measure size/position/spacing** of both states and confirm alignment. Also eyeball a screenshot.
+4. **Double-verify** — double (fast measurement) + real environment (eyeball). **Don't trust the double alone.**
 
-## Pitfalls ("숨은 staleness" 4형태)
+## Pitfalls
 
-- **캐시가 옛 자원 서빙**: 식별자(버전) 안 바뀌면 갱신 안 됨 → "재빌드해도 그대로". cache-bust 키로 강제.
-- **대역 divergence**: 복제한 대역이 실제와 미세하게 달라(설정·환경·데이터) "대역 통과"가 실환경에서 깨짐. → 실제를 단일 출처로 주입.
-- **버전 그림자**: 더 높은 옛 버전이 새 낮은 버전을 가림 → 새 배포가 무효. → orphan 제거 또는 최상위 bump.
-- **논리만 맞고 시각 어긋남**: 상태는 맞는데 크기·정렬이 달라 사용자가 "깨졌다"고 봄.
-- **합성 이벤트 통과 ≠ 실입력 통과**: 프로그램으로 발화한 이벤트는 실제 입력 경로(포커스·버블링·기본동작·IME)와 달라 "검증 통과"가 허상일 수 있음 → 실제 클릭·키입력으로 재검.
+- **Cache serves the old asset**: if the identifier (version) doesn't change, no refresh → "rebuilt but same". Force with a cache-bust key.
+- **Double divergence**: a cloned double differs subtly from reality (config, environment, data), so "passes on the double" breaks in production → inject the real value as the single source.
+- **Version shadow**: an older higher version masks the new lower one → the new deploy is void. Remove the orphan or bump to the top.
+- **Logic right, visuals wrong**: state is correct but size/alignment differs, so the user sees "broken".
+- **Synthetic event passes ≠ real input passes**: programmatically fired events differ from the real input path (focus, bubbling, default action, IME), so a "passing" check can be illusory → re-check with real click/keypress.
+- **Strange result = suspect your command/measurement first**: the code is fine but you ran the command wrong (typo, flag, quoting, path) or your measurement gives a false signal, so you chase a bug that isn't there. Before fixing the target, confirm the command and harness are right. (Anchor: putting `cmd; echo $?` in one shell call showed a false exit code of 0 — the culprit was the reproduction method, not the code.)
 
-## Verification (체크리스트)
+## Verification
 
-- [ ] 각 용의 계층을 가설이 아니라 실측으로 배제했나?
-- [ ] 실제가 최신을 로드하는지 확인했나 (캐시·버전·산출물)?
-- [ ] 대역을 실제의 알려진 동작과 최소 1회 대조했나 (설정은 실제 값 재사용)?
-- [ ] 상태 전환을 정량 실측 + 스크린샷으로 확인했나?
-- [ ] 대역과 실환경 **양쪽**에서, 실제 입력 경로로 확인했나?
+- [ ] Did I rule out each suspect layer by measurement, not hypothesis?
+- [ ] When the result looked strange, did I check **my own command/measurement** before the target?
+- [ ] Did I confirm reality loads the latest (cache, version, artifact)?
+- [ ] Did I compare the double against reality's known behavior at least once (reusing real values)?
+- [ ] Did I quantitatively measure the state transition + screenshot?
+- [ ] Did I verify in **both** the double and the real environment, via the real input path?
 
 ---
-*유래: 긴 프론트엔드 디버깅 세션에서 "고쳤는데 실환경만 그대로"가 반복됐고, 원인이 코드가 아니라 캐시·대역 divergence·버전 그림자라는 "숨은 staleness"였던 경험에서 정리.*
+*Origin: a long frontend-debugging session where "fixed but only reality unchanged" kept recurring, and the cause was not the code but "hidden staleness" — cache, double divergence, version shadow. v1.2: a backend supervision session where a CLI gate looked like "rejected but exit 0", yet the culprit was not the code but the reproduction method — `wsl bash -lc "cmd; echo $?"` corrupting the exit code to a false 0 — adding the "your measurement can lie" angle.*
