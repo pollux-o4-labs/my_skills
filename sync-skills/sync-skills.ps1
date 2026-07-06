@@ -6,7 +6,9 @@
 
   Hosts differ in registration mechanism (see CLAUDE.md "스킬 등록 경로" table):
 
-    Claude Code : curated source root at ~\.claude\skills
+    Claude Code : curated hub at ~\.claude\skills. A full run NEVER auto-adds repo
+                  skills (some are deliberately kept out). Register a repo skill with
+                  `-Only <name>` — it junctions repo\<name> -> hub\<name> if absent.
     Codex       : junction  ~\.codex\skills\<name>   ->  personal skills activated in ~\.claude\skills
     Gemini/agy  : COPY (physical dir) from ~\.claude\skills, with junctions resolved
 
@@ -30,6 +32,7 @@
   Usage:
     pwsh -File sync-skills.ps1                 # sync all hosts
     pwsh -File sync-skills.ps1 -Host gemini    # one host only (claude|codex|gemini)
+    pwsh -File sync-skills.ps1 -Only foo-skill # register repo skill 'foo-skill' into hub, then all hosts
     pwsh -File sync-skills.ps1 -WhatIf         # dry run, no changes
     pwsh -File sync-skills.ps1 -SkipPull       # accepted for backward compatibility (no-op)
 
@@ -68,7 +71,9 @@ $NotSkills = @('.git','.claude','.playwright-mcp','.system','review','sync-skill
 # mode 'junction': dest\<name> -> source\<name> (source = physical root this host owns)
 # mode 'mirror-copy': dest\<name> = physical copy of resolved source\<name>
 $Hosts = @(
-  @{ name='claude'; dest=(Join-Path $Home_ '.claude\skills');                 source=$ClaudeSkills; mode='source-only' },
+  # claude hub is CURATED: a full run never auto-adds repo skills (some are deliberately
+  # kept out, e.g. git-workflow-select). Pass -Only <name> to register a repo skill here.
+  @{ name='claude'; dest=(Join-Path $Home_ '.claude\skills');                 source=$RepoRoot;     mode='curated-junction' },
   @{ name='codex';  dest=(Join-Path $Home_ '.codex\skills');                  source=$ClaudeSkills; mode='personal-junction'; legacySources=$LegacyCodexSources },
   # agy reads three roots; all must be physical copies (union source resolved per skill)
   @{ name='gemini'; dest=(Join-Path $Home_ '.gemini\skills');                 source=$ClaudeSkills; mode='mirror-copy' },
@@ -150,7 +155,7 @@ foreach ($h in $Hosts) {
     }
   }
 
-  if ($mode -in @('junction','personal-junction','mirror-copy')) {
+  if ($mode -in @('junction','personal-junction','mirror-copy','curated-junction')) {
     $srcMap = Get-ResolvedSourceMap $source
     if ($mode -eq 'personal-junction') { $srcMap = Select-PersonalSourceMap $srcMap $RepoRoot }
     $wanted = @($srcMap.Keys)
@@ -163,6 +168,36 @@ foreach ($h in $Hosts) {
 
   if ($mode -eq 'source-only') {
     Write-Host "    source-only: no changes; this root controls the active skill set." -ForegroundColor Gray
+  }
+  elseif ($mode -eq 'curated-junction') {
+    # Register a repo skill into the curated hub ONLY when explicitly named via -Only.
+    # A full run leaves the hub untouched so deliberate exclusions survive.
+    if ($Only.Count -eq 0) {
+      Write-Host "    curated: full run leaves this hub untouched; pass -Only <name> to register a repo skill." -ForegroundColor Gray
+    }
+    else {
+      foreach ($name in $wanted) {
+        $src = $srcMap[$name]
+        $dst = Join-Path $dest $name
+        $existing = Get-Item $dst -ErrorAction SilentlyContinue
+        if ($existing) {
+          if ((Test-IsReparse $existing) -and ($existing.Target -ieq $src)) {
+            Write-Host "    = already registered: $name" -ForegroundColor Gray; continue
+          }
+          if (-not (Test-OwnedJunction $existing @($RepoRoot))) {
+            Write-Warning "    skip ${name}: hub slot occupied by foreign entry ($($existing.Target ?? 'plain dir')) — resolve manually."; continue
+          }
+          if ($PSCmdlet.ShouldProcess($dst, 'replace stale owned junction')) { [IO.Directory]::Delete($dst) }
+        }
+        if ($PSCmdlet.ShouldProcess($dst, "junction -> $src")) {
+          New-Item -ItemType Junction -Path $dst -Target $src | Out-Null
+          Write-Host "    + junction $name" -ForegroundColor Gray
+        }
+      }
+      foreach ($n in $Only) {
+        if ($n -notin $wanted) { Write-Warning "    ${n}: not a repo skill (no $RepoRoot\$n\SKILL.md) — nothing to register." }
+      }
+    }
   }
   elseif ($mode -in @('junction','personal-junction')) {
     # 1) prune ONLY junctions this source owns (dangling, or skill removed from source).
