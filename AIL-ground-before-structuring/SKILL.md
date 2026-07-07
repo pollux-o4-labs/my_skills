@@ -1,6 +1,6 @@
 ---
 name: AIL-ground-before-structuring
-description: Before proposing a structure — hierarchy, schema, split unit, data model, taxonomy — read the existing artifacts it will sit on top of (already-written content, data, samples, current schema/config, naming conventions, design records) to pin down "what is one unit" and the existing boundaries and naming. Prevents inferring the atomic unit / nesting depth / boundaries, or skipping that check under a "keep it simple" bias. Fires when designing a new structure, taxonomy, or split unit, or when refactoring/migrating on top of existing assets.
+description: "Grounds structure decisions in existing artifacts before proposing hierarchies, schemas, split units, data models, taxonomies, or refactor boundaries. Use before the agent is about to propose or change a structure on top of existing content, data, schemas, configs, naming conventions, or design records; do not use for true greenfield work with no prior artifact to consult."
 version: 1.1.0
 metadata:
   provenance: AIL

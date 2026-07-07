@@ -1,6 +1,6 @@
 ---
 name: AIL-pilot-before-scale
-description: Before running an expensive or large-scope operation (bulk LLM calls, mass file edits, full re-index/reprocess, migration or audit across many items), run it on a small representative sample first, verify the result, then scale to the full set. Prevents burning large cost on an approach that turns out wrong. Also: verify a *property* with a cheap deterministic/mock path instead of paying the full real-cost run.
+description: "Requires a small representative pilot or cheaper deterministic/mock proof before expensive or large-scope operations such as bulk LLM calls, mass edits, full re-index/reprocess, migrations, audits, or batch generation. Use before the agent is about to run work whose cost scales with many items or whose wrong approach would waste significant tokens, time, or irreversible edits; do not use for one small deterministic change."
 version: 0.1.0
 metadata:
   platforms: [claude-code]

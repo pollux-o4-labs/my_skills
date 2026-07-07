@@ -1,6 +1,6 @@
 ---
 name: AIL-calibrate-verification-depth
-description: Before asserting, proposing, or deciding on a conclusion reached by inference, earn confidence by argument (deduction/induction/contradiction/contrapositive) and match verification depth to it — summaries and related folders first, raw source last and human-gated. Use when about to state a fact, propose a structure, diagnose a cause, or answer from memory instead of checking.
+description: "Calibrates verification depth before asserting nontrivial inferred conclusions by matching confidence to assumptions, partial evidence, or memory-based reasoning. Use before asserting a nontrivial inferred conclusion when confidence depends on assumptions, partial evidence, or memory; do not use for directly observed facts, routine implementation steps, structure decisions covered by `AIL-ground-before-structuring`, or post-fix mismatch checks covered by `AIL-verify-against-reality`."
 version: 1.0.0
 metadata:
   provenance: AIL

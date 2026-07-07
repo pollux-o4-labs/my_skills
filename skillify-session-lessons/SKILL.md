@@ -1,61 +1,56 @@
 ---
 name: skillify-session-lessons
-description: 세션이 복잡한 작업·여러 실패 후 복구·사용자의 반복 정정·비trivial 워크플로 발견을 거쳐 마무리될 때, 또는 사용자가 "이거 스킬로 만들어"·"오늘 교훈 스킬화"·"배운 거 정리해서 스킬" 등을 요청할 때, 세션의 잘한 것·실패·배운 것을 회고(retrospective)해 재사용 가능한 스킬(SKILL.md)로 승격한다. 일반화·추상화 후 provenance 접두사로 등록. 자기개선 루프 — 같은 실수를 다음 세션이 반복하지 않게.
-version: 1.1.1
+description: "Turns reusable lessons from a difficult session into a durable English canonical SKILL.md, with Korean review rendering for user approval. Use when the user asks to make a skill from lessons learned, or at session close when there were repeated failures, user corrections, or a nontrivial workflow discovery that is clearly reusable."
+version: 1.1.2
 metadata:
   platforms: [claude-code, codex, gemini-cli]
 ---
 
 # Skillify Session Lessons
 
-한 세션에서 **실패→정정→결국 성공**을 겪었으면, 그 교훈은 다음 세션이 공짜로 쓸 자산이다. 이 스킬은 그 회고를 **재사용 가능한 스킬**로 굳히는 절차다. (일반 스킬 작성 규약은 `write-a-skill` 참조 — 이 스킬은 "세션 경험 → 스킬" 전환 흐름에 집중.)
+Use this skill to turn a concrete session lesson into a reusable skill. It owns the lesson-mining workflow; general skill authoring rules belong to `write-a-skill`.
 
-## When to Use (트리거)
+## When to Use
 
-- 세션이 다음 중 하나 이상을 거쳤을 때 종료 무렵:
-  - 도구 여러 번 쓴 **복잡한 작업**을 결국 성공
-  - **실패·막다른 길**을 만나 작동 경로를 찾음
-  - **사용자가 접근을 정정**함(특히 반복적으로)
-  - **비trivial 워크플로**를 발견
-- 사용자가 "스킬로 만들어"·"오늘 교훈 스킬화"·"배운 거 정리" 류를 요청
+- The user asks to make a skill from this session, today's lesson, a correction, or a repeated failure.
+- At session close, the work revealed a reusable workflow through repeated failures, user corrections, or nontrivial recovery.
 
-**발동 금지**: 순탄하게 끝난 1회성 작업, 프로젝트에만 통하는 특수 지식(그건 그 repo 문서/`lessons.md`에 남긴다). 재사용 가치가 없으면 스킬화하지 않는다 — 과잉 스킬은 해롭다. 세션 경험과 무관하게 사용자가 새 스킬을 기획·작성하려는 경우는 `write-a-skill`이 담당(이 스킬은 "경험 → 스킬" 승격 전용).
-
-**한계(자동성)**: 스킬은 대화 내용이 description과 매칭될 때만 로드된다 — "세션 종료" 자체를 감지해 자동 발동하는 메커니즘은 없다. 세션 말미에 스스로 위 트리거 충족 여부를 점검해 사용자에게 스킬화를 **제안**하고, 완전 자동화가 필요하면 [auto-trigger.md](./auto-trigger.md)의 훅 설계를 사용자 승인 하에 적용한다.
+Do not use for smooth one-off work, project-specific facts, or a brand-new skill idea unrelated to session experience. Use repo docs/lessons for project-local knowledge and `write-a-skill` for ordinary new skill authoring.
 
 ## Procedure
 
-1. **회고(Retrospective)** — 세션에서 뽑는다: ①무엇이 성공했나 ②무엇이 실패/막혔나 ③사용자가 무엇을 정정했나 ④근본원인(5 Whys). 원재료가 구체적일수록 좋다. 근본원인은 **blameless**로 — 실패를 "누가 틀렸나"가 아니라 **시스템·상호작용의 실패**로 본다(AI↔사용자 오해, 도구·환경 staleness 등). 사람 탓으로 좁히면 재발 방지 원리가 안 나온다.
-2. **필터(재사용성 바)** — "복잡 작업 / 사용자 정정 / 비trivial 워크플로" 중 하나라도 해당하고, **다른 프로젝트에서도 통할 일반 원리**인 것만 승격. 나머지는 repo `lessons.md`에 남긴다.
-3. **추상화** — 프로젝트·도구 지엽(특정 프레임워크·파일명·수치)을 걷어내 **전이 가능한 원리**로. "X에선 Y 해라"(1회성)가 아니라 "이 부류 문제는 이렇게 접근하라"(재사용)로. *맨입 일반론 금지 — 반드시 실제 정정·엣지케이스에서 출발.*
-4. **중복 확인** — 기존 스킬·사용자 MEMORY·`lessons.md`에 이미 있나? 있으면 새로 만들지 말고 **통합/보강**.
-5. **초안 작성** — `SKILL.md`, 표준 섹션: **When to Use(구체 트리거 + 발동 금지) → Procedure(번호 절차) → Pitfalls(실제 함정) → Verification(체크리스트)**. description은 구체 트리거 문구를 담되 짧게(모든 스킬의 description이 상시 로드됨 — 길이가 곧 비용). frontmatter에 `version`(semver)과 `metadata.platforms`를 기입. 500줄/5000토큰 이내, 넘치면 `references/`로 분리. **저장되는 SKILL.md 파일은 정본 언어 한 종만**(기존 스킬 관례 = 영어). 다른 언어(한국어)는 **파일로 저장하지 않고**, 초안 단계에서 사용자에게 보여주는 **교차검증용 렌더링**일 뿐이다 — 번역투·빈 주어·모호 표현을 드러내는 장치(한 언어에서 어색하면 개념이 덜 정리된 신호). 즉 "두 버전 작성"은 *파일 2개*가 아니라 *정본 파일(EN) + 검토용 대역(KO 구두 제시)*를 뜻한다. 사용자가 명시적으로 이중 언어 파일을 원할 때만 두 파일을 저장한다.
-6. **실행-후-수정(execute-then-revise)** — 초안을 등록 전에 **세션의 원 문제(또는 유사 케이스)에 되돌려 적용**해 본다: 초안만 참조해 그 문제를 다시 풀 수 있는지 절차를 따라가 보고, 막히거나 빠진 단계·모호한 지시가 드러나면 초안을 수정한다. 검증 없이 등록된 스킬은 다음 세션에서 처음 실패한다. 이후 실제 사용에서 결함이 드러날 때마다 수정하고 `version`을 올린다.
-7. **Provenance 등록** — AI가 세션 교훈에서 생성한 스킬이면 **`AIL-` 접두사**(repo CLAUDE.md 규약). 디렉토리명 = name(kebab). 정본은 소스 폴더(예: `Documents/my_skills/<name>`) 한 곳에만 두고, 각 host 스킬 폴더(`.claude/skills/`)엔 **링크만** 건다(단일 원본).
-   - **Windows 함정 — `ln -s`는 심링크 대신 복사본을 만든다**(MSYS 기본). 그러면 소스·등록본 2벌이 되어 이후 편집이 어긋난다. Windows에선 **junction**을 쓴다: `New-Item -ItemType Junction -Path <.claude/skills/링크> -Target <소스>` (또는 `mklink /J`). 관리자 권한 불필요.
-   - **링크 후 반드시 검증**: `Get-Item <링크>` 의 `LinkType`이 `Junction`/`SymbolicLink`인지(POSIX면 `readlink`) 확인. "real dir"로 나오면 복사된 것 → 지우고 다시 링크.
-   - **기존 스킬 편집 시**: 먼저 `.claude/skills/<name>`이 링크인지·어디를 가리키는지 확인하고 **정본(소스)을 수정**한다. 등록본을 직접 고치면 딴 복사본을 만지는 셈이 될 수 있다.
-8. **승인 게이트** — 확정 전 **두 언어 초안(영어·한국어)을 나란히 제시하고 승인**받는다(특히 description·트리거). 사용자가 범위·전역/프로젝트 여부·이름·정본 언어를 정한다. 승인 시 정본 등록, 보완 요청 시 반영 후 재제시.
+1. **Retrospect** - extract what succeeded, what failed, what the user corrected, and the blameless root cause. Use concrete session evidence.
+2. **Filter** - promote only lessons that transfer across projects. Keep project-specific facts in repo `lessons.md`.
+3. **Abstract** - remove local file names, tools, and incidental numbers while preserving the real edge case that taught the lesson.
+4. **Check duplicates** - search existing skills, memory, and repo lessons. Update an existing skill when it already covers the lesson.
+5. **Draft the canonical skill in English** - use `write-a-skill` for structure, description wording, size limits, references, scripts, and review checklist. Keep one canonical file, normally `SKILL.md` in English.
+6. **Show Korean review rendering** - before registration, show the user a Korean translation or summary of the English draft, especially name, description, triggers, scope, procedure, and pitfalls. Do not save a second Korean skill file unless the user explicitly asks.
+7. **Replay the draft** - apply the draft back to the original session problem or a close analogue. Revise if it misses a step or produces ambiguity.
+8. **Register provenance** - AI-generated session-lesson skills use the `AIL-` prefix and one source folder such as `Documents/my_skills/<name>`.
+9. **Link safely** - on Windows, prefer junctions (`New-Item -ItemType Junction` or `mklink /J`) and verify the link type to avoid copied skill folders drifting from source.
+10. **Approval gate** - register only after the user approves the English canonical draft via the Korean review rendering.
 
-## Pitfalls (실제 함정)
+## Pitfalls
 
-- **맨입 스킬화**: "스킬 만들어"만 시키면 공허한 일반론("에러를 적절히 처리하라")이 나온다 → 실제 세션의 정정·입출력·엣지케이스를 재료로.
-- **과잉 스킬화**: 1회성 잡담·프로젝트 특수 지식까지 스킬로 → 상시 로드되는 description만 늘고 오탐. 재사용성 바로 거른다.
-- **과도 구체**: 프로젝트 지엽(도구명·파일명)이 남으면 전역에서 무용 → 추상화 필수.
-- **중복 생성**: 이미 있는 스킬/MEMORY 확인 안 하고 재생성 → 파편화. 겹치면 **스킬 = 일반 원리, MEMORY = 프로젝트 구체 사례 + 스킬 포인터**로 역할 분리.
-- **미검증 초안 등록**: 초안을 원 케이스에 되돌려 보지 않고 등록 → 다음 세션이 베타테스터가 됨.
-- **문서화 누락**: 만들고 등록만 하고 CLAUDE.md 규약·provenance 안 남기면 다음 세션이 규칙을 모른다.
+- **Empty generality**: a skill made without concrete failure becomes advice nobody can apply.
+- **Over-skillifying**: every small hiccup does not deserve a globally visible description.
+- **Project leakage**: local facts make a global skill brittle.
+- **Duplicate skills**: overlapping skills fragment trigger quality and increase noise.
+- **Korean second source**: saving both English and Korean files creates two things to maintain. Translate for review, keep one canonical file.
+- **No replay**: if the draft cannot guide the original case, it is not ready.
+- **Copy instead of link**: duplicated registered folders drift from the source skill.
 
-## Verification (체크리스트)
+## Verification
 
-- [ ] 승격 대상이 재사용 가능한 일반 원리인가(1회성/프로젝트 특수 아님)?
-- [ ] 프로젝트·도구 지엽을 추상화했나?
-- [ ] 기존 스킬·MEMORY와 중복 확인했나?
-- [ ] 표준 섹션(트리거·절차·함정·검증) + 구체·간결 description + version/platforms frontmatter를 갖췄나?
-- [ ] 초안을 세션의 원 케이스에 되돌려 적용해 봤나(execute-then-revise)?
-- [ ] 영어·한국어 두 버전으로 작성해 표현 어색함을 교차검증했나?
-- [ ] provenance 접두사·디렉토리·등록·문서화를 마쳤나?
-- [ ] 사용자 승인을 받았나?
+- [ ] Is the lesson reusable outside this project?
+- [ ] Did it come from concrete session evidence?
+- [ ] Did I remove project-specific details without losing the edge case?
+- [ ] Did I check for an existing skill before creating a new one?
+- [ ] Did `write-a-skill` handle SKILL.md authoring rules?
+- [ ] Is the English `SKILL.md` the single canonical file?
+- [ ] Did I show a Korean translation or summary for user review?
+- [ ] Did the draft work against the original or analogous case?
+- [ ] Did the user approve name, scope, description, and trigger before registration?
 
 ---
-*자기개선 루프: 세션 회고 → 필터 → 추상화 → 스킬. 참고 계보 — Reflexion(실패의 언어적 성찰), Voyager(스킬 라이브러리), Hermes(정정·실패 후 자동 스킬화), Anthropic Agent Skills(Gotchas 중심).*
+*Self-improvement loop: session evidence -> reusable lesson -> English canonical draft via write-a-skill -> Korean review rendering -> replay -> approved skill.*

@@ -1,6 +1,6 @@
 ---
 name: AIL-verify-against-reality
-description: Diagnostic discipline for when a result looks wrong — before digging back into the target code, rule out (a) stale intermediate layers between code and reality (cache, test-double divergence, version shadow, un-rebuilt artifacts) and (b) your own command / measurement method itself, by measuring rather than assuming. Fires on "I fixed it but nothing changed", "rebuilt and still the same", a command result that looks off, or verifying state-transition UI.
+description: "Checks surprising verification results against real execution paths before re-debugging target code, focusing on stale caches, test-double divergence, version shadowing, unrebuilt artifacts, and faulty command or measurement methods. Use after a fix appears correct but reality is unchanged, tests or mocks pass while the real environment fails, a rebuild/reload shows no effect, or a command result looks suspicious."
 version: 1.2.0
 metadata:
   provenance: AIL
