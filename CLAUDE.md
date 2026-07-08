@@ -30,7 +30,13 @@ Claude Code, Codex, Gemini CLI 공용 커스텀 스킬 레포. 각 스킬 동작
 
 **커스텀 정책 — curated + AIL 자동**: 전체 실행은 curated hub 를 함부로 채우지 않는다(의도적 제외 스킬 보존). 단 **`AIL-*` 스킬은 전체 실행 시 자동 링크**되고, 비-AIL repo 스킬은 `--only`/`-Only` 로만 등록한다. prune 은 이 repo 가 소유한(타깃이 repo 하위) 링크가 **dangling(타깃 삭제)** 일 때만 — 단순 미포함은 건드리지 않는다.
 
-**pull 시 자동 연결 (git hook)**: `sync-skills/git-hooks/post-merge` 가 `git pull`/merge 직후 `sync-skills.sh` 를 돌려 새로 받은 AIL 스킬을 자동 링크한다. clone/새 환경에서 1회만 활성화: `git config core.hooksPath sync-skills/git-hooks`. (GitHub Actions 는 로컬 `~/.claude` 에 접근 불가 — 자동 연결은 반드시 로컬 hook 으로 한다. Actions 는 repo 쪽 검증 용도로만.)
+**pull 시 자동 연결 (git hook)**: `sync-skills/git-hooks/post-merge` 가 `git pull`/merge 직후 `sync-skills.sh` 를 돌려 새로 받은 AIL 스킬을 자동 링크한다. (GitHub Actions 는 로컬 `~/.claude` 에 접근 불가 — 자동 연결은 반드시 로컬 hook 으로 한다. Actions 는 repo 쪽 검증 용도로만.)
+
+**머신마다 1회 부트스트랩**: git 은 clone 에 hook 활성화를 딸려 주지 않는다(보안 — clone 이 코드 자동 실행 불가). 그래서 `core.hooksPath` 는 **clone 마다 한 번** 걸어야 한다. 새 컴퓨터에서 clone 직후:
+```bash
+bash sync-skills/install.sh   # core.hooksPath 설정 + 초기 sync (1회)
+```
+이후 그 머신에선 `git pull` 이 자동으로 새 AIL 스킬을 링크한다. (install.sh 없이 수동: `git config --local core.hooksPath sync-skills/git-hooks`.)
 
 ## 서브모듈 — md-ebook (= md2ebook), show-me
 
