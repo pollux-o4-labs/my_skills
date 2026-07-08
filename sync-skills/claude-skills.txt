@@ -11,8 +11,6 @@
 efficient-subagent
 skillify-session-lessons
 supervisor-mode
-
-# Deliberately NOT linked (uncomment to enable):
-# git-workflow-select
-# middle-merge
-# setup-my-skills
+git-workflow-select
+middle-merge
+setup-my-skills
