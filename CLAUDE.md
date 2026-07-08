@@ -28,7 +28,7 @@ Claude Code, Codex, Gemini CLI 공용 커스텀 스킬 레포. 각 스킬 동작
 - **Windows**: `sync-skills/sync-skills.ps1` (구 `~/.gemini/antigravity-cli/sync-skills.ps1` 대체). `-Host claude|codex|gemini`, `-Only <스킬명>`, `-WhatIf`(드라이런), Gemini prune 은 `-PruneMirror` 명시 시.
 - **Linux/macOS**: `sync-skills/sync-skills.sh` (동일 의미). `--host`, `--only a,b`, `--all-skills`, `--dry-run`, `--prune-mirror`. host 는 심볼릭 링크(claude·codex)·복사(gemini)로 등록하며, **해당 host 의 skills 디렉토리가 이미 있을 때만** 갱신한다(미설치 host 는 새로 만들지 않음).
 
-**커스텀 정책 — curated + AIL 자동**: 전체 실행은 curated hub 를 함부로 채우지 않는다(의도적 제외 스킬 보존). 단 **`AIL-*` 스킬은 전체 실행 시 자동 링크**되고, 비-AIL repo 스킬은 `--only`/`-Only` 로만 등록한다. prune 은 이 repo 가 소유한(타깃이 repo 하위) 링크가 **dangling(타깃 삭제)** 일 때만 — 단순 미포함은 건드리지 않는다.
+**커스텀 정책 — 선언적 매니페스트 + AIL 자동**: 전체 실행이 링크하는 집합 = **`AIL-*`(provenance 로 자동)** ∪ **`sync-skills/claude-skills.txt` 매니페스트에 적힌 비-AIL 스킬**. 개인 스킬(자동 인식 안 되는 전용 스킬)은 이 매니페스트에 **한 줄 추가**하면 모든 머신에서 다음 `git pull` 때 링크된다. `--only`/`-Only` 는 매니페스트에 없는 스킬을 일회성으로 등록. prune 은 이 repo 가 소유한(타깃이 repo 하위) 링크에 대해서만, **dangling 이거나 매니페스트에서 빠졌을 때** 수행 — foreign 링크·일반 디렉토리(다른 설치물)는 절대 안 건드린다. 매니페스트에서 한 줄 지우면 다음 sync 때 그 링크가 정리된다.
 
 **pull 시 자동 연결 (git hook)**: `sync-skills/git-hooks/post-merge` 가 `git pull`/merge 직후 `sync-skills.sh` 를 돌려 새로 받은 AIL 스킬을 자동 링크한다. (GitHub Actions 는 로컬 `~/.claude` 에 접근 불가 — 자동 연결은 반드시 로컬 hook 으로 한다. Actions 는 repo 쪽 검증 용도로만.)
 

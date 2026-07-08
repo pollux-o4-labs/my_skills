@@ -1,0 +1,18 @@
+# claude-skills.txt — declarative registration manifest for the curated claude hub.
+#
+# AIL-* skills are auto-linked by provenance and do NOT need to be listed here.
+# List only the NON-AIL repo skills you want linked into ~/.claude/skills.
+# One skill name (= directory name) per line. '#' starts a comment. Blank lines ignored.
+#
+# sync-skills.sh / sync-skills.ps1 link  =  AIL-* (auto)  ∪  the names below.
+# Add a line here → it links on every machine on the next `git pull`.
+# Remove a line → the owned link is pruned on the next sync (safe: only this repo's links).
+
+efficient-subagent
+skillify-session-lessons
+supervisor-mode
+
+# Deliberately NOT linked (uncomment to enable):
+# git-workflow-select
+# middle-merge
+# setup-my-skills

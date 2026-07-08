@@ -65,8 +65,16 @@ $CopyOnlyIfMissing = @('md2ebook')
 # Directories in a source root that are NOT skills.
 # md-ebook / show-me are git SUBMODULES deployed via `npx skills add pollux-o4/<repo>` —
 # never junction/copy them from here (working tree may hold unmerged branches).
-$NotSkills = @('.git','.claude','.playwright-mcp','.system','review','sync-skills','docs','node_modules',
+$NotSkills = @('.git','.github','.claude','.playwright-mcp','.system','review','sync-skills','docs','node_modules',
                'md-ebook','show-me')
+
+# Declarative manifest: non-AIL repo skills to link into the curated claude hub.
+# (AIL-* are auto by provenance and need not be listed.) One name per line; '#' comments.
+$ManifestFile = Join-Path $PSScriptRoot 'claude-skills.txt'
+$Manifest = @()
+if (Test-Path $ManifestFile) {
+  $Manifest = @(Get-Content $ManifestFile | ForEach-Object { ($_ -replace '#.*$','').Trim() } | Where-Object { $_ })
+}
 
 # --- host registration table -------------------------------------------------
 # mode 'junction': dest\<name> -> source\<name> (source = physical root this host owns)
@@ -171,18 +179,32 @@ foreach ($h in $Hosts) {
     Write-Host "    source-only: no changes; this root controls the active skill set." -ForegroundColor Gray
   }
   elseif ($mode -eq 'curated-junction') {
-    # Full run auto-registers AIL-* skills (always-on AI-Learned guidance) so `git pull`
-    # + this script connects newly pulled AIL skills. Non-AIL repo skills register only
-    # when named via -Only; deliberate exclusions otherwise survive. (Mirrors sync-skills.sh.)
+    # Full run registers AIL-* (auto by provenance) + claude-skills.txt manifest entries,
+    # so `git pull` connects newly pulled AIL skills and any declared personal skills.
+    # -Only adds ad-hoc names. Deliberate exclusions otherwise survive. (Mirrors sync-skills.sh.)
     $allNames = @($srcMap.Keys)
-    $targets  = @($allNames | Where-Object { $_ -like 'AIL-*' })
+    $targets  = @($allNames | Where-Object { ($_ -like 'AIL-*') -or ($_ -in $Manifest) })
     if ($Only.Count -gt 0) {
       $targets = @($targets + @($allNames | Where-Object { $_ -in $Only }) | Select-Object -Unique)
     }
     if ($targets.Count -eq 0) {
-      Write-Host "    curated: nothing to register (no AIL-* skills, no -Only)." -ForegroundColor Gray
+      Write-Host "    curated: nothing to register (no AIL-* skills, empty manifest, no -Only)." -ForegroundColor Gray
     }
     else {
+      # prune owned junctions that left the target set (dropped from manifest) or dangle.
+      # Foreign junctions / plain dirs are never touched. -Only limits pruning to named skills.
+      Get-ChildItem -Path $dest -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object {
+        $entry = $_
+        if (-not (Test-OwnedJunction $entry @($RepoRoot))) { return }
+        if ($Only.Count -gt 0 -and $entry.Name -notin $Only) { return }
+        $targetGone = -not (Test-Path $entry.Target)
+        $notWanted  = $entry.Name -notin $targets
+        if ($targetGone -or $notWanted) {
+          $why = if ($targetGone) { 'dangling' } else { 'dropped from manifest' }
+          Write-Host "    prune ($why): $($entry.Name)" -ForegroundColor DarkYellow
+          if ($PSCmdlet.ShouldProcess($entry.FullName, "remove ($why)")) { [IO.Directory]::Delete($entry.FullName) }
+        }
+      }
       foreach ($name in $targets) {
         $src = $srcMap[$name]
         $dst = Join-Path $dest $name

@@ -50,25 +50,37 @@ while [ $# -gt 0 ]; do
 done
 
 # Directories in the repo that are NOT skills (mirrors $NotSkills in the .ps1).
-NOT_SKILLS=(.git .claude .playwright-mcp .system review sync-skills docs node_modules md-ebook show-me)
+NOT_SKILLS=(.git .github .claude .playwright-mcp .system review sync-skills docs node_modules md-ebook show-me)
 # Skills whose gemini copy is refreshed only when absent (submodule-backed WIP).
 COPY_ONLY_IF_MISSING=(md2ebook)
 
+# Declarative manifest: non-AIL repo skills to link into the curated hub.
+# (AIL-* are auto by provenance and need not be listed.)
+MANIFEST_FILE="$SCRIPT_DIR/claude-skills.txt"
+MANIFEST=()
+if [ -f "$MANIFEST_FILE" ]; then
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%%#*}"; line="$(echo "$line" | xargs)"
+    [ -n "$line" ] && MANIFEST+=("$line")
+  done < "$MANIFEST_FILE"
+fi
+
 is_not_skill()   { local n="$1"; for x in "${NOT_SKILLS[@]}"; do [ "$n" = "$x" ] && return 0; done; return 1; }
-in_only()        { local n="$1"; for x in "${ONLY[@]}"; do [ "$n" = "$x" ] && return 0; done; return 1; }
+in_only()        { local n="$1"; for x in "${ONLY[@]:-}"; do [ "$n" = "$x" ] && return 0; done; return 1; }
+in_manifest()    { local n="$1"; for x in "${MANIFEST[@]:-}"; do [ "$n" = "$x" ] && return 0; done; return 1; }
 copy_if_missing(){ local n="$1"; for x in "${COPY_ONLY_IF_MISSING[@]}"; do [ "$n" = "$x" ] && return 0; done; return 1; }
 
 run() { if [ "$DRY" = 1 ]; then echo "    [dry] $*"; else eval "$@"; fi; }
 
-# The wanted set for a full run: AIL-* skills (auto) + any --only names, unless
-# --all-skills is set (then every repo skill with a SKILL.md).
+# The wanted set for a full run: AIL-* (auto by provenance) + manifest entries +
+# any --only names. --all-skills overrides and takes every repo skill with a SKILL.md.
 wanted_names() {
   local n
   for d in "$REPO_ROOT"/*/; do
     n="$(basename "$d")"
     is_not_skill "$n" && continue
     [ -f "$REPO_ROOT/$n/SKILL.md" ] || continue
-    if [ "$ALL_SKILLS" = 1 ] || [[ "$n" == AIL-* ]] || in_only "$n"; then
+    if [ "$ALL_SKILLS" = 1 ] || [[ "$n" == AIL-* ]] || in_manifest "$n" || in_only "$n"; then
       echo "$n"
     fi
   done
@@ -88,9 +100,10 @@ owned_link() {
 link_host() {   # symlink-based host (claude, codex)
   local dest="$1" src_root="$2"
   [ -d "$dest" ] || run "mkdir -p '$dest'"
-  # 1) prune ONLY owned links that are dangling (target dir removed from the repo).
-  #    A curated hub keeps legitimately-registered non-AIL links — never prune a link
-  #    just because it's outside the AIL auto set.
+  # 1) prune ONLY links this repo owns (target resolves under REPO_ROOT) that are
+  #    dangling OR no longer wanted (AIL dir removed, or dropped from the manifest).
+  #    Foreign links and plain dirs (other installers') are never touched. With --only,
+  #    limit pruning to the named skills so an ad-hoc run can't clear the hub.
   for entry in "$dest"/*; do
     [ -L "$entry" ] || continue
     local name; name="$(basename "$entry")"
@@ -98,6 +111,8 @@ link_host() {   # symlink-based host (claude, codex)
     if [ ${#ONLY[@]} -gt 0 ] && ! in_only "$name"; then continue; fi
     if [ ! -e "$entry" ]; then
       echo "    prune (dangling): $name"; run "rm -f '$entry'"
+    elif ! grep -qx "$name" <<< "$WANTED"; then
+      echo "    prune (dropped from manifest): $name"; run "rm -f '$entry'"
     fi
   done
   # 2) (re)create each wanted link
