@@ -6,8 +6,9 @@
 
   Hosts differ in registration mechanism (see CLAUDE.md "스킬 등록 경로" table):
 
-    Claude Code : curated hub at ~\.claude\skills. A full run NEVER auto-adds repo
-                  skills (some are deliberately kept out). Register a repo skill with
+    Claude Code : curated hub at ~\.claude\skills. A full run auto-registers AIL-*
+                  skills (AI-Learned, always-on guidance) but NOT other repo skills
+                  (some are deliberately kept out). Register a non-AIL repo skill with
                   `-Only <name>` — it junctions repo\<name> -> hub\<name> if absent.
     Codex       : junction  ~\.codex\skills\<name>   ->  personal skills activated in ~\.claude\skills
     Gemini/agy  : COPY (physical dir) from ~\.claude\skills, with junctions resolved
@@ -170,13 +171,19 @@ foreach ($h in $Hosts) {
     Write-Host "    source-only: no changes; this root controls the active skill set." -ForegroundColor Gray
   }
   elseif ($mode -eq 'curated-junction') {
-    # Register a repo skill into the curated hub ONLY when explicitly named via -Only.
-    # A full run leaves the hub untouched so deliberate exclusions survive.
-    if ($Only.Count -eq 0) {
-      Write-Host "    curated: full run leaves this hub untouched; pass -Only <name> to register a repo skill." -ForegroundColor Gray
+    # Full run auto-registers AIL-* skills (always-on AI-Learned guidance) so `git pull`
+    # + this script connects newly pulled AIL skills. Non-AIL repo skills register only
+    # when named via -Only; deliberate exclusions otherwise survive. (Mirrors sync-skills.sh.)
+    $allNames = @($srcMap.Keys)
+    $targets  = @($allNames | Where-Object { $_ -like 'AIL-*' })
+    if ($Only.Count -gt 0) {
+      $targets = @($targets + @($allNames | Where-Object { $_ -in $Only }) | Select-Object -Unique)
+    }
+    if ($targets.Count -eq 0) {
+      Write-Host "    curated: nothing to register (no AIL-* skills, no -Only)." -ForegroundColor Gray
     }
     else {
-      foreach ($name in $wanted) {
+      foreach ($name in $targets) {
         $src = $srcMap[$name]
         $dst = Join-Path $dest $name
         $existing = Get-Item $dst -ErrorAction SilentlyContinue
@@ -195,7 +202,7 @@ foreach ($h in $Hosts) {
         }
       }
       foreach ($n in $Only) {
-        if ($n -notin $wanted) { Write-Warning "    ${n}: not a repo skill (no $RepoRoot\$n\SKILL.md) — nothing to register." }
+        if ($n -notin $allNames) { Write-Warning "    ${n}: not a repo skill (no $RepoRoot\$n\SKILL.md) — nothing to register." }
       }
     }
   }

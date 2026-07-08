@@ -1,9 +1,28 @@
 #!/usr/bin/env bash
-# Auto-connect skills after `git pull`/merge. Installed via:
-#   git config core.hooksPath sync-skills/git-hooks
-# Only runs on Unix hosts; no-op if the sync script is missing.
+# Auto-connect skills after `git pull`/merge. Activated per-clone via install.sh /
+# install.ps1 (or `git config core.hooksPath sync-skills/git-hooks`).
+#
+# OS-dispatched: on Windows, Git Bash runs this hook — we hand off to PowerShell
+# (sync-skills.ps1, junction-based). On Unix, we run sync-skills.sh (symlink-based).
+# No-op if the target script or interpreter is missing (never blocks the merge).
 set -euo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-[ -x "$DIR/sync-skills.sh" ] || exit 0
 echo "[post-merge] syncing skills…"
-"$DIR/sync-skills.sh" || echo "[post-merge] sync-skills failed (non-fatal)"
+
+case "$(uname -s 2>/dev/null)" in
+  MINGW*|MSYS*|CYGWIN*|Windows*)
+    ps1="$DIR/sync-skills.ps1"
+    # PowerShell needs a native Windows path, not an MSYS /c/... path
+    if command -v cygpath >/dev/null 2>&1; then ps1="$(cygpath -w "$ps1")"; fi
+    if   command -v pwsh       >/dev/null 2>&1; then pwsh -NoProfile -File "$ps1"       || echo "[post-merge] sync-skills.ps1 failed (non-fatal)"
+    elif command -v powershell >/dev/null 2>&1; then powershell -NoProfile -File "$ps1" || echo "[post-merge] sync-skills.ps1 failed (non-fatal)"
+    else echo "[post-merge] no PowerShell found — skipping"; fi
+    ;;
+  *)
+    if [ -x "$DIR/sync-skills.sh" ]; then
+      "$DIR/sync-skills.sh" || echo "[post-merge] sync-skills.sh failed (non-fatal)"
+    else
+      echo "[post-merge] sync-skills.sh missing — skipping"
+    fi
+    ;;
+esac
