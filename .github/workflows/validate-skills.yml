@@ -1,0 +1,43 @@
+name: validate-skills
+# Repo-side check only. GitHub Actions cannot touch a machine's ~/.claude/skills,
+# so it does NOT connect skills — local `git pull` + the post-merge hook does that.
+# This just fails a push/PR that would ship a broken skill (missing SKILL.md, or an
+# AIL-* skill missing its provenance frontmatter).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: check every skill dir has SKILL.md; AIL-* have provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOT_SKILLS=".git .github .claude .playwright-mcp .system review sync-skills docs node_modules md-ebook show-me"
+          fail=0
+          for d in */; do
+            name="${d%/}"
+            case " $NOT_SKILLS " in *" $name "*) continue ;; esac
+            # submodules & non-skill dirs without SKILL.md are ignored unless they look like skills
+            if [ ! -f "$name/SKILL.md" ]; then
+              # only flag dirs that clearly intend to be skills (have any .md but no SKILL.md is fine to skip)
+              continue
+            fi
+            if [[ "$name" == AIL-* ]]; then
+              # provenance must be declared (value form varies: "AIL" or "AI-generated …")
+              if ! grep -qE '^[[:space:]]*provenance:[[:space:]]*\S' "$name/SKILL.md"; then
+                echo "::error file=$name/SKILL.md::AIL skill missing 'metadata.provenance'"
+                fail=1
+              fi
+              if ! grep -qE '^version:' "$name/SKILL.md"; then
+                echo "::error file=$name/SKILL.md::AIL skill missing 'version:' frontmatter"
+                fail=1
+              fi
+            fi
+            echo "ok: $name"
+          done
+          exit $fail

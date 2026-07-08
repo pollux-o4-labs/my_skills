@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Auto-connect skills after `git pull`/merge. Installed via:
+#   git config core.hooksPath sync-skills/git-hooks
+# Only runs on Unix hosts; no-op if the sync script is missing.
+set -euo pipefail
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+[ -x "$DIR/sync-skills.sh" ] || exit 0
+echo "[post-merge] syncing skills…"
+"$DIR/sync-skills.sh" || echo "[post-merge] sync-skills failed (non-fatal)"

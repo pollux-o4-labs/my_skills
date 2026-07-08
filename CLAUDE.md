@@ -24,7 +24,13 @@ Claude Code, Codex, Gemini CLI 공용 커스텀 스킬 레포. 각 스킬 동작
 
 새 스킬 등록 시 세 host 모두 처리하고, repo에서 스킬 삭제 시 각 host의 정션·복사본도 제거(dangling 정션 방지).
 
-세 host 등록·재동기화는 통합 스크립트 `sync-skills/sync-skills.ps1` 로 일괄 처리한다(구 `~/.gemini/antigravity-cli/sync-skills.ps1` 대체). `-Host claude|codex|gemini`, `-Only <스킬명>`, `-WhatIf`(드라이런) 지원. Gemini 복사본 prune 은 `-PruneMirror` 명시 시에만 수행. 서브모듈 기반 스킬(md-ebook·show-me)은 이 스크립트가 건드리지 않는다.
+세 host 등록·재동기화는 통합 스크립트로 일괄 처리한다. 서브모듈 기반 스킬(md-ebook·show-me)은 이 스크립트가 건드리지 않는다.
+- **Windows**: `sync-skills/sync-skills.ps1` (구 `~/.gemini/antigravity-cli/sync-skills.ps1` 대체). `-Host claude|codex|gemini`, `-Only <스킬명>`, `-WhatIf`(드라이런), Gemini prune 은 `-PruneMirror` 명시 시.
+- **Linux/macOS**: `sync-skills/sync-skills.sh` (동일 의미). `--host`, `--only a,b`, `--all-skills`, `--dry-run`, `--prune-mirror`. host 는 심볼릭 링크(claude·codex)·복사(gemini)로 등록하며, **해당 host 의 skills 디렉토리가 이미 있을 때만** 갱신한다(미설치 host 는 새로 만들지 않음).
+
+**커스텀 정책 — curated + AIL 자동**: 전체 실행은 curated hub 를 함부로 채우지 않는다(의도적 제외 스킬 보존). 단 **`AIL-*` 스킬은 전체 실행 시 자동 링크**되고, 비-AIL repo 스킬은 `--only`/`-Only` 로만 등록한다. prune 은 이 repo 가 소유한(타깃이 repo 하위) 링크가 **dangling(타깃 삭제)** 일 때만 — 단순 미포함은 건드리지 않는다.
+
+**pull 시 자동 연결 (git hook)**: `sync-skills/git-hooks/post-merge` 가 `git pull`/merge 직후 `sync-skills.sh` 를 돌려 새로 받은 AIL 스킬을 자동 링크한다. clone/새 환경에서 1회만 활성화: `git config core.hooksPath sync-skills/git-hooks`. (GitHub Actions 는 로컬 `~/.claude` 에 접근 불가 — 자동 연결은 반드시 로컬 hook 으로 한다. Actions 는 repo 쪽 검증 용도로만.)
 
 ## 서브모듈 — md-ebook (= md2ebook), show-me
 
