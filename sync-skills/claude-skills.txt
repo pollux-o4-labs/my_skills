@@ -14,3 +14,5 @@ supervisor-mode
 git-workflow-select
 middle-merge
 setup-my-skills
+format-response
+write-a-rule
