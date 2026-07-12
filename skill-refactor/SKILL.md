@@ -1,0 +1,50 @@
+---
+name: skill-refactor
+description: "Compresses an existing skill to its load-bearing core — cutting instruction creep (description enumerations, restated rules, narrative padding) while preserving every behavioral directive. Use when a skill exceeds the authoring budgets (description >400 chars, body past the 700-word target), when touching a skill under the retrofit-on-edit policy, or when a review flags bloat."
+version: 1.0.0
+metadata:
+  platforms: [claude-code, codex, gemini-cli]
+---
+
+# Skill Refactor
+
+Every skill description is loaded into every session's prompt, and every body word is read on every trigger — bloat is a recurring tax, not a one-time cost. A refactor cuts the tax without touching behavior: same triggers, same directives, fewer words. Why these standards exist: [RATIONALE.md](RATIONALE.md).
+
+## When to Use
+
+- A skill exceeds the budgets in the skills-repo `CLAUDE.md` (description >400 chars; body past the 700-word target — 1,000 is the review threshold).
+- You are editing a skill for another reason — the retrofit-on-edit policy says bring it into caps in the same pass.
+- A reviewer or the user flags a skill as bloated.
+
+**Skip for**: skills already within caps (don't churn); changes that alter triggers or behavior — that is a redesign, not a refactor, and needs its own review.
+
+## Procedure
+
+1. **Measure first**: lines, body words (frontmatter excluded), description chars. Record before/after.
+2. **Inventory load-bearing content before cutting — mechanically**: every imperative sentence, bullet, and checkbox in the original is an inventory item, plus trigger keywords, boundary cross-references ("not for X, see Y"), and the concrete example that taught the lesson. This list is the contract the refactor must not break.
+3. **Cut by creep pattern**:
+   - description enumerations (tool lists, exception lists) → body "Skip"/"Do NOT use" section; description keeps what+when in 2 sentences
+   - narrative intros and multi-line Origin stories → one line each
+   - Verification items restating Procedure steps → outcome checks only (≤6)
+   - the same rule stated in several places → one home + pointer
+   - edge-case branch prose → compact enumeration
+4. **Behavior-preservation check**: for each inventoried item, point to where it survives in the draft. An item with no home means the cut changed behavior — restore it, or stop and route the change as a redesign with its own review.
+5. **Finish**: bump the minor version, re-measure against the budgets, and show the diff with before/after numbers — reviewed against the original file, not just the inventory — before registering.
+
+## Pitfalls
+
+- **Cutting the edge case that taught the lesson** — the skill becomes advice nobody can apply.
+- **Over-trimming the description** until it loses discriminability from sibling skills.
+- **Treating the soft target as a hard cap** — mangling a load-bearing example to hit 700; the review threshold is 1,000.
+- **Silent behavior change** smuggled in as compression.
+
+## Verification
+
+- [ ] Before/after measurements recorded, and the result within caps (or the overshoot justified)?
+- [ ] Every inventoried directive, trigger, and example has a surviving home?
+- [ ] Any behavior change declared explicitly, not smuggled in?
+- [ ] Version bumped and the numbered diff shown for review?
+
+## Example
+
+Pilot: `AIL-calibrate-agent-spend`, 1,516→717 words, description 520→349 chars. Cut: tool/exception enumeration in the description (moved to the body "Skip for" line), two intro paragraphs already restated in Pitfalls, a five-line Origin narrative, and Verification items mirroring Procedure. Kept: the conflict-naming lesson ("don't silently pick the convenient policy doc") — verified surviving in Procedure step 3, one Pitfall, and the Example. An adversarial reviewer confirmed no load-bearing loss. (Numbers are session-measured, body words with frontmatter excluded; the pre-refactor version was never committed to git.)

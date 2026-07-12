@@ -10,7 +10,7 @@ Claude Code, Codex, Gemini CLI 공용 커스텀 스킬 레포. 각 스킬 동작
 - 디렉토리명 = name (kebab-case), 진입점 = SKILL.md
 - **provenance 접두사**: AI가 세션 교훈에서 스스로 생성·승격한 스킬은 `AIL-` 접두사(AI-Learned, 예: `AIL-verify-against-reality`). 사용자가 의도적으로 넣은 스킬과 구분 — 나중에 리팩터·정리·신뢰도 판단 시 식별용. 새 교훈 스킬화 시 이 접두사를 붙인다.
 - **AIL 스킬 frontmatter**: `version`(semver, 수정 시 bump) + `metadata.provenance: AIL` + `metadata.platforms` 기입. description은 짧게(상시 로드 비용).
-- **분량·중복 상한(전 스킬 공통)**: description = what+when 2문장, 목표 ≤400자 — 도구·예외 나열은 본문("Skip"/"Do NOT use" 절)으로 내린다. 본문 목표 ≤700단어(1,000 초과 시 분할·압축 검토). Verification은 결과 확인형 ≤6항 — Procedure의 1:1 재진술 금지. Origin/Provenance 서명은 1줄. 기존 스킬은 파일럿 우선 소급(1차 파일럿: AIL-calibrate-agent-spend) — 이후 각 스킬을 수정하는 시점에 이 상한으로 맞춘다. lint 자동화는 위반 재발 시 도입.
+- **분량·중복 상한(전 스킬 공통)**: description = what+when 2문장, 목표 ≤400자 — 도구·예외 나열은 본문("Skip"/"Do NOT use" 절)으로 내린다. 본문 목표 ≤700단어(1,000 초과 시 분할·압축 검토). Verification은 결과 확인형 ≤6항 — Procedure의 1:1 재진술 금지. Origin/Provenance 서명은 1줄. 기존 스킬은 파일럿 우선 소급(1차 파일럿: AIL-calibrate-agent-spend) — 이후 각 스킬을 수정하는 시점에 `skill-refactor` 스킬로 이 상한에 맞춘다. lint 자동화는 위반 재발 시 도입. 근거 원문은 `skill-refactor/RATIONALE.md`.
 - 보조 문서는 스킬 디렉토리 안에 — 루트 오염 금지
 - setup-my-skills → efficient-subagent 의존관계 있음
 - CLI 별 등록 경로와 전역 지침 파일 차이를 섞지 말고 대상 host 를 먼저 식별
