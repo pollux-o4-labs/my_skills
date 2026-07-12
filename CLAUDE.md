@@ -13,6 +13,7 @@ Claude Code, Codex, Gemini CLI 공용 커스텀 스킬 레포. 각 스킬 동작
 - **분량·중복 상한(전 스킬 공통)**: description = what+when 2문장, 목표 ≤400자 — 도구·예외 나열은 본문("Skip"/"Do NOT use" 절)으로 내린다. 본문 목표 ≤700단어(1,000 초과 시 분할·압축 검토). Verification은 결과 확인형 ≤6항 — Procedure의 1:1 재진술 금지. Origin/Provenance 서명은 1줄. 상한은 **영문 기준**(언어별 환산 근거는 `skill-refactor/RATIONALE.md` §3). 기존 스킬은 파일럿 우선 소급(1차 파일럿: AIL-calibrate-agent-spend) — 이후 각 스킬을 수정하는 시점에 `skill-refactor` 스킬로 이 상한에 맞춘다. lint 자동화는 위반 재발 시 도입. 근거 원문은 `skill-refactor/RATIONALE.md`.
 - **언어**: 스킬 정본은 영어 1개(한국어는 리뷰 렌더링만). 예외 = 한국어 출력 자체를 가르치는 스킬(예: format-response). repo 규칙·문서는 해당 repo의 문서 언어를 따른다(`write-a-rule` 표가 영·한 양식 지원).
 - 보조 문서는 스킬 디렉토리 안에 — 루트 오염 금지
+- **미완성 스킬은 origin에 올리지 않는다** — 로컬 untracked/.gitignore로 유지하고 완성·리뷰 후 커밋. untracked 스킬을 "커밋 누락"으로 단정해 대신 커밋하지 말 것(2026-07-12 AIL-prefer-incremental-over-full 오커밋 사건이 근거).
 - setup-my-skills → efficient-subagent 의존관계 있음
 - CLI 별 등록 경로와 전역 지침 파일 차이를 섞지 말고 대상 host 를 먼저 식별
 

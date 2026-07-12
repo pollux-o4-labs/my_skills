@@ -1,7 +1,7 @@
 ---
 name: skill-refactor
 description: "Compresses an existing skill to its load-bearing core — cutting instruction creep (description enumerations, restated rules, narrative padding) while preserving every behavioral directive. Use when a skill exceeds the authoring budgets (description >400 chars, body past the 700-word target), when touching a skill under the retrofit-on-edit policy, or when a review flags bloat."
-version: 1.0.0
+version: 1.1.0
 metadata:
   platforms: [claude-code, codex, gemini-cli]
 ---
@@ -28,6 +28,7 @@ Every skill description is loaded into every session's prompt, and every body wo
    - Verification items restating Procedure steps → outcome checks only (≤6)
    - the same rule stated in several places → one home + pointer
    - edge-case branch prose → compact enumeration
+   - maintenance-facing narrative (what changed, why it changed, review history) → git history / RATIONALE; the body keeps at most a one-line Origin
 4. **Behavior-preservation check**: for each inventoried item, point to where it survives in the draft. An item with no home means the cut changed behavior — restore it, or stop and route the change as a redesign with its own review.
 5. **Finish**: bump the minor version, re-measure against the budgets, and show the diff with before/after numbers — reviewed against the original file, not just the inventory — before registering.
 
