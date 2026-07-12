@@ -1,7 +1,7 @@
 ---
 name: AIL-calibrate-verification-depth
-description: "Calibrates verification depth before asserting nontrivial inferred conclusions by matching confidence to assumptions, partial evidence, or memory-based reasoning. Use before asserting a nontrivial inferred conclusion when confidence depends on assumptions, partial evidence, or memory; do not use for directly observed facts, routine implementation steps, structure decisions covered by `AIL-ground-before-structuring`, or post-fix mismatch checks covered by `AIL-verify-against-reality`."
-version: 1.0.0
+description: "Calibrates verification depth before asserting a nontrivial inferred conclusion — confidence must be earned by argument (deduction, induction, contradiction) and checking depth matched to how firm that argument is. Use before asserting conclusions that rest on assumptions, partial evidence, or memory rather than direct observation."
+version: 1.1.0
 metadata:
   provenance: AIL
   platforms: [claude-code, codex, gemini-cli]
@@ -12,6 +12,8 @@ metadata:
 Before you assert, propose, or decide on something reached by **inference**, treat confidence as earned by argument, not assumed — and match how deep you verify to how firm that argument is. (Domain siblings apply this per area: `AIL-ground-before-structuring` = structure, `AIL-verify-against-reality` = runtime; the same holds for debugging.)
 
 **Tradeoff:** biases toward checking over speed. For low-stakes, reversible claims, use judgment.
+
+**Skip for**: directly observed facts and routine implementation steps; structure decisions and post-fix mismatch checks belong to the domain siblings above.
 
 ## 1. Earn confidence by argument
 - **Deduction** — follows from an established rule/spec? A summary/index suffices.

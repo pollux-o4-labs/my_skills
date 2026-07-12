@@ -1,7 +1,7 @@
 ---
 name: AIL-verify-features-against-tests
-description: "Verifies a codebase's features are genuinely tested rather than merely green — by enumerating features in one index, writing per-feature must-hold and must-not invariants, mapping each to the test that exercises it, and reproducing the suite before trusting it. Use when auditing test coverage, building a feature/verification spec, hunting edge cases, or before citing a green suite as proof a feature works; the proactive counterpart to `AIL-verify-against-reality`. Not for a one-off test run with no coverage claim."
-version: 1.0.0
+description: "Verifies a codebase's features are genuinely tested rather than merely green — enumerate features in one index, write per-feature must-hold and must-not invariants, map each to the test that exercises it, and reproduce the suite before trusting it. Use when auditing test coverage, building a feature or verification spec, hunting edge cases, or before citing a green suite as proof a feature works."
+version: 1.1.0
 metadata:
   provenance: AIL
   platforms: [claude-code, codex, gemini-cli]
@@ -17,7 +17,7 @@ A green suite certifies the paths its fixtures exercise — **not** that a featu
 - You're auditing test coverage, or writing a feature / verification spec.
 - You're hunting edge cases or hardening a codebase.
 
-**Do NOT use** for a one-off test run with no coverage claim, or a plain bug that already reproduces in the suite (just fix it).
+**Do NOT use** for a one-off test run with no coverage claim, or a plain bug that already reproduces in the suite (just fix it). For post-hoc "fix looks right but reality is unchanged" checks, use `AIL-verify-against-reality` — this skill is its proactive counterpart.
 
 ## Procedure
 
@@ -42,8 +42,7 @@ A green suite certifies the paths its fixtures exercise — **not** that a featu
 - [ ] Does each feature carry ✔️ must-hold and ⛔ must-not derived from the usage flow?
 - [ ] Is each invariant tagged with a real `test::function`, or explicitly flagged as a gap?
 - [ ] Did I reproduce the suite myself (real exit code), not trust a report?
-- [ ] Did I confirm fixtures instantiate multi-instance / edge preconditions?
-- [ ] Did I check for marker/config-excluded tests dropping out of the default run?
+- [ ] Did I confirm fixtures instantiate multi-instance / edge preconditions, and check for marker/config-excluded tests dropping out of the default run?
 - [ ] Did I reproduce each gap in isolation before calling it a defect?
 
 ---

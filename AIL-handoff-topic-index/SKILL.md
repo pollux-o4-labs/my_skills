@@ -1,7 +1,7 @@
 ---
 name: AIL-handoff-topic-index
-description: "Structures session or project handoff as a directory of per-topic detail files fronted by one list-format index — each entry item, description, status; a list, not a table. Every topic file gets exactly one index line, and unlisted means forgotten; update by splicing one topic file plus its index line, never rewriting the whole. Use when writing or organizing handoff/continuity docs, splitting a growing monolithic handoff by topic, or setting a project's handoff convention. Distinct from the `handoff` skill (one-shot conversation compaction); this governs a standing, accreting handoff corpus."
-version: 1.0.0
+description: "Structures standing handoff docs as per-topic detail files fronted by one list-format index — every topic file gets exactly one index line, unlisted means forgotten, and updates splice one file plus its line. Use when writing or organizing handoff/continuity docs, splitting a growing monolithic handoff by topic, or setting a project's handoff convention."
+version: 1.1.0
 metadata:
   provenance: AIL
   platforms: [claude-code, codex, gemini-cli]
@@ -17,7 +17,7 @@ Handoff survives across sessions only if it is organized so nothing is silently 
 - A single handoff file is growing and should be split by topic.
 - Setting a project's handoff convention.
 
-**Do NOT use** for compacting one conversation into a single throwaway document — that is the plain `handoff` skill.
+**Do NOT use** for compacting one conversation into a single throwaway document — that is the plain `handoff` skill; this one governs a standing, accreting handoff corpus.
 
 ## Procedure
 
