@@ -1,7 +1,7 @@
 ---
 name: write-a-rule
 description: "Authoring standard for repository operational rules and agent policy documents — deontic wording, article-style structure, exception marking, and instruction-creep control. Use when writing or revising repo rules (docs/rules, CLAUDE.md norm sections, agent guidelines), or when rule docs show mixed obligation levels, ad-hoc exceptions, or unchecked growth."
-version: 1.0.0
+version: 1.1.0
 metadata:
   platforms: [claude-code, codex, gemini-cli]
 ---
@@ -16,20 +16,22 @@ Rules are read by agents under load: every ambiguity about *who must do what, wh
 - **Knowledge/guide documents** (explanations, how-tos, records): declarative statements; no bare imperatives.
 - Never mix in one document. A guide that needs a mandate links to the rule; a rule that needs background links to the guide.
 - Agent-facing instruction docs (skills, prompts, procedures) are imperative by design — this split governs repo documents, not the instruction genre itself.
+- Write rules in the repo's document language — the table below carries both English and Korean forms.
 
 ## Deontic vocabulary — one clause, one modality
 
-| Modality | English | Korean legal form |
+| Modality | English | Korean form |
 |---|---|---|
 | Obligation | must | ~해야 한다 |
 | Prohibition | must not | ~해서는 아니 된다 / 금지 |
+| Recommendation | should | ~하는 것이 좋다 / ~을 권장한다 |
 | Permission | may | ~할 수 있다 |
 
 Connectors — not modalities; each carries its own modality inside:
 
-| Connector | English | Korean legal form |
+| Connector | English | Korean form |
 |---|---|---|
-| Exception (proviso) | provided that / unless | 다만, ~ |
+| Exception (proviso) | unless / except that | 다만, ~ |
 | Sequel (follow-up step) | in that case | 이 경우, ~ |
 
 - Do not bury a prohibition inside a permission sentence, or an obligation inside background prose.
@@ -56,7 +58,7 @@ Connectors — not modalities; each carries its own modality inside:
 2. Draft each clause at exactly one modality from the table; mark exceptions as provisos and follow-ups as sequels.
 3. Run the creep check: is each micro-clause incident-backed? Can code enforce it instead? Is the file under budget?
 4. Fill metadata (status/date/grounds) and add the index line.
-5. Reread as the constrained agent: for each clause, can you answer "must, may, or must not — and unless what?" without guessing.
+5. Reread as the constrained agent: for each clause, can you answer "must, should, may, or must not — and unless what?" without guessing.
 
 ## Pitfalls
 
@@ -78,6 +80,11 @@ Before (modality soup + hidden exception):
 
 > 백업은 중요하므로 가급적 작업 전에 만들고, 파괴적 작업(단, self 제외)은 주의한다.
 
-After (one level per clause, proviso and sequel explicit):
+After (one modality per clause, proviso and sequel explicit):
 
 > 파괴적 작업 전에는 백업을 만들어야 한다. 다만, self 대상 작업은 예외로 한다. 이 경우, 실행 로그를 남겨야 한다.
+
+Same shape in English:
+
+> Before: "Backups matter, so try to make one before work (self excluded)."
+> After: "You must create a backup before a destructive operation, unless the operation targets self. In that case, you must still record an execution log."

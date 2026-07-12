@@ -18,14 +18,14 @@ Encyclopedic content is written declaratively ("WHO does not recommend aspirin")
 
 Working memory is narrow; extraneous load (bad formatting, run-on structure) steals capacity from understanding the rule itself. The research's quantitative standards: 50–75 characters per line (Latin) / ≤40 (CJK); sentences of 10–20 words; active voice ≥90%; a lead section of 1–4 paragraphs that stands alone, with no bullets; paragraph 4–6 lines.
 
-→ Adopted as: BLUF-first leads; short-sentence, active-voice preference; the description budget (≤400 chars, what+when only — the description is an always-loaded lead).
+→ Adopted as: BLUF-first leads; short-sentence, active-voice preference; the description budget (≤400 chars, what+when only — the description is an always-loaded lead). The word budgets are calibrated on English text; a Korean-canonical skill (rare — English is canonical by policy) should apply roughly half the word count, since Korean eojeol pack more information per word while costing more tokens per character.
 → Rejected: CPL, line-height, letter-spacing — rendering-layer properties, unenforceable in markdown source and of no benefit there.
 
 ## 4. Statutory article hierarchy (Korean legislative drafting)
 
 Statutes control thousands of clauses with a strict hierarchy (편-장-절-관-조, then 조-항-호-목): 항 must be a complete sentence; 호/목 must be noun-phrase enumerations, never full sentences; exceptions are provisos opening with 다만; conditional follow-ups are sequels opening with 이 경우; even terminal punctuation is semantically regulated. The point is mechanical: any clause can be cited unambiguously, and its binding force is readable from its form.
 
-→ Adopted as: write-a-rule's light 2-level hierarchy (numbered article → noun-phrase items), the modality table (must / must not / may), and the connector forms (다만 / 이 경우). Full 5-level hierarchy rejected as over-engineering for repo-scale rule sets.
+→ Adopted as: write-a-rule's light 2-level hierarchy (numbered article → noun-phrase items), the modality table (must / must not / should / may — the should row follows RFC 2119 practice, so authors don't force recommendations into must or may), and the connector forms (다만 / 이 경우). Full 5-level hierarchy rejected as over-engineering for repo-scale rule sets. The table carries English and Korean forms in parallel: skills stay English-canonical (token cost, host portability), repo rules follow the repo's document language.
 
 ## 5. Deontic properties map to machine-readable structure
 
