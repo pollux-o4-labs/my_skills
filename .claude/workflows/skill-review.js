@@ -22,7 +22,7 @@ if (!skill || !pr) throw new Error("args {skill, pr} required, e.g. {skill: 'AIL
 
 const ID_SCHEMA = {
   type: 'object',
-  required: ['summary', 'maturity', 'budgets', 'triggerType', 'coreDirectives', 'probeScenarios', 'replayScenarios', 'siblings'],
+  required: ['summary', 'maturity', 'budgets', 'triggerType', 'coreDirective', 'coreDirectives', 'probeScenarios', 'replayScenarios', 'siblings'],
   properties: {
     summary: { type: 'string', description: 'two-sentence identification: what the skill does, its origin' },
     maturity: { type: 'string', description: "'FORMED' if the file follows the standards' skill shape; 'RAW' if it is a bare lesson/notes dump needing drafting first" },
@@ -38,6 +38,7 @@ const ID_SCHEMA = {
       },
     },
     triggerType: { type: 'string', description: "'model-invoked' or 'user-invoked' + one-line justification per the standards' discriminator" },
+    coreDirective: { type: 'string', description: "THE one-sentence rule that carries the skill's central lesson — used as the hint in the derivability probe" },
     coreDirectives: { type: 'array', items: { type: 'string' }, description: "the skill's behavioral directives, one line each — the units the probe classifies" },
     probeScenarios: {
       type: 'array',
@@ -187,7 +188,28 @@ A directive is DEFAULT only if the probe answers actually exhibit it (deletion t
   { schema: JUDGE_SCHEMA, label: 'probe-judge', phase: 'Probe', model: 'opus', effort: 'high' }
 )
 
-const nonDefault = judge.classifications.filter(c => !c.isDefault)
+let nonDefault = judge.classifications.filter(c => !c.isDefault)
+
+// Derivability probe — zero-knowledge probing over-values elaborations: a directive can be
+// non-default from scratch yet fully derivable once the core rule is given. Measure that.
+let derivable = []
+if (nonDefault.length >= 3) {
+  const hinted = await agent(
+    `${id.probeScenarios[0]}\n\nAdditionally, you follow this one team rule: "${id.coreDirective}"\n\nDesign the implementation in full — every distinct outcome and behavior, edge cases you would handle, and how you would prove it works. Do NOT enumerate topics you were not asked about; just design. Return your plan only.`,
+    { agentType: 'skill-prober', label: 'probe:hinted', phase: 'Probe' }
+  )
+  const judge2 = await agent(
+    `A model was given ONLY this core rule: "${id.coreDirective}" plus the working scenario, and produced the plan below. Classify each remaining directive: does the plan already exhibit it (derivable from the core — the extra sentence would change nothing), or is it absent/contradicted (needs its own sentence)?
+DIRECTIVES:\n${nonDefault.map((c, i) => `${i + 1}. ${c.directive}`).join('\n')}
+HINTED-PROBE PLAN:\n${hinted}
+Mark isDefault=true when the plan exhibits the directive (derivable), false when absent or contradicted. The core rule itself, if listed, is always isDefault=false. Beware prompt contamination: if the directive only appears because the scenario text seeded it, judge conservatively (isDefault=false). Quote evidence.`,
+    { schema: JUDGE_SCHEMA, label: 'derivability-judge', phase: 'Probe', model: 'opus', effort: 'high' }
+  )
+  derivable = judge2.classifications.filter(c => c.isDefault)
+  const derivableSet = new Set(derivable.map(c => c.directive))
+  nonDefault = nonDefault.filter(c => !derivableSet.has(c.directive))
+  log(`derivability: ${derivable.length} directives derivable from the core → cut candidates; ${nonDefault.length} retained`)
+}
 
 let verdict, fixes = [], rulings = [], accepted = [], remaining = [], rounds = 0, replay = null, adversarial = null
 
@@ -244,7 +266,7 @@ Rule on every index: BLOCKER (would mislead or break an executing agent), CHEAP 
       const editKind = verdict === 'COMPRESS' && rounds === 1 ? 'COMPRESS' : 'FIX'
       await agent(
         `EDIT mode — ${editKind}. Target: ./${skill}/SKILL.md on the checked-out PR branch.
-${editKind === 'COMPRESS' ? `Probe-proven non-default core to keep: ${JSON.stringify(nonDefault.map(c => c.directive))}.\n` : ''}Budget violations to cure: ${JSON.stringify(id.budgets.violations)}.
+${editKind === 'COMPRESS' ? `Probe-proven non-default core to keep: ${JSON.stringify(nonDefault.map(c => c.directive))}.\n` : ''}${derivable.length ? `Derivable-from-core directives — cut or fold into the core step (a Verification outcome check may stay): ${JSON.stringify(derivable.map(c => c.directive))}.\n` : ''}Budget violations to cure: ${JSON.stringify(id.budgets.violations)}.
 Accepted findings to apply (round ${rounds}):\n${remaining.map(f => `[${f.index}|${f.severity}|${f.class}] ${f.finding} → ${f.fix}`).join('\n') || '(none — budgets only)'}`,
         {
           agentType: 'skill-fixer',
