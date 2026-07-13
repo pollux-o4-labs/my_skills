@@ -1,7 +1,7 @@
 ---
 name: skill-refactor
 description: "Compresses an existing skill to its load-bearing core — cutting instruction creep (description enumerations, restated rules, narrative padding) while preserving every behavioral directive. Use when a skill exceeds the authoring budgets (description >400 chars, body past the 700-word target), when touching a skill under the retrofit-on-edit policy, or when a review flags bloat."
-version: 1.2.0
+version: 1.2.1
 metadata:
   platforms: [claude-code, codex, gemini-cli]
 ---
@@ -12,7 +12,7 @@ Every skill description is loaded into every session's prompt, and every body wo
 
 ## When to Use
 
-- A skill exceeds the budgets in the skills-repo `CLAUDE.md` (description >400 chars; body past the 700-word target — 1,000 is the review threshold).
+- A skill exceeds the budgets in `skillify-session-lessons/authoring-standards.md` (description >400 chars; body past the 700-word target — 1,000 is the review threshold).
 - You are editing a skill for another reason — the retrofit-on-edit policy says bring it into caps in the same pass.
 - A reviewer or the user flags a skill as bloated.
 

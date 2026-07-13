@@ -1,6 +1,6 @@
 # Rationale — where these authoring standards come from
 
-Provenance: user-provided research synthesis (2026-07-12) mapping encyclopedia governance standards, statutory drafting practice, and cognitive-load research onto rule and knowledge authoring. This file grounds `skill-refactor`, `write-a-rule`, and the quantitative caps in the skills-repo `CLAUDE.md`. It records **why** those rules exist and **what was deliberately rejected**, so future edits argue against the source, not against a bare number.
+Provenance: user-provided research synthesis (2026-07-12) mapping encyclopedia governance standards, statutory drafting practice, and cognitive-load research onto rule and knowledge authoring. This file grounds `skill-refactor`, `write-a-rule`, and the quantitative caps in `skillify-session-lessons/authoring-standards.md`. It records **why** those rules exist and **what was deliberately rejected**, so future edits argue against the source, not against a bare number.
 
 ## 1. Instruction creep (Wikipedia governance)
 
@@ -37,7 +37,7 @@ Obligation / prohibition / permission / exception / sequence map one-to-one onto
 
 Four tests for agent skills. **Trigger**: user- vs model-invoked is a load allocation — a model-invoked description is resident in every session (context load) and fires probabilistically (may need trigger evals); user-invoked costs zero context but shifts recall onto the human (cognitive load). **Structure**: a skill is procedure + reference, two tiers — always-used material in the body, rarely-used material behind a file door. **Steering**: one strong term the model already knows ("vertical slice") beats paragraphs of explanation — verified when the term echoes in reasoning traces; and an agent that rushes a stage is seeing its final goal, so split stages into separate skills to hide the future. **Pruning**: the deletion test — if deleting a sentence cannot change behavior, it never did anything; the three accretions are duplication, sediment, and no-op sentences.
 
-→ Adopted as: the trigger-type rule in the skills-repo `CLAUDE.md`; the no-op and leading-word cut patterns in `skill-refactor`. Two-tier structure was already practiced here (CATALOG/REFERENCE/RATIONALE side files).
+→ Adopted as: the trigger-type rule in `skillify-session-lessons/authoring-standards.md`; the no-op and leading-word cut patterns in `skill-refactor`. Two-tier structure was already practiced here (CATALOG/REFERENCE/RATIONALE side files).
 → Deferred: stage-splitting (no rush-prone stage identified yet); trigger evals (no model-invocation reliability complaint yet).
 
 Source: Matt Pocock (AI Engineer talk), youtu.be/YLq04CDeOTE — cross-checked against his skills repo, where the top skill `grill-me` is a ~20-word user-invoked button delegating to a model-invoked `grilling` discipline skill.
@@ -45,4 +45,4 @@ Source: Matt Pocock (AI Engineer talk), youtu.be/YLq04CDeOTE — cross-checked a
 ## 7. Deliberately not adopted
 
 - Prose meta-rules about how to write rules, placed inside a project repo — that reproduces the creep it fights. Standards live here (a propagating skill) and in code-level backstops (validators, caps), not as more repo prose.
-- Retrofitting all existing skills at once — pilot-first, then retrofit-on-edit (see skills-repo `CLAUDE.md`).
+- Retrofitting all existing skills at once — pilot-first, then retrofit-on-edit (see `skillify-session-lessons/authoring-standards.md`).
