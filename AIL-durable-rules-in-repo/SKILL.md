@@ -1,6 +1,6 @@
 ---
 name: AIL-durable-rules-in-repo
-description: "Routes reusable rules and lessons to a git-synced canonical home (project CLAUDE.md, ADR, skills repo) instead of machine-local agent memory, which doesn't sync across machines and is invisible to other agents and people. Use when saving a lesson, rule, or workflow that should outlive the current machine and session, or when about to store it only in personal memory."
+description: "Routes shareable reusable rules and lessons to a git-synced canonical home (project CLAUDE.md, ADR, skills repo) instead of machine-local agent memory — and private or secret items away from shared repos. Use when saving a lesson, rule, or workflow that should outlive the current machine and session, or when about to store it only in personal memory."
 version: 1.0.0
 metadata:
   platforms: [claude-code]
@@ -9,12 +9,12 @@ metadata:
 
 # Durable Rules Live in the Repo
 
-Personal agent memory (`~/.claude` and equivalents) is machine-local scratch: it doesn't travel between machines, other agents and human collaborators can't see it, and recall is probabilistic. A rule that exists only there is one machine switch away from gone. Two axes decide the home — **durability** (must it outlive this machine?) and **audience** (who may see it?) — and privacy always outranks durability.
+Personal agent memory (`~/.claude` and equivalents) is machine-local scratch. Two axes decide a fact's home — **durability** (must it outlive this machine?) and **audience** (who may see it?).
 
 ## When to Use
 
 - About to save a reusable rule, lesson, or workflow into personal/agent memory.
-- A correction from the user should govern future sessions on any machine — and is shareable with the target repo's audience.
+- A correction from the user should govern future sessions on any machine.
 - Reviewing memory and finding entries that are actually team- or project-level rules.
 
 **Do NOT use for** session-scoped context that expires with the task — don't persist it at all.
@@ -27,7 +27,9 @@ Personal agent memory (`~/.claude` and equivalents) is machine-local scratch: it
    - Machine-local fact (path, hardware quirk) → memory or local config; never the shared repo.
    - Person-private fact (health, identity, non-public preference) → personal memory or a private personal repo — never a shared repo, even though it usefully travels.
    - Secret/credential → OS keychain or credential helper; never plaintext anywhere, repo or memory — memory holds at most a pointer to where it lives.
-2. **Memory may keep a pointer, not the payload** — an accelerator naming the canonical location, so a recall failure degrades to a lookup, not a loss.
+
+   Example: "always run the delta sync, not full rebuild" → skills repo; "this box mounts scratch at D:" → memory; API token → keychain, memory keeps only "token is in keychain X".
+2. **For repo-routed rules, memory keeps a pointer, not the payload** — an accelerator naming the canonical location.
 3. **On "remember this"**: if it should hold on another machine or for another agent, write it to the repo first — but only if every reader of that repo may see it — then optionally a memory pointer.
 
 ## Pitfalls
@@ -38,7 +40,7 @@ Personal agent memory (`~/.claude` and equivalents) is machine-local scratch: it
 ## Verification
 
 - [ ] Would this rule survive a machine switch or a fresh clone? ("No, but it's private" still means memory — privacy outranks durability.)
-- [ ] Is the git-synced copy the canonical one, with memory at most pointing to it?
+- [ ] After a machine wipe, could every shareable rule be recovered from git alone?
 - [ ] Nothing private or machine-local pushed to a shared repo — and no secret in plaintext anywhere?
 
 ---

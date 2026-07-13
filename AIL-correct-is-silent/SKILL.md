@@ -1,6 +1,6 @@
 ---
 name: AIL-correct-is-silent
-description: "Keeps living documents free of inline history — a correctly placed or corrected artifact states only its current state, while the story of what moved where and why belongs in commit messages and ADRs. Use when about to annotate a fix or relocation with its history ('this used to be...'), or when transition banners are spreading across documents."
+description: "Keeps living documents free of inline history — a correctly placed or corrected artifact states only its current state, while the story of what moved where and why belongs in commit messages and ADRs. Use when about to annotate a fix or relocation with its history ('this used to be...') outside history-purposed docs, or when transition banners are spreading across documents."
 version: 1.0.0
 metadata:
   platforms: [claude-code]
@@ -9,7 +9,7 @@ metadata:
 
 # Correct Is Silent
 
-A reader of a living document needs the current correct state, not the journey. Inline narratives ("[2026-07 rewritten] previously X…", "moved here from Y") age into noise: they outlive their usefulness, spread by imitation, and bury the actual content. Version control already records what changed, when, and why.
+A reader of a living document needs the current correct state, not the journey. Inline narratives ("[2026-07 rewritten] previously X…", "moved here from Y") age into noise — version control is where that story lives.
 
 ## When to Use
 
@@ -17,13 +17,13 @@ A reader of a living document needs the current correct state, not the journey. 
 - A transition/migration banner is appearing in more than one document.
 - Writing config or gitignore comments that narrate history instead of stating purpose.
 
-**Do NOT use when** the document's purpose IS history, or a consumer must act on the transition: changelogs and release notes; deprecation notices (including `@deprecated` source annotations) and migration guides for consumers who must act on the change (operators, deployers, API users); comments stating a live constraint ("don't reorder — X depends on init order") — that is rationale, not narrative.
+**Do NOT use when** the document's purpose IS history, or a consumer must act on the transition: changelogs, release notes, and decision logs/ADRs themselves; deprecation notices (including `@deprecated` source annotations) and migration guides for consumers who must act on the change (operators, deployers, API users); comments stating a live constraint ("don't reorder — X depends on init order") — that is rationale, not narrative.
 
 ## Procedure
 
 1. **Route the story to its canonical home**: the what/why of the change → commit message; a decision with lasting value → ADR (or the repo's decision log). The artifact itself keeps only the current state.
 2. **Comments state purpose, not provenance** — "excludes build artifacts", not "moved here from the Makefile cleanup in June".
-3. **A recurring banner is an absorption signal.** If the same transition note appears in a second document, delete both; if the transition embodies a durable decision, write the one ADR they would have linked to — otherwise the commit message is the record. If readers may still arrive at the old location, a one-line redirect stub THERE replaces banners at the new one. (Consumer-facing surfaces — changelog, deprecation notice, migration guide — legitimately repeat the same transition; that repetition is not a banner.)
+3. **A recurring banner is an absorption signal.** If the same transition note appears in a second document, delete both when those documents are within the current task's scope — otherwise flag the duplication instead of editing unasked. If the transition embodies a durable decision, write the one ADR they would have linked to; otherwise the commit message is the record. If readers may still arrive at the old location, a one-line redirect stub THERE (exempt from this banner rule) replaces banners at the new one.
 4. **When editing near old narrative**, don't extend it; if your change makes it stale, remove it in the same commit — its content goes into that commit's message.
 
 ## Pitfalls
