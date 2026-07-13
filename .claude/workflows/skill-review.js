@@ -11,8 +11,9 @@ export const meta = {
 }
 
 // args: { skill: '<skill directory name on the checked-out PR branch>', pr: <PR number> }
-const skill = args && args.skill
-const pr = args && args.pr
+const a = typeof args === 'string' ? JSON.parse(args) : args
+const skill = a && a.skill
+const pr = a && a.pr
 if (!skill || !pr) throw new Error("args {skill, pr} required, e.g. {skill: 'AIL-foo', pr: 12}")
 
 const ID_SCHEMA = {
@@ -176,11 +177,13 @@ phase('Apply')
 const applied = await agent(
   `Apply this skill-review verdict to PR #${pr} (branch already checked out; skill file ./${skill}/SKILL.md).
 VERDICT: ${verdict}
-PROBE CLASSIFICATIONS:\n${JSON.stringify(judge.classifications, null, 1)}
-BUDGETS/VIOLATIONS:\n${JSON.stringify(id.budgets, null, 1)}
-FIX LIST (severity-sorted):\n${JSON.stringify(fixes, null, 1)}
+PROBE CLASSIFICATIONS:\n${JSON.stringify(judge.classifications)}
+BUDGETS/VIOLATIONS:\n${JSON.stringify(id.budgets)}
+FIX LIST (severity-sorted):\n${JSON.stringify(fixes)}
 Follow your discipline for this verdict, then report what you committed/pushed/commented in a few lines.`,
-  { agentType: 'skill-fixer', label: `apply:${verdict}`, phase: 'Apply', model: 'opus', effort: 'high' }
+  verdict === 'COMPRESS'
+    ? { agentType: 'skill-fixer', label: `apply:${verdict}`, phase: 'Apply', model: 'opus', effort: 'high' }
+    : { agentType: 'skill-fixer', label: `apply:${verdict}`, phase: 'Apply', model: 'sonnet' }
 )
 
 return {
