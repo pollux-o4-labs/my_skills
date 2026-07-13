@@ -1,6 +1,6 @@
 # matt-checklist-adoption — Matt Pocock 스킬 체크리스트 도입
 
-BLUF: 트리거·구조·유도·가지치기 4단계 체크리스트를 repo 저작 표준에 반영 완료(PR #1·#2, 2026-07-13). 정본은 `skillify-session-lessons/authoring-standards.md`, 근거 원문은 `skill-refactor/RATIONALE.md` §6, 출처 정리본은 Obsidian([정리] 좋은 에이전트 스킬 작성법, youtu.be/YLq04CDeOTE).
+BLUF: 트리거·구조·유도·가지치기 4단계 체크리스트를 repo 저작 표준에 반영 완료(PR #1·#2, 2026-07-13). 정본은 `skillify-session-lessons/authoring-standards.md`, 근거는 `skill-refactor/RATIONALE.md` §6(논거 요지·채택/유보 매핑·출처 youtu.be/YLq04CDeOTE — 여기까지가 repo 내 정본). Obsidian 정리본([정리] 좋은 에이전트 스킬 작성법)은 사장 개인 vault 보조 자료로 이 머신 외에선 접근 불가.
 
 ## 반영 완료
 
