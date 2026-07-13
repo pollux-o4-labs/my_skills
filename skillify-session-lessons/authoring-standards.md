@@ -6,7 +6,7 @@ Canonical conventions for creating or editing any SKILL.md in this repo. This fi
 
 - **description**: what + when, 2 sentences, ≤400 chars. No tool/exception enumerations — move those to a body "Skip" / "Do NOT use" section.
 - **body**: ≤700 words target; past 1,000 → split/compress review.
-- **Verification**: outcome checks only, ≤6 items — no 1:1 restatement of Procedure. The deletion test applies per item: keep only checks that command something Procedure doesn't already; a pure-echo checklist is dropped as a section (the pipeline's replay/verify stages enforce outcomes, not the in-skill echo).
+- **Verification**: outcome checks only, ≤6 items — no 1:1 restatement of Procedure. The deletion test applies per item: keep only checks that command something Procedure doesn't already; a pure-echo checklist is dropped as a section (the pipeline's replay/verify stages enforce outcomes, not the in-skill echo; 2026-07-13 A/B, 4 probes: with/without echo checklist produced identical re-verification behavior).
 - **Origin/Provenance**: one line.
 - Existing skills: retrofit on edit via `skill-refactor` (pilot-first, no mass retrofit). Lint automation only if violations recur.
 
