@@ -9,6 +9,7 @@ export const meta = {
     { title: 'Review', detail: 'replay and adversarial attack in parallel' },
     { title: 'Arbitrate', detail: 'BLOCKER / CHEAP accepted — NOISE rejected with reasons' },
     { title: 'Fix & Verify', detail: 'edit-only fixer ⇄ per-item verifier, ≤2 rounds, no commit' },
+    { title: 'Re-audit', detail: 'conditional second adversary — fires on noise ≥3, exhausted loop, or unresolved items' },
     { title: 'Land', detail: 'commit, push, undraft on clean pass, verdict comment' },
   ],
 }
@@ -267,6 +268,28 @@ Also check load-bearing loss: compare against the finding list's implied origina
   }
 }
 
+// Conditional re-audit — only on risk signals (rejection-overturn risk, unstable fix loop, human-pending items)
+let reaudit = null
+const noiseCount = rulings.filter(r => !r.accept).length
+if (verdict !== 'REJECT' && (noiseCount >= 3 || rounds >= 2 || remaining.length)) {
+  phase('Re-audit')
+  reaudit = await agent(
+    `Second-opinion audit of ./${skill}/SKILL.md AFTER fixes were applied (repo root = working directory). Standards: ./skillify-session-lessons/authoring-standards.md.
+APPLIED FIXES (audit each is genuinely resolved, not cosmetic):\n${accepted.map(f => `- [${f.severity}] ${f.finding} → ${f.fix}`).join('\n') || '(none)'}
+ARBITER'S NOISE REJECTIONS (audit each: wrongly dismissed? NOTE especially where an applied fix changed the calculus — new concrete code can invalidate a rejection that was sound against the old abstract text):\n${rulings.filter(r => !r.accept).map(r => `- ${fixes[r.index].finding} | rejected because: ${r.reason}`).join('\n') || '(none)'}
+Also fresh-attack the newly added material for contradictions and self-sufficiency. Report only findings that survive scrutiny.`,
+    { agentType: 'skill-adversary', schema: FIX_SCHEMA, label: 're-audit', phase: 'Re-audit', model: 'opus', effort: 'high' }
+  )
+  const blockers = reaudit ? reaudit.fixes.filter(f => f.severity === 'FIX-FIRST') : []
+  if (blockers.length) {
+    await agent(
+      `EDIT mode — FIX. Target: ./${skill}/SKILL.md on the checked-out PR branch. Re-audit blockers to apply:\n${blockers.map(f => `[FIX-FIRST] ${f.finding} → ${f.fix}`).join('\n')}`,
+      { agentType: 'skill-fixer', label: 'fix:reaudit', phase: 'Re-audit', model: 'sonnet' }
+    )
+  }
+  log(`re-audit: ${reaudit ? reaudit.fixes.length : 0} findings, ${blockers.length} blockers applied`)
+}
+
 phase('Land')
 const clean = verdict !== 'REJECT' && remaining.length === 0
 const landed = await agent(
@@ -274,9 +297,9 @@ const landed = await agent(
 VERDICT: ${verdict} | CLEAN PASS: ${clean}${remaining.length ? ` | UNRESOLVED: ${JSON.stringify(remaining.map(f => f.finding))}` : ''}
 PROBE: ${JSON.stringify(judge.classifications)}
 APPLIED: ${JSON.stringify(accepted.map(f => f.finding))}
-NOISE REJECTED: ${JSON.stringify(rulings.filter(r => !r.accept).map(r => ({ finding: fixes[r.index].finding, reason: r.reason })))}
+NOISE REJECTED: ${JSON.stringify(rulings.filter(r => !r.accept).map(r => ({ finding: fixes[r.index].finding, reason: r.reason })))}${reaudit && reaudit.fixes.length ? `\nRE-AUDIT ADVISORIES (non-blocking — include in the comment): ${JSON.stringify(reaudit.fixes.filter(f => f.severity !== 'FIX-FIRST').map(f => f.finding))}` : ''}
 Follow your LAND discipline: ${verdict === 'REJECT' ? 'comment only.' : clean ? 'version bump, commit, push, gh pr ready, comment.' : 'version bump, commit, push, KEEP DRAFT, comment marking unresolved items as needing human judgment.'}`,
   { agentType: 'skill-fixer', label: `land:${verdict}`, phase: 'Land', model: 'sonnet' }
 )
 
-return { skill, pr, verdict, clean, rounds, nonDefaultDirectives: nonDefault, accepted: accepted.map(f => f.finding), noise: rulings.filter(r => !r.accept).map(r => ({ finding: fixes[r.index] && fixes[r.index].finding, reason: r.reason })), unresolved: remaining.map(f => f.finding), landed }
+return { skill, pr, verdict, clean, rounds, nonDefaultDirectives: nonDefault, accepted: accepted.map(f => f.finding), noise: rulings.filter(r => !r.accept).map(r => ({ finding: fixes[r.index] && fixes[r.index].finding, reason: r.reason })), reaudit: reaudit ? reaudit.fixes : null, unresolved: remaining.map(f => f.finding), landed }
