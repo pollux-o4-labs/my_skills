@@ -1,7 +1,7 @@
 ---
 name: write-a-rule
 description: "Authoring standard for repository operational rules and agent policy documents — deontic wording, article-style structure, exception marking, and instruction-creep control. Use when writing or revising repo rules (docs/rules, CLAUDE.md norm sections, agent guidelines), or when rule docs show mixed obligation levels, ad-hoc exceptions, or unchecked growth."
-version: 1.1.0
+version: 1.2.0
 metadata:
   platforms: [claude-code, codex, gemini-cli]
 ---
@@ -48,6 +48,7 @@ Connectors — not modalities; each carries its own modality inside:
 ## Creep control
 
 - **Principle first, discretion second.** State the principle and trust judgment for edge cases. Add a micro-clause only after a real incident, and cite that incident as grounds.
+- **Grounds live in a companion log.** Keep incidents in a descriptive log (a knowledge doc, one home), link rule↔incident both ways, and co-locate same-root incidents so recurrence is visible — the recurrence count is the strongest grounds.
 - **Structural backstop beats prose.** If a validator, test, or hook can enforce the rule, build the check and shrink the prose to one line pointing at it.
 - **Split at ~800 words** (summary style): parent file keeps the principle plus a one-line index of children; details move to child files.
 - **One rule, one home.** Never restate a rule's body in a second document; link to it. Every duplicate is a future sync failure.
