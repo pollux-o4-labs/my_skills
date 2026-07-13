@@ -1,7 +1,7 @@
 ---
 name: AIL-verify-pid-before-signal
 description: "Verify process identity (cmdline marker match, fail-closed) before signaling or classifying liveness of any pid read from a recorded source — pidfile, activity ledger, saved state — because the OS recycles pids and a stale record can point at an innocent process. Use when implementing or reviewing stop/cleanup/reap/monitor paths that act on a stored pid."
-version: 1.0.0
+version: 1.1.0
 metadata:
   provenance: AIL
   platforms: [claude-code, codex, gemini-cli]
@@ -10,6 +10,8 @@ metadata:
 # Verify PID Before Signal
 
 A pid you *recorded* is a name, not a handle. If the recording process crashed before cleaning up, the OS may hand that number to an unrelated process — then `kill <pid>` murders a bystander and `os.kill(pid, 0)` "alive" checks classify a ghost as running. Both failures report **success**. Never act on a stored pid without confirming the process is still yours.
+
+**Tradeoff:** not absolute — if the user, owning the context, explicitly waives the check, comply, but state in one line that a recycled pid could then signal a bystander; the guarantee is theirs to waive.
 
 ## When to Use
 
@@ -27,12 +29,20 @@ A pid you *recorded* is a name, not a handle. If the recording process crashed b
    - **gone** (no such process) → stale-confirmed: clean the record.
    - **unknown** (unreadable, e.g. EACCES) → **fail-closed**: don't signal, don't delete the record, exit nonzero with manual guidance.
    ```python
-   raw = open(f"/proc/{pid}/cmdline", "rb").read()      # FileNotFoundError → gone
-   is_mine = b"myapp.cli" in raw                         # alien if False
+   try:
+       raw = open(f"/proc/{pid}/cmdline", "rb").read()
+   except FileNotFoundError:
+       verdict = "gone"          # stale-confirmed: clean the record
+   except (PermissionError, OSError):
+       verdict = "unknown"       # fail-closed: no signal, keep record, exit nonzero
+   else:
+       args = raw.split(b"\0")
+       verdict = "match" if b"myapp.cli" in args else "alien"  # exact argv element, not a substring
    ```
+   Scope: a pid is checkable only where it was recorded — same host and pid namespace. Cross-host records (distributed locks, shared storage) need a host/boot-id/namespace paired with the pid, or a lease/heartbeat instead — a bare cross-host pid check is invalid.
 2. **Separate "clean the record" from "send the signal".** Stale-confirmed verdicts fix the *record*; only match earns a signal. A path that conflates them deletes evidence on unknown or kills on alien.
 3. **Exempt the reader's own pid.** The process doing the check cannot be a recycled instance of itself — skipping the check there avoids self-misclassification (and lets tests inject a checker without tripping on the runner's pid).
-4. **Back-stop the unverifiable with an age cap.** Monitors that must classify (not signal) treat unknown as innocent but bound it: recorded entries older than N× the operation's own timeout are stale regardless — otherwise one unreadable pid stays "running" forever.
+4. **Back-stop the unverifiable with an age cap.** Monitors that must classify (not signal) treat unknown as still-live — give it the benefit of the doubt — but bound it: recorded entries older than N× the operation's own timeout are stale regardless — otherwise one unreadable pid stays "running" forever.
 5. **Keep the kill-site race handler.** Identity check → signal still races with process exit; retain `ProcessLookupError` handling at the actual kill as the final backstop.
 6. **Make the reviewer reproduce it.** The convincing test writes an innocent process's pid into the record and asserts the code refuses to kill it — not that the happy path works.
 
