@@ -11,7 +11,7 @@ metadata:
 
 A pid you *recorded* is a name, not a handle. If the recording process crashed before cleaning up, the OS may hand that number to an unrelated process — then `kill <pid>` murders a bystander and `os.kill(pid, 0)` "alive" checks classify a ghost as running. Both failures report **success**. Never act on a stored pid without confirming the process is still yours.
 
-**Tradeoff:** not absolute — if the user, owning the context, explicitly waives the check, comply, but state in one line that a recycled pid could then signal a bystander; the guarantee is theirs to waive.
+**User override:** not absolute — if the user, owning the context, explicitly waives the check, comply, but state in one line that a recycled pid could then signal a bystander; the guarantee is theirs to waive.
 
 ## When to Use
 
@@ -32,8 +32,8 @@ A pid you *recorded* is a name, not a handle. If the recording process crashed b
    try:
        raw = open(f"/proc/{pid}/cmdline", "rb").read()
    except FileNotFoundError:
-       verdict = "gone"          # stale-confirmed: clean the record
-   except (PermissionError, OSError):
+       verdict = "gone"          # standard /proc only — under hidepid=2 a hidden LIVE process also raises this: treat as unknown there
+   except OSError:
        verdict = "unknown"       # fail-closed: no signal, keep record, exit nonzero
    else:
        args = raw.split(b"\0")
