@@ -1,12 +1,15 @@
 export const meta = {
   name: 'skill-review',
-  description: 'Full skill-PR pipeline: probe default behavior, replay + adversarial review, triage verdict, apply fixes and undraft — merge stays the human gate',
-  whenToUse: 'After checking out a skill PR branch: run with {skill: "<dir>", pr: <number>}. Probes an unaided mid-tier model to classify default vs non-default directives, replays scenarios (incl. mandatory user-override boundary), adversarially attacks, then a fixer agent commits the verdict (REGISTER/FIX/COMPRESS/REJECT) to the branch and undrafts. The user only squash-merges (or closes a REJECT).',
+  description: 'Skill-PR pipeline v3: draft raw notes if needed, probe default behavior, review, arbitrate noise, fix-verify loop, land — merge stays the human gate',
+  whenToUse: 'After checking out a skill PR branch: run with {skill: "<dir>", pr: <number>}. RAW note drafts get formed first; probes classify default vs non-default directives; replay + adversarial findings pass an arbiter (BLOCKER/CHEAP accepted, NOISE rejected with reasons); a fix⇄verify loop (≤2 rounds) edits without committing; Land commits, undrafts only on a clean pass, and posts the verdict. The user only squash-merges (or closes a REJECT).',
   phases: [
-    { title: 'Identify', detail: 'read draft + standards; budgets, directives, scenarios, siblings' },
+    { title: 'Identify', detail: 'read draft + standards; maturity, budgets, directives, scenarios, siblings' },
+    { title: 'Draft', detail: 'RAW notes only: form the skill per standards, then re-identify' },
     { title: 'Probe', detail: 'unaided sonnet probes → default/non-default per directive', model: 'sonnet' },
     { title: 'Review', detail: 'replay and adversarial attack in parallel' },
-    { title: 'Apply', detail: 'triage verdict → fixer commits to PR branch, undrafts, comments' },
+    { title: 'Arbitrate', detail: 'BLOCKER / CHEAP accepted — NOISE rejected with reasons' },
+    { title: 'Fix & Verify', detail: 'edit-only fixer ⇄ per-item verifier, ≤2 rounds, no commit' },
+    { title: 'Land', detail: 'commit, push, undraft on clean pass, verdict comment' },
   ],
 }
 
@@ -18,9 +21,10 @@ if (!skill || !pr) throw new Error("args {skill, pr} required, e.g. {skill: 'AIL
 
 const ID_SCHEMA = {
   type: 'object',
-  required: ['summary', 'budgets', 'triggerType', 'coreDirectives', 'probeScenarios', 'replayScenarios', 'siblings'],
+  required: ['summary', 'maturity', 'budgets', 'triggerType', 'coreDirectives', 'probeScenarios', 'replayScenarios', 'siblings'],
   properties: {
     summary: { type: 'string', description: 'two-sentence identification: what the skill does, its origin' },
+    maturity: { type: 'string', description: "'FORMED' if the file follows the standards' skill shape; 'RAW' if it is a bare lesson/notes dump needing drafting first" },
     budgets: {
       type: 'object',
       required: ['bodyWords', 'descChars', 'verificationItems', 'originLines', 'violations'],
@@ -105,13 +109,61 @@ const FIX_SCHEMA = {
   },
 }
 
-phase('Identify')
-const id = await agent(
-  `Identify the skill draft ./${skill}/SKILL.md for pipeline review. Working directory = my_skills repo root, PR branch checked out.
+const ARB_SCHEMA = {
+  type: 'object',
+  required: ['rulings'],
+  properties: {
+    rulings: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['index', 'class', 'accept', 'reason'],
+        properties: {
+          index: { type: 'number', description: '0-based index into the findings list given to you' },
+          class: { type: 'string', description: 'BLOCKER (real defect, must fix) | CHEAP (valid, low-cost improvement) | NOISE (adversarial artifact, style opinion, or duplicate)' },
+          accept: { type: 'boolean', description: 'BLOCKER and CHEAP → true; NOISE → false' },
+          reason: { type: 'string', description: 'one line; for NOISE, why it does not survive scrutiny' },
+        },
+      },
+    },
+  },
+}
+
+const VERIFY_SCHEMA = {
+  type: 'object',
+  required: ['items', 'loadBearingLoss'],
+  properties: {
+    items: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['index', 'resolved', 'note'],
+        properties: {
+          index: { type: 'number', description: '0-based index into the accepted-findings list' },
+          resolved: { type: 'boolean' },
+          note: { type: 'string', description: 'where in the new text it is resolved, or what is still missing' },
+        },
+      },
+    },
+    loadBearingLoss: { type: 'array', items: { type: 'string' }, description: 'directives/examples present before the edit that vanished without a declared deletion-test rationale' },
+  },
+}
+
+const identifyPrompt = `Identify the skill draft ./${skill}/SKILL.md for pipeline review. Working directory = my_skills repo root, PR branch checked out.
 Read the draft, ./skillify-session-lessons/authoring-standards.md, and any side files in ./${skill}/.
-Produce (per the schema): budgets incl. Origin line count and violations; triggerType; coreDirectives (each behavioral rule as one line); probeScenarios (reconstruct the origin situation with NO hints — do not name tools, commands, or suspicions the skill teaches; the probe must be able to fail); replayScenarios (original + analogue + boundary + exactly one boundary-user-override where the user explicitly instructs against the skill's rule); siblings (scan AIL-*/SKILL.md descriptions and this draft's pointer lines).`,
-  { schema: ID_SCHEMA, label: `identify:${skill}`, phase: 'Identify', model: 'opus', effort: 'high' }
-)
+Produce (per the schema): maturity (FORMED skill vs RAW notes dump); budgets incl. Origin line count and violations; triggerType; coreDirectives (each behavioral rule as one line); probeScenarios (reconstruct the origin situation with NO hints — do not name tools, commands, or suspicions the skill teaches; the probe must be able to fail); replayScenarios (original + analogue + boundary + exactly one boundary-user-override where the user explicitly instructs against the skill's rule); siblings (scan AIL-*/SKILL.md descriptions and this draft's pointer lines).`
+
+phase('Identify')
+let id = await agent(identifyPrompt, { schema: ID_SCHEMA, label: `identify:${skill}`, phase: 'Identify', model: 'opus', effort: 'high' })
+
+if (id.maturity === 'RAW') {
+  phase('Draft')
+  await agent(
+    `EDIT mode — DRAFT. ./${skill}/SKILL.md is a raw lesson/notes dump, not a formed skill. Form it per your DRAFT discipline. Identification context: ${id.summary}`,
+    { agentType: 'skill-fixer', label: `draft:${skill}`, phase: 'Draft', model: 'opus', effort: 'high' }
+  )
+  id = await agent(identifyPrompt, { schema: ID_SCHEMA, label: `re-identify:${skill}`, phase: 'Draft', model: 'opus', effort: 'high' })
+}
 
 phase('Probe')
 const probeAnswers = (
@@ -129,70 +181,102 @@ const probeAnswers = (
 const judge = await agent(
   `Classify each directive of a skill as default or non-default model behavior, using unaided probe answers as evidence.
 DIRECTIVES:\n${id.coreDirectives.map((d, i) => `${i + 1}. ${d}`).join('\n')}
-UNAIDED PROBE ANSWERS (a mid-tier model answered the origin scenario with no access to the skill):\n${probeAnswers.map((a, i) => `--- PROBE ${i + 1} ---\n${a}`).join('\n')}
+UNAIDED PROBE ANSWERS (a mid-tier model answered the origin scenario with no access to the skill):\n${probeAnswers.map((p, i) => `--- PROBE ${i + 1} ---\n${p}`).join('\n')}
 A directive is DEFAULT only if the probe answers actually exhibit it (deletion test: the skill sentence would change nothing). If a probe does the opposite or reaches for a weaker method, that directive is NON-DEFAULT — quote the mistake as evidence. Judge strictly.`,
   { schema: JUDGE_SCHEMA, label: 'probe-judge', phase: 'Probe', model: 'opus', effort: 'high' }
 )
 
-phase('Review')
-const scenarioBlock = id.replayScenarios.map((s, i) => `SCENARIO ${i + 1} [${s.kind}]: ${s.prompt}`).join('\n\n')
-const [replay, adversarial] = await parallel([
-  () =>
-    agent(`Skill under replay: ./${skill}/SKILL.md (repo root = working directory).\n\n${scenarioBlock}`, {
-      agentType: 'skill-replayer',
-      schema: FIX_SCHEMA,
-      label: `replay:${skill}`,
-      phase: 'Review',
-      model: 'opus',
-      effort: 'high',
-    }),
-  () =>
-    agent(
-      `Skill under attack: ./${skill}/SKILL.md (repo root = working directory).\nStandards: ./skillify-session-lessons/authoring-standards.md.\nSiblings to check: ${id.siblings.join(', ')}.\nKnown probe result (attack vector 4 context): non-default directives = ${JSON.stringify(
-        judge.classifications.filter(c => !c.isDefault).map(c => c.directive)
-      )}.`,
-      { agentType: 'skill-adversary', schema: FIX_SCHEMA, label: `adversarial:${skill}`, phase: 'Review', model: 'opus', effort: 'high' }
-    ),
-])
-
-// Triage — deterministic script logic
-const order = { 'FIX-FIRST': 0, SHOULD: 1, NIT: 2 }
-const fixes = [
-  ...(replay ? replay.fixes.map(f => ({ ...f, source: 'replay' })) : []),
-  ...(adversarial ? adversarial.fixes.map(f => ({ ...f, source: 'adversarial' })) : []),
-].sort((a, b) => (order[a.severity] ?? 3) - (order[b.severity] ?? 3))
-
 const nonDefault = judge.classifications.filter(c => !c.isDefault)
-const mustFix = fixes.filter(f => f.severity === 'FIX-FIRST' || f.severity === 'SHOULD')
 
-let verdict
-if (nonDefault.length === 0) verdict = 'REJECT' // fully default behavior — skill is a no-op
-else if (nonDefault.length * 2 < judge.classifications.length) verdict = 'COMPRESS' // minority non-default core
-else if (mustFix.length > 0 || id.budgets.violations.length > 0) verdict = 'FIX'
-else verdict = 'REGISTER'
+let verdict, fixes = [], rulings = [], accepted = [], remaining = [], rounds = 0, replay = null, adversarial = null
 
-log(`${skill}: verdict=${verdict} — non-default ${nonDefault.length}/${judge.classifications.length} directives, ${fixes.filter(f => f.severity === 'FIX-FIRST').length} FIX-FIRST / ${fixes.filter(f => f.severity === 'SHOULD').length} SHOULD`)
+if (nonDefault.length === 0) {
+  verdict = 'REJECT' // every directive is default behavior — the skill is a no-op
+  log(`${skill}: verdict=REJECT — all ${judge.classifications.length} directives default; skipping review`)
+} else {
+  phase('Review')
+  const scenarioBlock = id.replayScenarios.map((s, i) => `SCENARIO ${i + 1} [${s.kind}]: ${s.prompt}`).join('\n\n')
+  ;[replay, adversarial] = await parallel([
+    () =>
+      agent(`Skill under replay: ./${skill}/SKILL.md (repo root = working directory).\n\n${scenarioBlock}`, {
+        agentType: 'skill-replayer',
+        schema: FIX_SCHEMA,
+        label: `replay:${skill}`,
+        phase: 'Review',
+        model: 'opus',
+        effort: 'high',
+      }),
+    () =>
+      agent(
+        `Skill under attack: ./${skill}/SKILL.md (repo root = working directory).\nStandards: ./skillify-session-lessons/authoring-standards.md.\nSiblings to check: ${id.siblings.join(', ')}.\nKnown probe result (attack vector 4 context): non-default directives = ${JSON.stringify(nonDefault.map(c => c.directive))}.`,
+        { agentType: 'skill-adversary', schema: FIX_SCHEMA, label: `adversarial:${skill}`, phase: 'Review', model: 'opus', effort: 'high' }
+      ),
+  ])
 
-phase('Apply')
-const applied = await agent(
-  `Apply this skill-review verdict to PR #${pr} (branch already checked out; skill file ./${skill}/SKILL.md).
-VERDICT: ${verdict}
-PROBE CLASSIFICATIONS:\n${JSON.stringify(judge.classifications)}
-BUDGETS/VIOLATIONS:\n${JSON.stringify(id.budgets)}
-FIX LIST (severity-sorted):\n${JSON.stringify(fixes)}
-Follow your discipline for this verdict, then report what you committed/pushed/commented in a few lines.`,
-  verdict === 'COMPRESS'
-    ? { agentType: 'skill-fixer', label: `apply:${verdict}`, phase: 'Apply', model: 'opus', effort: 'high' }
-    : { agentType: 'skill-fixer', label: `apply:${verdict}`, phase: 'Apply', model: 'sonnet' }
+  const order = { 'FIX-FIRST': 0, SHOULD: 1, NIT: 2 }
+  fixes = [
+    ...(replay ? replay.fixes.map(f => ({ ...f, source: 'replay' })) : []),
+    ...(adversarial ? adversarial.fixes.map(f => ({ ...f, source: 'adversarial' })) : []),
+  ].sort((x, y) => (order[x.severity] ?? 3) - (order[y.severity] ?? 3))
+
+  phase('Arbitrate')
+  if (fixes.length) {
+    const arb = await agent(
+      `You arbitrate review findings against a skill draft. Reviewers are prompted adversarially — they always produce findings; your job is separating real defects from adversarial artifacts.
+Read ./${skill}/SKILL.md, ./skillify-session-lessons/authoring-standards.md, ./skill-refactor/RATIONALE.md, and the named siblings (${id.siblings.join(', ')}) — they are your judgment basis, not your memory.
+FINDINGS (0-indexed):\n${fixes.map((f, i) => `${i}. [${f.severity}|${f.source}] ${f.finding} → fix: ${f.fix}`).join('\n')}
+Rule on every index: BLOCKER (would mislead or break an executing agent), CHEAP (valid, low-cost, no downside), NOISE (style opinion, duplicate of another finding, speculative edge case, or contradicts the standards/repo precedent). Accept BLOCKER+CHEAP, reject NOISE with a one-line reason. Do not rubber-stamp: a wrong "fix" that would bloat or distort the skill is NOISE even if the observation is true.`,
+      { schema: ARB_SCHEMA, label: 'arbitrate', phase: 'Arbitrate', model: 'opus', effort: 'high' }
+    )
+    rulings = arb.rulings
+    accepted = rulings.filter(r => r.accept).map(r => ({ ...fixes[r.index], class: r.class }))
+  }
+
+  verdict = nonDefault.length * 2 < judge.classifications.length ? 'COMPRESS' : accepted.length || id.budgets.violations.length ? 'FIX' : 'REGISTER'
+  log(`${skill}: verdict=${verdict} — non-default ${nonDefault.length}/${judge.classifications.length}, findings ${fixes.length} → accepted ${accepted.length} (noise ${rulings.filter(r => !r.accept).length})`)
+
+  phase('Fix & Verify')
+  remaining = accepted.map((f, i) => ({ ...f, index: i }))
+  if (verdict === 'COMPRESS' || remaining.length || id.budgets.violations.length) {
+    while (rounds < 2) {
+      rounds++
+      const editKind = verdict === 'COMPRESS' && rounds === 1 ? 'COMPRESS' : 'FIX'
+      await agent(
+        `EDIT mode — ${editKind}. Target: ./${skill}/SKILL.md on the checked-out PR branch.
+${editKind === 'COMPRESS' ? `Probe-proven non-default core to keep: ${JSON.stringify(nonDefault.map(c => c.directive))}.\n` : ''}Budget violations to cure: ${JSON.stringify(id.budgets.violations)}.
+Accepted findings to apply (round ${rounds}):\n${remaining.map(f => `[${f.index}|${f.severity}|${f.class}] ${f.finding} → ${f.fix}`).join('\n') || '(none — budgets only)'}`,
+        {
+          agentType: 'skill-fixer',
+          label: `fix:round${rounds}`,
+          phase: 'Fix & Verify',
+          ...(editKind === 'COMPRESS' ? { model: 'opus', effort: 'high' } : { model: 'sonnet' }),
+        }
+      )
+      const check = await agent(
+        `Verify an edited skill against its accepted findings. Read ./${skill}/SKILL.md (post-edit).
+ACCEPTED FINDINGS (verify each is genuinely resolved in the current text, quoting where):\n${accepted.map((f, i) => `${i}. [${f.severity}] ${f.finding} → agreed fix: ${f.fix}`).join('\n')}
+Also check load-bearing loss: compare against the finding list's implied original content — any directive or example that vanished without a declared deletion-test rationale goes in loadBearingLoss. Judge strictly; cosmetic acknowledgment is not resolution.`,
+        { schema: VERIFY_SCHEMA, label: `verify:round${rounds}`, phase: 'Fix & Verify', model: 'opus', effort: 'high' }
+      )
+      const unresolvedIdx = check.items.filter(it => !it.resolved).map(it => it.index)
+      remaining = accepted.map((f, i) => ({ ...f, index: i })).filter(f => unresolvedIdx.includes(f.index))
+      for (const loss of check.loadBearingLoss) remaining.push({ index: -1, severity: 'FIX-FIRST', class: 'BLOCKER', finding: `load-bearing loss: ${loss}`, fix: 'restore it (or declare the deletion-test rationale)' })
+      log(`round ${rounds}: ${remaining.length} unresolved`)
+      if (!remaining.length) break
+    }
+  }
+}
+
+phase('Land')
+const clean = verdict !== 'REJECT' && remaining.length === 0
+const landed = await agent(
+  `LAND mode — PR #${pr}, skill ./${skill}/SKILL.md.
+VERDICT: ${verdict} | CLEAN PASS: ${clean}${remaining.length ? ` | UNRESOLVED: ${JSON.stringify(remaining.map(f => f.finding))}` : ''}
+PROBE: ${JSON.stringify(judge.classifications)}
+APPLIED: ${JSON.stringify(accepted.map(f => f.finding))}
+NOISE REJECTED: ${JSON.stringify(rulings.filter(r => !r.accept).map(r => ({ finding: fixes[r.index].finding, reason: r.reason })))}
+Follow your LAND discipline: ${verdict === 'REJECT' ? 'comment only.' : clean ? 'version bump, commit, push, gh pr ready, comment.' : 'version bump, commit, push, KEEP DRAFT, comment marking unresolved items as needing human judgment.'}`,
+  { agentType: 'skill-fixer', label: `land:${verdict}`, phase: 'Land', model: 'sonnet' }
 )
 
-return {
-  skill,
-  pr,
-  verdict,
-  nonDefaultDirectives: nonDefault,
-  fixes,
-  replayVerdicts: replay ? replay.verdicts : null,
-  adversarialVerdicts: adversarial ? adversarial.verdicts : null,
-  applied,
-}
+return { skill, pr, verdict, clean, rounds, nonDefaultDirectives: nonDefault, accepted: accepted.map(f => f.finding), noise: rulings.filter(r => !r.accept).map(r => ({ finding: fixes[r.index] && fixes[r.index].finding, reason: r.reason })), unresolved: remaining.map(f => f.finding), landed }
