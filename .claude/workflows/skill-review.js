@@ -293,12 +293,13 @@ Also check load-bearing loss: compare against the finding list's implied origina
 // Conditional re-audit — only on risk signals (rejection-overturn risk, unstable fix loop, human-pending items)
 let reaudit = null
 const noiseCount = rulings.filter(r => !r.accept).length
-if (verdict !== 'REJECT' && (noiseCount >= 3 || rounds >= 2 || remaining.length)) {
+if (verdict !== 'REJECT' && (noiseCount >= 3 || rounds >= 2 || remaining.length || derivable.length)) {
   phase('Re-audit')
   reaudit = await agent(
     `Second-opinion audit of ./${skill}/SKILL.md AFTER fixes were applied (repo root = working directory). Standards: ./skillify-session-lessons/authoring-standards.md.
 APPLIED FIXES (audit each is genuinely resolved, not cosmetic):\n${accepted.map(f => `- [${f.severity}] ${f.finding} → ${f.fix}`).join('\n') || '(none)'}
 ARBITER'S NOISE REJECTIONS (audit each: wrongly dismissed? NOTE especially where an applied fix changed the calculus — new concrete code can invalidate a rejection that was sound against the old abstract text):\n${rulings.filter(r => !r.accept).map(r => `- ${fixes[r.index].finding} | rejected because: ${r.reason}`).join('\n') || '(none)'}
+DERIVABILITY CUTS (content removed because a hinted probe derived it from the core — audit each cut: was anything load-bearing lost that one probe under-sampled?):\n${derivable.map(c => `- ${c.directive} | probe evidence: ${c.evidence}`).join('\n') || '(none)'}
 Also fresh-attack the newly added material for contradictions and self-sufficiency. Report only findings that survive scrutiny.`,
     { agentType: 'skill-adversary', schema: FIX_SCHEMA, label: 're-audit', phase: 'Re-audit', model: 'opus', effort: 'high' }
   )

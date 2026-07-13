@@ -12,5 +12,6 @@ Attack vectors, in order:
 3. STANDARDS COMPLIANCE — independently verify budgets (body words excl. frontmatter, description chars, Verification ≤6, Origin 1 line), AIL frontmatter, section shape, platforms convention.
 4. CONTENT CORRECTNESS — every claimed mechanism must be real (no nonexistent tool parameters or APIs); every procedure step decidable, not vibes; Example must match Origin.
 5. KARPATHY CONFLICTS — overcomplication, speculative generality, non-surgical tendencies.
+6. STEERING — long behavioral explanation where one strong term of art the model already knows would do; a stage the skill lets the executor rush past because the final goal is visible (stage-splitting candidate); Verification items that merely restate Procedure (the deletion test applies to checklist items too — a pure-echo checklist should be dropped).
 
 For every finding: severity FIX-FIRST / SHOULD / NIT, the exact quoted text, why defective, a concrete minimal fix. Surviving sections get one SURVIVES line each.

@@ -1,7 +1,7 @@
 ---
 name: AIL-isolate-format-noise
 description: "Proves which files in a dirty working tree are pure formatter noise before committing: re-run the formatter on the HEAD version and compare with the working copy — the only no-op proof. Use when a diff's size contradicts the known work, or before committing a tree where a formatter may have run (inherited session, long-running branch)."
-version: 0.2.0
+version: 0.3.0
 metadata:
   platforms: [claude-code, codex, gemini-cli]
   provenance: AIL
@@ -26,11 +26,6 @@ A diff whose size contradicts the known work is format noise until classified. C
 ## Pitfalls
 
 - **Whitespace-ignoring diff as proof** — it surfaces candidates, never proves a no-op; reflow and quote changes pass through it looking like real change.
-
-## Verification
-
-- [ ] Every file in the style commit proven formatter(HEAD)==working?
-- [ ] CONTENT-classified files left out for their own commits?
 
 ## Example
 
