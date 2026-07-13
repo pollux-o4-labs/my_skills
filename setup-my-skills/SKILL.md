@@ -1,100 +1,74 @@
 ---
 name: setup-my-skills
 disable-model-invocation: true
-description: Bootstrap a repo for the `efficient-subagent` skill — scaffold a slim `CLAUDE.md` structure (한국어), `docs/handoff/` (per `AIL-handoff-topic-index`, tracking ownership/reclaim state across sessions), `docs/rules/` (관심사별 분리된 행동 규칙) + per-folder `README.md` navigation, and an `## Agent skills` block carrying Sub-agent discipline rules + the ADR `status: proposed/accepted` convention. Backlog priority is NOT scaffolded here — that's `setup-matt-pocock-skills`'s GitHub Issues + triage labels. Designed to coexist with `setup-matt-pocock-skills`, which handles `CONTEXT.md` / `docs/adr/` consumer rules; the bodies of those files are created lazily by `grill-with-docs`, not pre-seeded here. Use when adding the skill to a new project.
+description: Bootstrap a repo with the layout `efficient-subagent` assumes — an `## Agent skills` block (sub-agent discipline + ADR status convention) in `CLAUDE.md`/`AGENTS.md`, plus `docs/handoff/` (per `AIL-handoff-topic-index`), `docs/rules/`, and per-folder `README.md` navigation. Use when adding these skills to a new project; coexists with `setup-matt-pocock-skills`.
 ---
 
 # Setup My Skills
 
-Scaffold the per-repo artifacts that `efficient-subagent` assumes:
+Scaffold the per-repo artifacts that `efficient-subagent` assumes. Prompt-driven, not a script: explore → present → confirm → write. Never overwrite existing user content.
 
-- **Agent-skills index** — a `## Agent skills` block in `CLAUDE.md` or `AGENTS.md` carrying Sub-agent discipline rules and the ADR `status: proposed/accepted` convention. Merges into the same heading produced by `setup-matt-pocock-skills` — never create two `## Agent skills` headings.
-- **Claude workflow scaffold** — slim `CLAUDE.md` structure (한국어), `docs/handoff/` (`AIL-handoff-topic-index` convention: topic files + one list index, tracking which branch/sub-agent owns a topic and when it was reclaimed/merged back), `docs/rules/` (writing rules, sub-agent efficiency block — one file per concern, not one bloated doc), and a per-folder `README.md` convention for navigation.
+- **Agent-skills index** — an `## Agent skills` block in `CLAUDE.md` or `AGENTS.md` carrying Sub-agent discipline rules and the ADR `status: proposed/accepted` convention. Merges into the heading `setup-matt-pocock-skills` produces — never create a second `## Agent skills` heading.
+- **Claude workflow scaffold** — slim `CLAUDE.md` structure (한국어), `docs/handoff/` (`AIL-handoff-topic-index` convention: one list index + topic files, tracking which branch/sub-agent owns a topic and when it was reclaimed/merged back), `docs/rules/` (one file per concern), and per-folder `README.md` navigation.
 
-Backlog priority (P0/P1/P2, done/pending) is deliberately **not** scaffolded here — `setup-matt-pocock-skills` already owns that via GitHub Issues + triage labels. A local `TODO.md` would just be a second, driftable copy of the same concern.
+**Deliberately not scaffolded:**
 
-`CONTEXT.md` and `docs/adr/` bodies are **not** seeded here. `setup-matt-pocock-skills` defines their consumer rules in `docs/agents/domain.md`, and `grill-with-docs` creates the files lazily when first terms/decisions get resolved. Pre-seeding empty stubs would conflict with that lazy-creation philosophy.
-
-`docs/meta/` and a central `spec-locations.md` index are deliberately **not** used — a single file trying to record "what's where" for the whole repo goes stale and bloats. Navigation instead relies on each folder carrying its own `README.md` describing its own contents.
-
-Prompt-driven skill, not a script. Explore → present → confirm → write. Never overwrite existing user content.
+- Backlog priority (P0/P1/P2, `TODO.md`) — owned by `setup-matt-pocock-skills` via GitHub Issues + triage labels; a local `TODO.md` would be a second, driftable copy.
+- `CONTEXT.md` / `docs/adr/` bodies — consumer rules live in `docs/agents/domain.md` (`setup-matt-pocock-skills`); the files themselves are created lazily by `grill-with-docs`. Pre-seeded stubs would conflict with that.
+- `docs/meta/` or any central "what's where" index — a single index for the whole repo goes stale and bloats; each folder's own `README.md` documents it instead.
 
 ## Process
 
 ### 1. Explore
 
-Look at the repo's starting state. Read what exists; don't assume:
+Read the starting state; don't assume:
 
-- `CLAUDE.md` and `AGENTS.md` at the repo root — does either exist? Is there already an `## Agent skills` block in either (possibly from `setup-matt-pocock-skills`)? Does it have 작업 시작 규칙 / 작업 규칙 sections?
-- `docs/handoff/` — does it exist? Does its index follow `AIL-handoff-topic-index` (list, not table; one line per topic file)? Is there a leftover `TODO.md` from an older layout that should retire in favor of GitHub Issues?
-- `docs/rules/` — does it exist? Which of `writing.md`, `efficiency-feedback.md` are present? Is there a leftover `docs/meta/` from an older layout that should migrate?
-- Major folders (repo root, each `{area}/`, `docs/`) — do they already carry a `README.md`?
-- `docs/agents/` — sign that `setup-matt-pocock-skills` has already run. Note its presence so the `## Agent skills` block merges instead of duplicating.
+- `CLAUDE.md` / `AGENTS.md` at root — does either exist? already has an `## Agent skills` block (possibly from `setup-matt-pocock-skills`)? has 작업 시작 규칙 / 작업 규칙 sections?
+- `docs/handoff/` — exists? index follows `AIL-handoff-topic-index` (list, one line per topic file)? a leftover `TODO.md` that should retire to GitHub Issues?
+- `docs/rules/` — which of `writing.md`, `efficiency-feedback.md` exist? a leftover `docs/meta/` to migrate?
+- Major folders (root, each `{area}/`, `docs/`) — already carrying a `README.md`?
+- `docs/agents/` — signals `setup-matt-pocock-skills` already ran; note it so the block merges instead of duplicating.
 
 ### 2. Present findings and ask
 
-Summarise what's present and what's missing in a short table. Then walk the user through two decisions **one at a time** — present a section, get the user's answer, then move to the next.
+Summarise present/missing in a short table, then walk the user through the two sections **one at a time**. Assume the user does not know what every term means — each section opens with a short explainer, then the choices and the default.
 
-Assume the user does not know what every term means. Each section starts with a short explainer. Then show the choices and the default.
+**Section A — `## Agent skills` block.**
 
-**Section A — `## Agent skills` block in `CLAUDE.md` / `AGENTS.md`.**
+> Explainer: a section in `CLAUDE.md` / `AGENTS.md` telling future sessions and sub-agents how to discipline sub-agents and which ADR `status` convention to follow. If `setup-matt-pocock-skills` already added its subsections (Issue tracker / Triage labels / Domain docs), this skill's subsections (Sub-agent discipline / ADR status lifecycle / Handoff ownership / Folder navigation / Docs rules) merge into the **same** heading.
 
-> Explainer: A section in `CLAUDE.md` / `AGENTS.md` that tells future sessions and sub-agents how to discipline sub-agents and which ADR `status` convention to follow. If `setup-matt-pocock-skills` already added its own subsections (Issue tracker / Triage labels / Domain docs), this skill's subsections (Sub-agent discipline / ADR status lifecycle / Handoff ownership / Folder navigation / Docs rules) merge into the **same** `## Agent skills` heading — do not create a second one.
-
-Use [agent-skills-block.md](./agent-skills-block.md) as the seed. Adapt language (English / the user's working language) before writing.
+Seed from [agent-skills-block.md](./agent-skills-block.md); adapt language (English / the user's working language) before writing.
 
 **Section B — Claude workflow scaffold.**
 
-> Explainer: A set of lightweight conventions for Claude Code sessions — a slim `CLAUDE.md` structure that separates root rules from sub-area rules, a `docs/handoff/` topic-index (who owns/reclaimed which in-flight topic) for cross-session continuity, and `docs/rules/` guides that sub-agents can reference. These make every Claude Code session start faster and produce consistent handoffs between sessions.
+> Explainer: lightweight session conventions — a slim `CLAUDE.md` separating root rules from sub-area rules, a `docs/handoff/` topic-index (who owns/reclaimed which in-flight topic) for cross-session continuity, and `docs/rules/` guides sub-agents can reference.
 
-For each item, **detect first, fill only if missing:**
+Detect first, fill only if missing:
 
-- **`CLAUDE.md` structure** — if missing or lacks 작업 시작 규칙 / 작업 규칙 sections, propose adding them from [claude-root-template.md](./claude-root-template.md). Never overwrite existing content — merge only missing sections.
-- **`docs/handoff/`** — if missing, propose creating from [handoff-index-template.md](./handoff-index-template.md), following `AIL-handoff-topic-index` (one list index + topic files added as work actually happens — index starts empty).
-- **`docs/rules/`** — if directory is missing or incomplete, propose creating:
-  - `docs/rules/writing.md` — single source of truth rules, no one-off reports
-  - `docs/rules/efficiency-feedback.md` — reusable sub-agent prompt efficiency block
-  - One file per concern as rules accumulate — never fold unrelated concerns into one doc.
-- **Per-folder `README.md`** — for the repo root and each major folder (`{area}/`, `docs/`, etc.) missing a `README.md`, propose a short one describing that folder's contents. Replaces a central location index: each folder documents itself instead of one file trying to track the whole repo.
+- **`CLAUDE.md` structure** — merge missing 작업 시작 규칙 / 작업 규칙 sections from [claude-root-template.md](./claude-root-template.md); never overwrite existing content.
+- **`docs/handoff/`** — create from [handoff-index-template.md](./handoff-index-template.md); the index starts empty, topic files come with actual work.
+- **`docs/rules/`** — `writing.md` (single source of truth, no one-off reports) and `efficiency-feedback.md` (reusable sub-agent prompt block); one file per concern as rules accumulate, never one bloated doc.
+- **Per-folder `README.md`** — for each major folder missing one, propose a short description of that folder's contents.
 
 ### 3. Confirm and edit
 
-Show the user a draft of:
-
-- The `## Agent skills` subsections being added (or the full block if it doesn't exist yet)
-- Any new files: `docs/handoff/README.md` / `docs/rules/*.md` / new `README.md`s
-- Any sections being added to existing `CLAUDE.md`
-
-Let them edit before writing.
+Show drafts of the `## Agent skills` subsections, any new files (`docs/handoff/README.md` / `docs/rules/*.md` / new `README.md`s), and any sections added to existing `CLAUDE.md`. Let the user edit before writing.
 
 ### 4. Write
 
-**Pick the file to edit:**
-
-- If `CLAUDE.md` exists, edit it.
-- Else if `AGENTS.md` exists, edit it.
-- If neither exists, ask the user which one to create — don't pick for them.
-
-Never create `AGENTS.md` when `CLAUDE.md` already exists (or vice versa) — always edit the one that's already there.
-
-If an `## Agent skills` block already exists in the chosen file, **update its contents in-place** rather than appending a duplicate. Don't overwrite user edits to the surrounding sections.
-
-For directories and files: only write if missing. Existing files are user-owned content — leave them.
+Edit `CLAUDE.md` if it exists, else `AGENTS.md`; if neither exists, ask the user which to create — don't pick for them. Never create the second one when the other already exists. If an `## Agent skills` block exists, **update in place** — no duplicate heading, no touching surrounding user content. Directories and files: write only if missing; existing files are user-owned.
 
 ### 5. Done
 
-Tell the user the setup is complete and which skill will now operate against this layout:
+Report completion and what now operates against this layout:
 
-- `efficient-subagent` will brief sub-agents to read `CLAUDE.md` → `CONTEXT.md`/`CONTEXT-MAP.md` → `docs/adr/` → the target folder's own `README.md`. In-flight decisions surface as `status: proposed` ADRs and require a heads-up before being changed.
-- `CONTEXT.md` and `docs/adr/` themselves are created on demand by `grill-with-docs` — this skill doesn't pre-create them. If `setup-matt-pocock-skills` hasn't been run yet, suggest it next so consumer rules (`docs/agents/domain.md`) land too.
+- `efficient-subagent` briefs sub-agents to read `CLAUDE.md` → `CONTEXT.md`/`CONTEXT-MAP.md` → `docs/adr/` → the target folder's own `README.md`. `status: proposed` ADRs mean in-flight areas needing a heads-up before change.
+- If `setup-matt-pocock-skills` hasn't run yet, suggest it next so consumer rules land too.
 
-Mention they can edit any of these files directly later — re-running this skill is only necessary to refresh the `## Agent skills` block.
+Mention that re-running this skill is only needed to refresh the `## Agent skills` block.
 
 ## Anti-patterns (do not do)
 
 - Overwriting existing `CLAUDE.md` sections or the `## Agent skills` block without confirming.
-- Creating both `CLAUDE.md` and `AGENTS.md`.
-- Creating a second `## Agent skills` heading when `setup-matt-pocock-skills` already produced one — merge subsections into the existing heading instead.
-- Pre-seeding `CONTEXT.md` or `docs/adr/` files. Those are consumed via `setup-matt-pocock-skills` rules and created lazily by `grill-with-docs`.
-- Pre-seeding `docs/handoff/` topic files — only the empty list index is scaffolded; topic files are added as work actually happens.
-- Creating `TODO.md`. Backlog priority belongs in `setup-matt-pocock-skills`'s GitHub Issues — a local TODO.md would duplicate it and drift.
+- Creating both `CLAUDE.md` and `AGENTS.md`, or a second `## Agent skills` heading.
+- Pre-seeding anything on the "deliberately not scaffolded" list, or `docs/handoff/` topic files — only the empty index is scaffolded.
