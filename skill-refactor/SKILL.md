@@ -1,7 +1,7 @@
 ---
 name: skill-refactor
 description: "Compresses an existing skill to its load-bearing core — cutting instruction creep (description enumerations, restated rules, narrative padding) while preserving every behavioral directive. Use when a skill exceeds the authoring budgets (description >400 chars, body past the 700-word target), when touching a skill under the retrofit-on-edit policy, or when a review flags bloat."
-version: 1.1.0
+version: 1.2.0
 metadata:
   platforms: [claude-code, codex, gemini-cli]
 ---
@@ -29,7 +29,9 @@ Every skill description is loaded into every session's prompt, and every body wo
    - the same rule stated in several places → one home + pointer
    - edge-case branch prose → compact enumeration
    - maintenance-facing narrative (what changed, why it changed, review history) → git history / RATIONALE; the body keeps at most a one-line Origin
-4. **Behavior-preservation check**: for each inventoried item, point to where it survives in the draft. An item with no home means the cut changed behavior — restore it, or stop and route the change as a redesign with its own review.
+   - no-op directives — sentences whose deletion cannot change behavior because the model already acts that way untrained (the **deletion test**) → delete
+   - long behavioral explanation → one strong term of art the model already knows ("vertical slice", BLUF), repeated at the decision points; it worked if the term echoes in reasoning traces
+4. **Behavior-preservation check**: for each inventoried item, point to where it survives in the draft. An item with no home means the cut changed behavior — restore it, or stop and route the change as a redesign with its own review. Exception: deletion-test cuts are declared in the diff summary instead of restored — each with its no-op rationale (why the model already does this untrained), so the exception can't smuggle a real behavior loss.
 5. **Finish**: bump the minor version, re-measure against the budgets, and show the diff with before/after numbers — reviewed against the original file, not just the inventory — before registering.
 
 ## Pitfalls
@@ -42,7 +44,7 @@ Every skill description is loaded into every session's prompt, and every body wo
 ## Verification
 
 - [ ] Before/after measurements recorded, and the result within caps (or the overshoot justified)?
-- [ ] Every inventoried directive, trigger, and example has a surviving home?
+- [ ] Every inventoried directive, trigger, and example has a surviving home (deletion-test cuts declared with rationale, not restored)?
 - [ ] Any behavior change declared explicitly, not smuggled in?
 - [ ] Version bumped and the numbered diff shown for review?
 

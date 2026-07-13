@@ -33,7 +33,16 @@ Obligation / prohibition / permission / exception / sequence map one-to-one onto
 
 → Adopted as: the modality-per-clause discipline (one clause, one modality). The graph-extraction half (deontic relation types) was deliberately deferred in the vgo project until a consumer exists — recorded in `docs/review/2026-07-12-doc-validate-quant-checks.md` there.
 
-## 6. Deliberately not adopted
+## 6. Skill checklist (Matt Pocock, AI Engineer talk)
+
+Four tests for agent skills. **Trigger**: user- vs model-invoked is a load allocation — a model-invoked description is resident in every session (context load) and fires probabilistically (may need trigger evals); user-invoked costs zero context but shifts recall onto the human (cognitive load). **Structure**: a skill is procedure + reference, two tiers — always-used material in the body, rarely-used material behind a file door. **Steering**: one strong term the model already knows ("vertical slice") beats paragraphs of explanation — verified when the term echoes in reasoning traces; and an agent that rushes a stage is seeing its final goal, so split stages into separate skills to hide the future. **Pruning**: the deletion test — if deleting a sentence cannot change behavior, it never did anything; the three accretions are duplication, sediment, and no-op sentences.
+
+→ Adopted as: the trigger-type rule in the skills-repo `CLAUDE.md`; the no-op and leading-word cut patterns in `skill-refactor`. Two-tier structure was already practiced here (CATALOG/REFERENCE/RATIONALE side files).
+→ Deferred: stage-splitting (no rush-prone stage identified yet); trigger evals (no model-invocation reliability complaint yet).
+
+Source: Matt Pocock (AI Engineer talk), youtu.be/YLq04CDeOTE — cross-checked against his skills repo, where the top skill `grill-me` is a ~20-word user-invoked button delegating to a model-invoked `grilling` discipline skill.
+
+## 7. Deliberately not adopted
 
 - Prose meta-rules about how to write rules, placed inside a project repo — that reproduces the creep it fights. Standards live here (a propagating skill) and in code-level backstops (validators, caps), not as more repo prose.
 - Retrofitting all existing skills at once — pilot-first, then retrofit-on-edit (see skills-repo `CLAUDE.md`).
