@@ -6,6 +6,7 @@
 Claude Code, Codex, Gemini CLI 공용 커스텀 스킬 레포. 각 스킬 동작은 해당 `SKILL.md` 참조.
 
 ## 작업 규칙
+- **세션 시작 시 [docs/handoff/README.md](./docs/handoff/README.md) 확인** — 진행 중·기계 간·유보 상태의 단일 진실원(WIP 스킬 소재 등). 상태 변화 시 해당 줄만 splice.
 - 스킬 수정 전 해당 SKILL.md를 반드시 읽고 시작
 - 디렉토리명 = name (kebab-case), 진입점 = SKILL.md
 - **provenance 접두사**: AI가 세션 교훈에서 스스로 생성·승격한 스킬은 `AIL-` 접두사(AI-Learned, 예: `AIL-verify-against-reality`). 사용자가 의도적으로 넣은 스킬과 구분 — 나중에 리팩터·정리·신뢰도 판단 시 식별용. 새 교훈 스킬화 시 이 접두사를 붙인다.
