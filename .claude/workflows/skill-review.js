@@ -109,7 +109,7 @@ const id = await agent(
   `Identify the skill draft ./${skill}/SKILL.md for pipeline review. Working directory = my_skills repo root, PR branch checked out.
 Read the draft, ./skillify-session-lessons/authoring-standards.md, and any side files in ./${skill}/.
 Produce (per the schema): budgets incl. Origin line count and violations; triggerType; coreDirectives (each behavioral rule as one line); probeScenarios (reconstruct the origin situation with NO hints — do not name tools, commands, or suspicions the skill teaches; the probe must be able to fail); replayScenarios (original + analogue + boundary + exactly one boundary-user-override where the user explicitly instructs against the skill's rule); siblings (scan AIL-*/SKILL.md descriptions and this draft's pointer lines).`,
-  { schema: ID_SCHEMA, label: `identify:${skill}`, phase: 'Identify' }
+  { schema: ID_SCHEMA, label: `identify:${skill}`, phase: 'Identify', model: 'opus', effort: 'high' }
 )
 
 phase('Probe')
@@ -130,7 +130,7 @@ const judge = await agent(
 DIRECTIVES:\n${id.coreDirectives.map((d, i) => `${i + 1}. ${d}`).join('\n')}
 UNAIDED PROBE ANSWERS (a mid-tier model answered the origin scenario with no access to the skill):\n${probeAnswers.map((a, i) => `--- PROBE ${i + 1} ---\n${a}`).join('\n')}
 A directive is DEFAULT only if the probe answers actually exhibit it (deletion test: the skill sentence would change nothing). If a probe does the opposite or reaches for a weaker method, that directive is NON-DEFAULT — quote the mistake as evidence. Judge strictly.`,
-  { schema: JUDGE_SCHEMA, label: 'probe-judge', phase: 'Probe' }
+  { schema: JUDGE_SCHEMA, label: 'probe-judge', phase: 'Probe', model: 'opus', effort: 'high' }
 )
 
 phase('Review')
@@ -142,13 +142,15 @@ const [replay, adversarial] = await parallel([
       schema: FIX_SCHEMA,
       label: `replay:${skill}`,
       phase: 'Review',
+      model: 'opus',
+      effort: 'high',
     }),
   () =>
     agent(
       `Skill under attack: ./${skill}/SKILL.md (repo root = working directory).\nStandards: ./skillify-session-lessons/authoring-standards.md.\nSiblings to check: ${id.siblings.join(', ')}.\nKnown probe result (attack vector 4 context): non-default directives = ${JSON.stringify(
         judge.classifications.filter(c => !c.isDefault).map(c => c.directive)
       )}.`,
-      { agentType: 'skill-adversary', schema: FIX_SCHEMA, label: `adversarial:${skill}`, phase: 'Review' }
+      { agentType: 'skill-adversary', schema: FIX_SCHEMA, label: `adversarial:${skill}`, phase: 'Review', model: 'opus', effort: 'high' }
     ),
 ])
 
@@ -178,7 +180,7 @@ PROBE CLASSIFICATIONS:\n${JSON.stringify(judge.classifications, null, 1)}
 BUDGETS/VIOLATIONS:\n${JSON.stringify(id.budgets, null, 1)}
 FIX LIST (severity-sorted):\n${JSON.stringify(fixes, null, 1)}
 Follow your discipline for this verdict, then report what you committed/pushed/commented in a few lines.`,
-  { agentType: 'skill-fixer', label: `apply:${verdict}`, phase: 'Apply' }
+  { agentType: 'skill-fixer', label: `apply:${verdict}`, phase: 'Apply', model: 'opus', effort: 'high' }
 )
 
 return {
