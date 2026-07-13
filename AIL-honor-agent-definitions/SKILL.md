@@ -1,7 +1,7 @@
 ---
 name: AIL-honor-agent-definitions
 description: "Treats registered agent definitions (system prompt, model, effort, tools) as authored policy when delegating: spawn the typed agent, adopt its doctrine in the main session, or substitute a generic type while porting the definition's settings — a deliberate choice, never a silent default. Use before spawning subagents for a role a registered/plugin agent type may cover, or when taking that role yourself."
-version: 0.1.0
+version: 0.2.0
 metadata:
   platforms: [claude-code]
   provenance: AIL
@@ -30,6 +30,14 @@ A registered agent type (plugin agent, `.claude/agents` entry) is **configuratio
 4. **State the delta in one line before spawning**: which definition, what you kept, what you changed and why.
 5. **No definition exists** → set tier by task nature: mechanical execution low, judgment/audit mid, final synthesis the session model.
 
+## Team Runtime (messaging-based teammates)
+
+When the role runs as a named teammate with a message mailbox — not an Agent-tool subagent whose final text returns automatically:
+
+- **Final text is NOT delivered.** Only an explicit send reaches the leader. Every teammate prompt must end with: "before exiting, send your full report to the leader via SendMessage — final text alone is lost."
+- **Idle-without-report → ping once** for a resend; recurring silence is a failure signal, not completion.
+- **Re-verification after a fix needs a precondition**: instruct the verifier to assert the fix marker exists in the tested artifact (grep the served/deployed copy) before running. Crossed messages otherwise yield stale FAIL/PASS verdicts against pre-fix state.
+
 ## Pitfalls
 
 - **Tool-driven type choice silently dropping model config** — picking generic for one missing tool and letting session-model inheritance apply unexamined.
@@ -50,4 +58,4 @@ A registered agent type (plugin agent, `.claude/agents` entry) is **configuratio
 Asked to organize an inspection team with "specialized agents", the orchestrator reads the plugin lead's system prompt (correct: adopt-in-session, user is steering live) but spawns all four teammates as `general-purpose` because one needs `Write`. The plugin's reviewer/implementer definitions all pin `model: opus`; the substitution silently inherits the top-tier session model instead. Caught only by two user challenges. The fix this skill encodes: enumerate → read frontmatter → spawn typed where tools suffice, and where substituting, pass `model: "opus"` and say so up front.
 
 ---
-*Origin: AIL — launch-inspection team (prompt-gen, 2026-07-13): four general-purpose teammates spawned for tool access, dropping the plugin definitions' model tier; surfaced by two user corrections.*
+*Origin: AIL — launch-inspection team (prompt-gen, 2026-07-13): four general-purpose teammates spawned for tool access, dropping the plugin definitions' model tier (two user corrections); four idle-without-report incidents fixed by a SendMessage-before-exit prompt clause; two crossed-message stale verdicts fixed by fix-marker preconditions.*
