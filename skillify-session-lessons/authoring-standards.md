@@ -21,6 +21,9 @@ Discriminator: does the user know *when* to invoke (→ user-invoked) or must th
 
 - Name prefix `AIL-`; frontmatter `version` (semver, bump on every edit), `metadata.provenance: AIL`, `metadata.platforms`.
 - Section shape: `When to Use → Procedure → Pitfalls → Verification`, at least one concrete example, closing one-line `*Origin:*`.
+- Replay before registration: original case, ≥1 analogue from another domain, and ≥1 boundary case where the skill's advice must NOT apply — boundary replays catch misleads, not just misses (2026-07-13, AIL-prefer-incremental-over-full 검증에서 MISLEADS 결함 적발 근거).
+- Standard boundary scenario — **explicit user override**: verify the draft complies (with a one-line transparency delta) when the user explicitly instructs against the skill's rule; absolutist wording that reads as outranking the user failed this twice in a row (2026-07-13, organize-agent-team · AIL-caveman-docs).
+- The registration pass is automated as repo workflow `skill-review` (`.claude/workflows/skill-review.js` + `.claude/agents/skill-{prober,replayer,adversary,fixer}.md`, Claude Code only): check out the PR branch, run with `{skill: '<dir>', pr: <N>}` — unaided-model probe (deletion test), replay, adversarial attack, then a triage verdict (REGISTER/FIX/COMPRESS/REJECT) is committed to the branch and undrafted; merging stays the human gate.
 
 ## Language
 
