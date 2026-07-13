@@ -17,3 +17,4 @@ setup-my-skills
 format-response
 write-a-rule
 skill-refactor
+organize-agent-team
