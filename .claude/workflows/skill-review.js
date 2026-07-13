@@ -294,6 +294,7 @@ phase('Land')
 const clean = verdict !== 'REJECT' && remaining.length === 0
 const landed = await agent(
   `LAND mode — PR #${pr}, skill ./${skill}/SKILL.md.
+SKILL SUMMARY (use this to open the comment in plain language): ${id.summary}
 VERDICT: ${verdict} | CLEAN PASS: ${clean}${remaining.length ? ` | UNRESOLVED: ${JSON.stringify(remaining.map(f => f.finding))}` : ''}
 PROBE: ${JSON.stringify(judge.classifications)}
 APPLIED: ${JSON.stringify(accepted.map(f => f.finding))}
