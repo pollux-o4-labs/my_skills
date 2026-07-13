@@ -20,6 +20,19 @@ try {
     Write-Host "[install] initial sync:"
     & $sync
   }
+
+  # register skill-owned Stop hook (idempotent; runs after sync so the skill is linked)
+  $gateRegistrar = Join-Path $RepoRoot 'skillify-session-lessons\hooks\register-hook.mjs'
+  if (Test-Path $gateRegistrar) {
+    if (Get-Command node -ErrorAction SilentlyContinue) {
+      Write-Host "[install] registering skillify Stop hook:"
+      & node $gateRegistrar
+      if ($LASTEXITCODE -ne 0) { Write-Host "[install] WARN: hook registration failed (skills still linked)" }
+    } else {
+      Write-Host "[install] WARN: node not found — skipping skillify Stop hook registration"
+    }
+  }
+
   Write-Host "[install] done — future 'git pull' will auto-link skills."
 }
 finally { Pop-Location }
