@@ -20,7 +20,7 @@ Every skill description is loaded into every session's prompt, and every body wo
 
 ## Procedure
 
-1. **Measure first**: lines, body words (frontmatter excluded), description chars. Record before/after.
+1. **Measure first**: lines, body words (frontmatter excluded), description chars, Verification items, Origin lines — every budgeted quantity. Record before/after.
 2. **Inventory load-bearing content before cutting — mechanically**: every imperative sentence, bullet, and checkbox in the original is an inventory item, plus trigger keywords, boundary cross-references ("not for X, see Y"), and the concrete example that taught the lesson. This list is the contract the refactor must not break.
 3. **Cut by creep pattern**:
    - description enumerations (tool lists, exception lists) → body "Skip"/"Do NOT use" section; description keeps what+when in 2 sentences
