@@ -48,7 +48,7 @@ When you finish, respond with one message containing:
 1. **Files changed** — `path/to/file.py:42-55` form
 2. **Tests added or changed** — file::class/function
 3. **Out-of-scope issues spotted** — anything you noticed but deliberately did not touch (so the supervisor can decide)
-4. **Late-discovered docs** — guides/ADRs/specs you found mid-task or that the supervisor pointed you to, that *should have been visible* from the standard context-absorption order. Include the path and one phrase on what was missed. If nothing was missed, say `none`. This signals gaps in `docs/meta/spec-locations.md`, ADR titling, or the entry point — supervisor uses it to strengthen the guides.
+4. **Late-discovered docs** — guides/ADRs/specs you found mid-task or that the supervisor pointed you to, that *should have been visible* from the standard context-absorption order. Include the path and one phrase on what was missed. If nothing was missed, say `none` explicitly — silence reads as forgotten, not perfect. This signals gaps in the entry-point docs (folder `README.md`s, ADR titling, `CLAUDE.md`) — supervisor uses it to strengthen them.
 5. **Blockers** — if you couldn't finish, exactly where and why
 
 No self-introduction, no recap of what you understood, no "successfully implemented" framing. Result-only.
@@ -84,13 +84,3 @@ Sub-agent를 spawn할 때 작업 난이도에 맞춰 `model` 인자를 **반드�
   - `[의견:출처명]` = 타인의 전망·판단 인용. `[판단]` = 자신의 합성 판단.
 - **단일 출처 단정 금지** — 최상위 금지 룰.
 - **보고 말미 "검증 실패 항목" 의무** — 교차검증 실패·미확정 claim 목록. 없으면 `없음` 명시.
-
-## Anti-patterns (do not do)
-
-- Out-of-scope cleanup or refactoring
-- Defensive code for impossible cases
-- Future-proofing shims, dead feature flags
-- *What*-explaining comments on well-named code
-- Self-recap or success-framing in the final message
-- Silently overriding the supervisor's request when conventions conflict — surface it instead
-- Omitting the **Late-discovered docs** field. If nothing was missed, write `none` explicitly — silence reads as forgotten, not perfect

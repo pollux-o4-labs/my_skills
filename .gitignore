@@ -1,3 +1,4 @@
 .playwright-mcp/
 # 미완성 스킬 — 로컬 전용, 완성·리뷰 후 해제 (CLAUDE.md 작업 규칙 참조)
 /AIL-prefer-incremental-over-full/
+.personal-information/
