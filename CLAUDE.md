@@ -9,22 +9,19 @@ Claude Code, Codex, Gemini CLI 공용 커스텀 스킬 레포. 각 스킬 동작
 - 스킬 수정 전 해당 SKILL.md를 반드시 읽고 시작
 - 디렉토리명 = name (kebab-case), 진입점 = SKILL.md
 - **provenance 접두사**: AI가 세션 교훈에서 스스로 생성·승격한 스킬은 `AIL-` 접두사(AI-Learned, 예: `AIL-verify-against-reality`). 사용자가 의도적으로 넣은 스킬과 구분 — 나중에 리팩터·정리·신뢰도 판단 시 식별용. 새 교훈 스킬화 시 이 접두사를 붙인다.
-- **AIL 스킬 frontmatter**: `version`(semver, 수정 시 bump) + `metadata.provenance: AIL` + `metadata.platforms` 기입. description은 짧게(상시 로드 비용).
-- **분량·중복 상한(전 스킬 공통)**: description = what+when 2문장, 목표 ≤400자 — 도구·예외 나열은 본문("Skip"/"Do NOT use" 절)으로 내린다. 본문 목표 ≤700단어(1,000 초과 시 분할·압축 검토). Verification은 결과 확인형 ≤6항 — Procedure의 1:1 재진술 금지. Origin/Provenance 서명은 1줄. 상한은 **영문 기준**(언어별 환산 근거는 `skill-refactor/RATIONALE.md` §3). 기존 스킬은 파일럿 우선 소급(1차 파일럿: AIL-calibrate-agent-spend) — 이후 각 스킬을 수정하는 시점에 `skill-refactor` 스킬로 이 상한에 맞춘다. lint 자동화는 위반 재발 시 도입. 근거 원문은 `skill-refactor/RATIONALE.md`.
-- **언어**: 스킬 정본은 영어 1개(한국어는 리뷰 렌더링만). 예외 = 한국어 출력 자체를 가르치는 스킬(예: format-response). repo 규칙·문서는 해당 repo의 문서 언어를 따른다(`write-a-rule` 표가 영·한 양식 지원).
-- **트리거 유형 결정(신규 스킬)**: 판별 기준 = 호출 시점을 사용자가 아는가(user) vs 상황을 보고 스스로 발동해야 하는가(model). 사용자 워크플로 스킬은 `disable-model-invocation: true` — description 상주 비용 0, 대신 호출 기억은 사용자 몫. 자동 행동 교정 스킬(AIL 등)만 model 호출로 두되, 그 description 은 매 세션 상주 비용 + 확률적 호출임을 전제로 쓴다. 근거: `skill-refactor/RATIONALE.md` §6.
+- **스킬 저작 규약(분량 상한·트리거 유형·AIL frontmatter·언어)**: 정본은 [skillify-session-lessons/authoring-standards.md](./skillify-session-lessons/authoring-standards.md) — 스킬 폴더와 함께 전 host 에 전파되는 위치라 CLAUDE.md 가 아닌 그곳에 둔다. 스킬 생성·수정 전 그 파일을 읽는다. 근거 원문은 `skill-refactor/RATIONALE.md`.
 - 보조 문서는 스킬 디렉토리 안에 — 루트 오염 금지
 - **미완성 스킬은 origin에 올리지 않는다** — 로컬 untracked/.gitignore로 유지하고 완성·리뷰 후 커밋. untracked 스킬을 "커밋 누락"으로 단정해 대신 커밋하지 말 것(2026-07-12 AIL-prefer-incremental-over-full 오커밋 사건이 근거).
 - setup-my-skills → efficient-subagent 의존관계 있음
 - CLI 별 등록 경로와 전역 지침 파일 차이를 섞지 말고 대상 host 를 먼저 식별
 
-## 스킬 등록 경로 (host별 — 2026-07 실측)
+## 스킬 등록 경로 (host별 — 2026-07-13 sync-skills.ps1 실측: repo → 허브 → codex·gemini)
 
 | Host | 경로 | 방식 | 주의 |
 |---|---|---|---|
-| Claude Code | `~/.claude/skills/<name>` | 이 repo로 **정션** | 즉시 반영 |
-| Codex | `~/.codex/skills/<name>` | `~/.agents/my_skills/<name>`로 정션 | `~/.agents/my_skills`는 GitHub **clone** — push 후 그쪽에서 `git pull` 해야 반영 |
-| Gemini CLI | `~/.gemini/skills/<name>` | 디렉토리 **복사본** | pull/정션 아님 → 방치 시 drift. 갱신 시 재복사 필요 |
+| Claude Code | `~/.claude/skills/<name>` | 이 repo로 **정션** (curated 허브) | 즉시 반영 |
+| Codex | `~/.codex/skills/<name>` | 허브 등재 항목 중 타깃이 이 repo 하위인 것만 선별해 **repo 물리 경로로 재정션** | 로컬 sync 로 반영. `~/.agents/my_skills` clone 은 legacy 소스(정리 대상) |
+| Gemini CLI | `~/.gemini/skills/<name>` 외 3개 루트 | 허브에서 **복사본**(정션 해석, agy 가 ReparsePoint 를 못 읽어 물리 복사 필수) | 방치 시 drift. 갱신 시 재복사, 정리는 `-PruneMirror` 명시 시 |
 
 새 스킬 등록 시 세 host 모두 처리하고, repo에서 스킬 삭제 시 각 host의 정션·복사본도 제거(dangling 정션 방지).
 
