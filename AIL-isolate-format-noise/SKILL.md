@@ -37,4 +37,4 @@ A diff whose size contradicts the known work is format noise until classified. C
 A team fears "+7,877 uncommitted lines"; classification shows 28 files FORMAT-ONLY against 18 CONTENT — the bulk was a prior session's formatter run. The style commit takes the 28 plus prettier config; the 18 stay out for their own concerns.
 
 ---
-*Origin: AIL — doc-maintenance team (prompt-gen, 2026-07-13). Unaided-model probes (sonnet ×2, 2026-07-13) showed size-suspicion, explicit staging, and concern-splitting are already default behavior — v0.2.0 keeps only the non-default core: the proof method.*
+*Origin: AIL — doc-maintenance team (prompt-gen, 2026-07-13): the formatter(HEAD)==working test split a feared +7,877-line tree into 28 format-only vs 18 content files.*
