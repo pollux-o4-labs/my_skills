@@ -10,4 +10,5 @@
 ## Topics
 
 - retrofit-backlog — 저작 상한 초과 잔여분(supervisor-mode desc 596c·AIL-design-for-extension desc 403c·setup-my-skills 759w·efficient-subagent 851w) — retrofit-on-edit 정책상 해당 스킬 수정 시점에 처리, 별도 착수 불요 — 2026-07-13
-- [matt-checklist-adoption](./matt-checklist-adoption.md) — Matt Pocock 4단계 체크리스트 저작 표준 반영(PR #1·#2 머지, 정본 authoring-standards.md) — 유보 기법 2종(stage-splitting·trigger evals) 증상 실발생 시 착수 — 2026-07-13
+- [matt-checklist-adoption](./matt-checklist-adoption.md) — Matt Pocock 4단계 체크리스트 저작 표준 반영(PR #1·#2 머지, 정본 authoring-standards.md) + 4축 전부 skill-review 파이프라인 검사 내장 — 유보 2종 중 trigger evals 는 실발생 1건 적립(2026-07-13 correct-is-silent 미발동), 재발 시 착수 — 2026-07-13
+- skill-review-pipeline — 스킬 PR 전자동 심사 워크플로 v3.3(.claude/workflows/skill-review.js + skill-{prober,replayer,adversary,fixer} 에이전트): 프로브(삭제 테스트)→파생가능성 프로브→replay·적대→중재(NOISE 기각)→fix⇄verify 루프→조건 재심→Land(쉬운말 코멘트), 머지만 사람 게이트. 사용법 정본은 authoring-standards — 가동 상태(#10·#11 실적) — 2026-07-13
