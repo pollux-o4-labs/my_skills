@@ -1,7 +1,7 @@
 ---
 name: AIL-correct-is-silent
-description: "Keeps living documents free of inline history — a correctly placed or corrected artifact states only its current state, while the story of what moved where and why belongs in commit messages and ADRs. Use when about to annotate a fix or relocation with its history ('this used to be...') outside history-purposed docs, when transition banners are spreading across documents, or when writing a subagent prompt that asks it to annotate changes in the artifact."
-version: 1.0.0
+description: "Keeps living documents free of inline history — a corrected artifact states only its current state; the what-moved-where-and-why belongs in commits and ADRs. Use when annotating a fix or relocation with its history ('this used to be...') outside history-purposed docs, when transition banners spread across docs, or when writing a subagent prompt that tells it to mark changes in the artifact."
+version: 1.1.0
 metadata:
   platforms: [claude-code]
   provenance: AIL
@@ -16,7 +16,7 @@ A reader of a living document needs the current correct state, not the journey. 
 - About to leave a "this was here, now it's there" / "previously X" annotation next to something you just fixed or relocated.
 - A transition/migration banner is appearing in more than one document.
 - Writing config or gitignore comments that narrate history instead of stating purpose.
-- **Writing instructions for a delegate (subagent prompt, task spec) that tell it to annotate changes in the artifact** — "mark intentional changes in comments" plants the violation at one remove; route the change-log to the delegate's report or the commit message instead. Skills do not auto-trigger inside subagents, so the supervisor's prompt is the only gate.
+- **Writing instructions for a delegate (subagent prompt, task spec) that tell it to annotate changes with their history in the artifact** — "mark intentional changes in comments" plants the violation at one remove; route the change-log to the delegate's report or the commit message instead (this skill can't fire inside the subagent, so the supervisor's prompt is the only gate — and the "Do NOT use" carve-outs apply the same at one remove). If the user explicitly asks for inline change-marks, comply and note once that the durable record belongs in the commit.
 
 **Do NOT use when** the document's purpose IS history, or a consumer must act on the transition: changelogs, release notes, and decision logs/ADRs themselves; deprecation notices (including `@deprecated` source annotations) and migration guides for consumers who must act on the change (operators, deployers, API users); comments stating a live constraint ("don't reorder — X depends on init order") — that is rationale, not narrative.
 
