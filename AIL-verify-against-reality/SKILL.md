@@ -1,7 +1,7 @@
 ---
 name: AIL-verify-against-reality
 description: "Checks surprising verification results against the real execution path — stale intermediate layers and your own command or measurement — before re-debugging target code. Use when a fix looks correct but reality is unchanged, tests pass while reality fails, a rebuild shows no effect, a result looks suspicious, or you're about to cite a measured number in a commit message or report."
-version: 1.4.0
+version: 1.5.0
 metadata:
   provenance: AIL
   platforms: [claude-code, codex, gemini-cli]
@@ -35,17 +35,8 @@ If a fix works in code and tests but not in reality, the bug is **usually not in
 ## Pitfalls
 
 - **Chasing a bug that isn't there**: the code is fine but the command was wrong (typo, flag, quoting, path) or the harness gives a false signal. Anchor: `wsl bash -lc "cmd; echo $?"` reported exit 0 for a failing gate — the reproduction method, not the code, was the culprit.
-- **"Rebuilt but same"**: an identifier-stable cache never busts, so the rebuild silently changes nothing visible.
 - **Logic right, visuals wrong**: state is correct but size/alignment differs — the user still sees "broken".
 - **Citing a pre-edit measurement**: true when measured, stale when committed — a commit message said 949w, the final file held 955w. Measure, then write, nothing in between.
-
-## Verification
-
-- [ ] Each suspect layer ruled out by measurement, not hypothesis — starting with my own command/harness?
-- [ ] Reality confirmed to load the latest code (cache, version, artifact)?
-- [ ] Double compared against reality's known behavior at least once, using real values and the real input path?
-- [ ] State-transition UI measured quantitatively in both states, plus a screenshot?
-- [ ] Verified in **both** the double and the real environment?
 
 ---
 *Origin: frontend sessions where "fixed but reality unchanged" kept tracing to hidden staleness (cache, double divergence, version shadow), and a supervision session where a false exit-0 harness — not the code — was the bug.*
