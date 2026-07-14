@@ -1,6 +1,6 @@
 ---
 name: AIL-correct-is-silent
-description: "Keeps living documents free of inline history — a correctly placed or corrected artifact states only its current state, while the story of what moved where and why belongs in commit messages and ADRs. Use when about to annotate a fix or relocation with its history ('this used to be...') outside history-purposed docs, or when transition banners are spreading across documents."
+description: "Keeps living documents free of inline history — a correctly placed or corrected artifact states only its current state, while the story of what moved where and why belongs in commit messages and ADRs. Use when about to annotate a fix or relocation with its history ('this used to be...') outside history-purposed docs, when transition banners are spreading across documents, or when writing a subagent prompt that asks it to annotate changes in the artifact."
 version: 1.0.0
 metadata:
   platforms: [claude-code]
@@ -16,6 +16,7 @@ A reader of a living document needs the current correct state, not the journey. 
 - About to leave a "this was here, now it's there" / "previously X" annotation next to something you just fixed or relocated.
 - A transition/migration banner is appearing in more than one document.
 - Writing config or gitignore comments that narrate history instead of stating purpose.
+- **Writing instructions for a delegate (subagent prompt, task spec) that tell it to annotate changes in the artifact** — "mark intentional changes in comments" plants the violation at one remove; route the change-log to the delegate's report or the commit message instead. Skills do not auto-trigger inside subagents, so the supervisor's prompt is the only gate.
 
 **Do NOT use when** the document's purpose IS history, or a consumer must act on the transition: changelogs, release notes, and decision logs/ADRs themselves; deprecation notices (including `@deprecated` source annotations) and migration guides for consumers who must act on the change (operators, deployers, API users); comments stating a live constraint ("don't reorder — X depends on init order") — that is rationale, not narrative.
 
