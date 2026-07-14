@@ -53,7 +53,7 @@ When a role runs as a named teammate with a message mailbox — not an Agent-too
 
 ## Example
 
-Asked to organize an inspection team with "specialized agents", the orchestrator correctly adopts the plugin lead's doctrine in-session (user steering live) but spawns all four teammates as `general-purpose` because one needs `Write`. The plugin definitions pin `model: opus`; the substitution silently inherits the session model — caught only by two user challenges. The fix this skill encodes: enumerate → spawn typed where tools suffice (no file read needed); read only the `Write`-needing role's definition to substitute it, with `model: "opus"` ported, its doctrine injected, and the swap announced.
+Asked to organize an inspection team with "specialized agents", the orchestrator correctly adopts the plugin lead's doctrine in-session (user steering live) but spawns all four teammates as `general-purpose` because one needs `Write`. The plugin definitions pin `model: opus`; the substitution silently inherits the session model — caught only by two user challenges. The fix this skill encodes: enumerate → read the lead's definition to adopt its doctrine and the `Write`-needing role's to substitute it (`model: "opus"` ported, doctrine injected, swap announced); spawn the remaining teammates typed with no file read.
 
 ---
 *Origin: session lesson (launch-inspection team, 2026-07-13) reshaped into a user-invoked workflow — provenance and registry measurements in `RATIONALE.md`.*
