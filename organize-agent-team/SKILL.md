@@ -1,7 +1,7 @@
 ---
 name: organize-agent-team
 description: "Organize a multi-agent team from the installed agent registry instead of ad-hoc generic spawns: enumerate typed definitions (plugin agents, .claude/agents), read their model/tools pins and role doctrine, place each role deliberately, and set the team's runtime ground rules. Invoke when the user asks to organize or assemble an agent team."
-version: 0.4.0
+version: 0.5.0
 disable-model-invocation: true
 metadata:
   platforms: [claude-code]
@@ -17,7 +17,7 @@ A registered agent type (plugin agent, `.claude/agents` entry) is **configuratio
 
 1. **Honor user pins first.** An explicit user placement or model instruction supersedes registry pins — state the delta once ("plugin pins opus, you chose sonnet") and comply; skip the steps below for roles the user has already decided.
 2. **Enumerate before composing.** List available agent types *and* plugin commands; if a packaged command already covers the requested workflow (e.g. an installed `/team-feature`), propose or use it instead of hand-composing. `general-purpose` is the fallback, not the starting point.
-3. **Read each matched definition** — frontmatter (model, tools) *and* body doctrine. A definition's value is invisible until you open the file.
+3. **Read the definition only when placement needs its body or model.** The registry enumeration already surfaces each type's name, tools, and role summary — enough to spawn it typed, since a typed spawn carries the pinned model automatically without your knowing its value. Open the file only to *adopt* its doctrine in-session or to *substitute* a generic (porting the model, injecting the body). Don't re-search the filesystem for a definition the listing already covers.
 4. **Place each role deliberately** (three-way):
    - **Spawn the typed agent** when its toolset suffices and the role is self-contained: user is away, multiple teams run, or the role's chatter would pollute the main context.
    - **Adopt its doctrine in-session** — at most one role, the one at the user interface (typically the lead); steering need wins any tie with the spawn criteria. Follow its protocol — you are not a relay; translate steering into directives.
@@ -40,11 +40,12 @@ When a role runs as a named teammate with a message mailbox — not an Agent-too
 - **Assuming built-ins run on cheap models** — inheritance is the rule; unset ≠ economical.
 - **Spawning a leader agent under active user steering** — every correction then transits a lossy relay hop (user → you → lead → teammates).
 - **Adopting doctrine from memory** — naming the protocol without reading the definition file.
+- **Re-searching for a definition the enumeration already lists** — a plain typed spawn needs no file read; `find`-ing and opening it just to spawn typed burns round-trips. Read only to adopt or substitute.
 - **Relitigating a user pin** — the delta line is for transparency, not for arguing the registry back.
 
 ## Verification
 
-- [ ] Registry enumerated and matched definitions' frontmatter + body actually read before any spawn?
+- [ ] Registry enumerated, and definitions read *only* for roles being adopted or substituted (not for plain typed spawns the listing already covers)?
 - [ ] Placement (spawn / adopt / substitute) chosen for stated reasons — user pins honored, not relitigated?
 - [ ] Every substitution ports the model and carries (or names the loss of) the definition's doctrine?
 - [ ] Delta stated before invocation — would it survive "did you just ignore the plugin's settings?"
@@ -52,7 +53,7 @@ When a role runs as a named teammate with a message mailbox — not an Agent-too
 
 ## Example
 
-Asked to organize an inspection team with "specialized agents", the orchestrator correctly adopts the plugin lead's doctrine in-session (user steering live) but spawns all four teammates as `general-purpose` because one needs `Write`. The plugin definitions pin `model: opus`; the substitution silently inherits the session model — caught only by two user challenges. The fix this skill encodes: enumerate → read → spawn typed where tools suffice; substitute only the `Write`-needing role, with `model: "opus"` ported, its doctrine injected, and the swap announced.
+Asked to organize an inspection team with "specialized agents", the orchestrator correctly adopts the plugin lead's doctrine in-session (user steering live) but spawns all four teammates as `general-purpose` because one needs `Write`. The plugin definitions pin `model: opus`; the substitution silently inherits the session model — caught only by two user challenges. The fix this skill encodes: enumerate → read the lead's definition to adopt its doctrine and the `Write`-needing role's to substitute it (`model: "opus"` ported, doctrine injected, swap announced); spawn the remaining teammates typed with no file read.
 
 ---
 *Origin: session lesson (launch-inspection team, 2026-07-13) reshaped into a user-invoked workflow — provenance and registry measurements in `RATIONALE.md`.*
