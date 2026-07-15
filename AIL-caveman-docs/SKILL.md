@@ -1,7 +1,7 @@
 ---
 name: AIL-caveman-docs
-description: "Compression discipline for agent-read text — documents (handoffs, guides, runbooks) and inter-agent messages: strip filler via a load-bearing whitelist, gate by item preservation (never ratio), and keep evidence sections verbatim. Use when writing docs agents re-read, shrinking a doc corpus for token spend, or setting team message compression conventions."
-version: 0.3.0
+description: "Compression discipline for prose a future agent session will re-read — handoffs, guides, runbooks, READMEs, ADR/session notes, and inter-agent messages: strip filler via a load-bearing whitelist, gate by item preservation (never ratio), keep evidence verbatim. Use when drafting, extending, or shrinking such text — not only when explicitly asked to compress."
+version: 0.4.0
 metadata:
   provenance: AIL
 ---
@@ -12,7 +12,7 @@ Docs written for agents are **read many times but written once**, so compression
 
 ## When to Use
 
-- Writing new prose into handoffs, regression guides, runbooks, ADR notes, session records — anything agents re-read.
+- Drafting, extending, or shrinking prose in handoffs, guides, runbooks, READMEs, ADR notes, session records — anything a future agent session re-reads. Applies while writing fresh text, not only when compression is explicitly requested.
 - Asked to reduce token cost of an existing doc corpus.
 - Retrofit opportunistically: compress a doc's section when already editing it (no mass-rewrite campaigns).
 
@@ -45,6 +45,7 @@ Same whitelist, different profile — messages are read few times, but their evi
 - **Compressing the unversioned** — the loss is invisible at compression time and permanent afterward.
 - **Rewriting history** — an audit snapshot's stale numbers are evidence of what was observed, not errors to fix; annotate, don't rewrite.
 - **Touching user files** — a user's scratch note is theirs even when verbose.
+- **Mistaking cross-document duplication for filler** — restating a fact that already lives more precisely elsewhere (a code comment, another doc) isn't wordy phrasing to trim, it's a second source that will drift; link to the original instead (`write-a-rule`'s "one rule, one home", `AIL-bluf-is-a-label` for summary lines) rather than compressing the restatement in place.
 
 ## Verification
 
