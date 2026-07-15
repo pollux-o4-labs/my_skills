@@ -16,12 +16,8 @@ import re
 import shlex
 import sys
 
-NOTE = ("[worktree-cleanup-gate] `gh pr merge` 직후다 — 머지한 브랜치와 관련 워크트리 정리 요망. "
-        "워크트리는 개당 수 GB 를 문다. 정리는 감독 전담이다(규칙 06 제2조): "
-        "`git worktree list` 로 확인하고 끝난 것만 `git worktree remove <경로>`. "
-        "지금 그 워크트리 안에 서 있으면 주 체크아웃으로 cd 한 뒤 지워라 — clean 하면 "
-        "remove 가 거부 없이 성공해 이 세션의 이후 명령이 전부 깨진다. "
-        "정리하지 않을 거라면 그 이유를 한 줄로 말하라 — 침묵으로 넘기지 말 것.")
+NOTE = ("[worktree-cleanup-gate] `gh pr merge` 직후다 — 머지한 브랜치와 관련 워크트리 정리 요망 "
+        "(개당 수 GB). 정리하지 않을 거라면 그 이유를 한 줄로 말하라.")
 
 # heredoc 본문은 명령이 아니라 데이터다.
 _HEREDOC = re.compile(r"<<-?\s*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\1.*?^\s*\2\s*$", re.S | re.M)

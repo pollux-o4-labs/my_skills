@@ -1,7 +1,7 @@
 ---
 name: AIL-worktree-parallel-guard
 description: "Guard rails for verifying code inside a secondary checkout (git worktree, extra clone) and for parallelizing implementation agents across them — an editable-installed package silently imports the primary checkout, so a green suite may have tested the wrong code. Use before running tests in a worktree, spawning parallel worktree workers, or attributing a worktree-only test failure."
-version: 1.3.0
+version: 1.2.0
 metadata:
   provenance: AIL
 ---
@@ -44,18 +44,5 @@ A git worktree gives workers isolated *files*, but not an isolated *import path*
 - [ ] Zero worker commits touched a shared hot file — the conflict was prevented, not resolved after?
 - [ ] Nothing sharing a live runtime had two change-sets in flight at once?
 
-## Cleanup Summons (PostToolUse hook)
-
-Written rules don't summon themselves at cleanup time: "tidy up when done" fires at *worktree add* and never at *worktree remove*, so finished worktrees sit at multiple GB each. [hooks/worktree-cleanup-gate.sh](hooks/worktree-cleanup-gate.sh) pins the summons to the merge moment — it detects a local `gh pr merge` and emits one line asking the supervisor to clean up. It judges nothing (you just merged; you know which one) and deletes nothing — mutation stays with the supervisor.
-
-**Install** (`~/.claude/settings.json` → `hooks.PostToolUse`; see `update-config`):
-```json
-{ "matcher": "Bash",
-  "hooks": [{ "type": "command",
-    "command": "bash \"<repo>/AIL-worktree-parallel-guard/hooks/worktree-cleanup-gate.sh\"",
-    "timeout": 10 }] }
-```
-Point settings.json at the repo script (no copies to drift). Reload via `/hooks` or restart. Grounds: [docs/history/worktree-cleanup-gate.md](../docs/history/worktree-cleanup-gate.md).
-
 ---
-*Origin: a vgo supervision session (2026-07) that measured editable-install shadowing before its first parallel worktree pair, then watched both stewards (the worktree worker agents) hit — and correctly attribute — the same environment-inherent test failure. The cleanup hook came later, from 47GB of merged-but-unremoved worktrees in the same repo.*
+*Origin: a vgo supervision session (2026-07) that measured editable-install shadowing before its first parallel worktree pair, then watched both stewards (the worktree worker agents) hit — and correctly attribute — the same environment-inherent test failure.*
