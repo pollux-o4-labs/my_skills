@@ -2,7 +2,7 @@
 
 > 커밋·ADR 에 담기 어려운 경험 기록(companion log)의 거처 — `write-a-rule` "Grounds live in a companion log" 의 실체이며, `AIL-correct-is-silent` 의 history-purposed doc 예외 대상. 규칙·스킬의 근거(grounds)는 여기를 역참조한다.
 > 형식: 기록 1건당 아래 인덱스 줄 1개(BLUF) + 상세 `<slug>.md`. 같은 뿌리 사건은 한 파일에 모아 재발 횟수가 보이게 한다.
-> 인덱스 줄은 무슨 사건인지 + 확정된 결론만 담는다 — 실측 수치·폐기안 상세·곁가지 발견은 본문에 두고 인덱스에는 싣지 않는다(근거: 2026-07-16 실측, 인덱스 줄이 117~284자로 벌어져 있었고 긴 쪽엔 본문에 이미 있는 수치·별건 발견까지 중복 적재돼 있었다).
+> 인덱스 줄(BLUF) 작성 규범은 [규칙 01](../rules/01-index-line-bluf-discipline.md)을 따른다.
 
 ## 파일명 접두사 — `B-`/`G-`
 
@@ -14,3 +14,4 @@
 
 - [light-review-log](./light-review-log.md) — 약식 스킬 심사(적대 1기) 실적 장부: 5건 적립 + 사후 결함 0 도달 시 규정화 재상정, 현재 3건 — 2026-07-15
 - [B-worktree-cleanup-gate](./B-worktree-cleanup-gate.md) — 워크트리 정리 훅: 로컬 머지 판정 방식을 폐기하고 명령어 인지 + 한 줄 소환으로 확정 — 2026-07-15
+- [B-history-index-line-drift](./B-history-index-line-drift.md) — 인덱스 줄 실측 117~284자 드리프트, 규칙 01로 승격 — 2026-07-16

@@ -13,6 +13,7 @@ Claude Code, Codex, Gemini CLI 공용 커스텀 스킬 레포. 각 스킬 동작
 - **스킬 저작 규약(분량 상한·트리거 유형·AIL frontmatter·언어)**: 정본은 [skillify-session-lessons/authoring-standards.md](./skillify-session-lessons/authoring-standards.md) — 스킬 폴더와 함께 전 host 에 전파되는 위치라 CLAUDE.md 가 아닌 그곳에 둔다. 스킬 생성·수정 전 그 파일을 읽는다. 근거 원문은 `skill-refactor/RATIONALE.md`.
 - 보조 문서는 스킬 디렉토리 안에 — 루트 오염 금지
 - **경험 기록(companion log)은 [docs/history/README.md](./docs/history/README.md)** — 커밋·ADR 에 담기 어려운 근거·실적의 거처(BLUF 인덱스 + 상세 .md). 규칙·스킬의 grounds 는 여기를 역참조.
+- **레포 자체 운영 규칙은 [docs/rules/README.md](./docs/rules/README.md)** — `write-a-rule` 표준으로 작성한 my_skills 전용 규칙(문서 저작·인덱스 형식 등), grounds 는 docs/history 역참조.
 - **미완성 스킬은 origin에 올리지 않는다** — 로컬 untracked/.gitignore로 유지하고 완성·리뷰 후 커밋. untracked 스킬을 "커밋 누락"으로 단정해 대신 커밋하지 말 것(2026-07-12 AIL-prefer-incremental-over-full 오커밋 사건이 근거).
 - setup-my-skills → efficient-subagent 의존관계 있음
 - CLI 별 등록 경로와 전역 지침 파일 차이를 섞지 말고 대상 host 를 먼저 식별

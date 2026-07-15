@@ -41,12 +41,12 @@ Connectors — not modalities; each carries its own modality inside:
 - One rule = one numbered article with a title, written in complete sentences.
 - Conditions and enumerable cases go in numbered noun-phrase lists — the governing sentence above the list carries the modality; items end in a noun or "~할 것", never a full sentence.
 - Nesting depth ≤2 (article → items). Needing a third level means the rule does too much; split it.
-- Metadata per rule file: status, date, a grounds backreference (the incident, ADR, or decision that created it), and an honest enforcement note — state whether each clause is backed by a mechanical gate (validator, hook, test) or relies on reviewer judgment only; never imply a gate that doesn't exist. Register every rule file as one line in the rules index.
+- Metadata per rule file: status, date, a grounds backreference (the incident, ADR, or decision that created it), and an enforcement note (mechanical gate — validator, hook, test — or reviewer judgment only). Register every rule file as one line in the rules index.
 
 ## Creep control
 
 - **Principle first, discretion second.** State the principle and trust judgment for edge cases. Add a micro-clause only after a real incident, and cite that incident as grounds.
-- **Grounds live in a companion log.** Keep incidents in a descriptive log (a knowledge doc, one home), link rule↔incident both ways — the log entry names which rule/article it was promoted into, with a date, not just the rule naming the incident — and co-locate same-root incidents so recurrence is visible — the recurrence count is the strongest grounds.
+- **Grounds live in a companion log.** Keep incidents in a descriptive log (a knowledge doc, one home), link rule↔incident both ways — the log entry also names which rule/article it was promoted into, with a date — and co-locate same-root incidents so recurrence is visible — the recurrence count is the strongest grounds.
 - **Structural backstop beats prose.** If a validator, test, or hook can enforce the rule, build the check and shrink the prose to one line pointing at it.
 - **Measure before you set a number.** A length cap, retry count, or rotation limit is itself instruction creep if set by intuition — measure the current distribution first and cite the measurement as grounds, not a guess.
 - **Split at ~800 words** (summary style): parent file keeps the principle plus a one-line index of children; details move to child files.
@@ -65,7 +65,7 @@ Connectors — not modalities; each carries its own modality inside:
 - **Modality soup** — 필수/권장/가능 mixed in one paragraph, so the reader cannot rank clauses.
 - **Parenthetical exceptions** — "(self는 면제)" style asides that hide an override where scanners skip.
 - **Prophylactic clauses** — rules against imagined failures; wait for the incident (quick fail, quick win).
-- **Restating instead of linking** — copying a rule into CLAUDE.md "for visibility" creates a drifting second source; a numeric cap duplicated across two rule docs and quietly diverging is the textbook case.
+- **Restating instead of linking** — copying a rule into CLAUDE.md "for visibility" creates a drifting second source.
 
 ## Verification
 
@@ -73,7 +73,7 @@ Connectors — not modalities; each carries its own modality inside:
 - [ ] Every exception is a proviso attached to its clause, every follow-up a sequel?
 - [ ] Each micro-clause cites its incident, or was replaced by a code check?
 - [ ] File within word budget, metadata and index line present, no body duplicated elsewhere?
-- [ ] Enforcement note is honest (no clause implies a gate that doesn't exist), and any numeric norm cites a measurement, not a guess?
+- [ ] Enforcement note present and accurate; any numeric norm cites a measurement?
 
 ## Example
 
