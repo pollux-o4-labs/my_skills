@@ -14,4 +14,4 @@
 
 - [light-review-log](./light-review-log.md) — 약식 스킬 심사(적대 1기) 실적 장부: 5건 적립 + 사후 결함 0 도달 시 규정화 재상정, 현재 3건 — 2026-07-15
 - [B-worktree-cleanup-gate](./B-worktree-cleanup-gate.md) — 워크트리 정리 훅: 로컬 머지 판정 방식을 폐기하고 명령어 인지 + 한 줄 소환으로 확정 — 2026-07-15
-- [B-history-index-line-drift](./B-history-index-line-drift.md) — 인덱스 줄 실측 117~284자 드리프트, 규칙 01로 승격 — 2026-07-16
+- [B-history-index-line-drift](./B-history-index-line-drift.md) — 인덱스 줄 길이 드리프트 실측, 규칙 01로 승격 — 2026-07-16
