@@ -25,4 +25,3 @@
 
 - `write-a-rule` — 이 규칙 자체의 저작 표준(조문·메타·grounds 형식).
 - [docs/history/README.md](../history/README.md) — 이 규칙을 적용받는 인덱스 컨벤션의 정본 문서.
-- [docs/handoff/README.md](../handoff/README.md) — 이 규칙 위반 상태 추적의 단일 진실원(개별 항목은 여기서 재서술하지 않는다).
