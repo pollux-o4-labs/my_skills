@@ -1,2 +1,4 @@
 .playwright-mcp/
 .personal-information/
+
+__pycache__/
