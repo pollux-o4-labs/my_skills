@@ -4,7 +4,6 @@ description: "Grounds structure decisions in existing artifacts before proposing
 version: 1.1.0
 metadata:
   provenance: AIL
-  platforms: [claude-code, codex, gemini-cli]
 ---
 
 # Ground Before Structuring

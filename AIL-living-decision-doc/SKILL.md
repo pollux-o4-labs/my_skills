@@ -4,7 +4,6 @@ description: "Keeps a living decision doc during a long multi-turn task — reco
 version: 1.2.0
 metadata:
   provenance: AIL
-  platforms: [claude-code, codex, gemini-cli]
 ---
 
 # Living Decision Doc

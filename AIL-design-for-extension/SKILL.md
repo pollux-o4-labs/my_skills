@@ -3,7 +3,6 @@ name: AIL-design-for-extension
 description: When a rule or case is about to recur (roughly the third instance), make it declarative/data-driven so new cases are added by declaration or config — not by editing code or duplicating prose. Use when hardcoded if-branches or "handle X, and also Y, and also Z" lists are piling up, or when a one-off is being baked into a system core. Avoids both re-doing the same work and speculative over-abstraction.
 version: 0.1.0
 metadata:
-  platforms: [claude-code]
   provenance: AI-generated from session lessons (vector-graph-ontology, 2026-07-05)
 ---
 

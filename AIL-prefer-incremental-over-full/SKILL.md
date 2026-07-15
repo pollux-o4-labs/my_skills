@@ -3,7 +3,6 @@ name: AIL-prefer-incremental-over-full
 description: "Checks whether the system already declares a cheaper incremental or delta path before defaulting to an obviously-named bulk operation (full rebuild, reindex, reprocess, resync). Use before running or recommending a large-scope operation to fix something reported stale or incomplete, especially when acting on an inherited recommendation (handoff note, runbook, teammate)."
 version: 1.1.0
 metadata:
-  platforms: [claude-code]
   provenance: AIL
 ---
 

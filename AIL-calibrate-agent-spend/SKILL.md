@@ -3,7 +3,6 @@ name: AIL-calibrate-agent-spend
 description: "Checks that the effort level or fan-out width of a multi-agent or effort-leveled tool call is derived from the measured task size and the project's declared review policy, not left at a default. Use before passing an effort/depth/parallelism argument to a cost-scaling tool, or before spawning several parallel agents for review, audit, or research."
 version: 0.2.0
 metadata:
-  platforms: [claude-code, codex]
   provenance: AIL
 ---
 

@@ -4,7 +4,6 @@ description: "Calibrates verification depth before asserting a nontrivial inferr
 version: 1.1.0
 metadata:
   provenance: AIL
-  platforms: [claude-code, codex, gemini-cli]
 ---
 
 # Calibrate Verification Depth

@@ -3,7 +3,6 @@ name: AIL-caveman-docs
 description: "Compression discipline for agent-read text — documents (handoffs, guides, runbooks) and inter-agent messages: strip filler via a load-bearing whitelist, gate by item preservation (never ratio), and keep evidence sections verbatim. Use when writing docs agents re-read, shrinking a doc corpus for token spend, or setting team message compression conventions."
 version: 0.3.0
 metadata:
-  platforms: [claude-code, codex, gemini-cli]
   provenance: AIL
 ---
 

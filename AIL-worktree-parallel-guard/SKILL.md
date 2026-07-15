@@ -4,7 +4,6 @@ description: "Guard rails for verifying code inside a secondary checkout (git wo
 version: 1.2.0
 metadata:
   provenance: AIL
-  platforms: [claude-code, codex, gemini-cli]
 ---
 
 # Worktree Parallel Guard

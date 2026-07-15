@@ -2,8 +2,6 @@
 name: write-a-rule
 description: "Authoring standard for repository operational rules and agent policy documents — deontic wording, article-style structure, exception marking, and instruction-creep control. Use when writing or revising repo rules (docs/rules, CLAUDE.md norm sections, agent guidelines), or when rule docs show mixed obligation levels, ad-hoc exceptions, or unchecked growth."
 version: 1.2.0
-metadata:
-  platforms: [claude-code, codex, gemini-cli]
 ---
 
 # Write a Rule

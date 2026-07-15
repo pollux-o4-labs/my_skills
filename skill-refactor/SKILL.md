@@ -2,8 +2,6 @@
 name: skill-refactor
 description: "Compresses an existing skill to its load-bearing core — cutting instruction creep (description enumerations, restated rules, narrative padding) while preserving every behavioral directive. Use when a skill exceeds the authoring budgets (description >400 chars, body past the 700-word target), when touching a skill under the retrofit-on-edit policy, or when a review flags bloat."
 version: 1.2.1
-metadata:
-  platforms: [claude-code, codex, gemini-cli]
 ---
 
 # Skill Refactor

@@ -4,7 +4,6 @@ description: "Requires a small representative pilot — or a cheaper determinist
 version: 0.2.0
 metadata:
   provenance: AIL
-  platforms: [claude-code]
 ---
 
 # Pilot Before Scale

@@ -4,7 +4,6 @@ description: "Structures standing handoff docs as per-topic detail files fronted
 version: 1.1.0
 metadata:
   provenance: AIL
-  platforms: [claude-code, codex, gemini-cli]
 ---
 
 # Structured Handoff: Topic Files + List Index

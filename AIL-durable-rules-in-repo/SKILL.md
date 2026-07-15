@@ -3,7 +3,6 @@ name: AIL-durable-rules-in-repo
 description: "Routes shareable reusable rules and lessons to a git-synced canonical home (project CLAUDE.md, ADR, skills repo) instead of machine-local agent memory — and private or secret items away from shared repos. Use when saving a lesson, rule, or workflow that should outlive the current machine and session, or when about to store it only in personal memory."
 version: 1.0.0
 metadata:
-  platforms: [claude-code]
   provenance: AIL
 ---
 

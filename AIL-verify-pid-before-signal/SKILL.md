@@ -4,7 +4,6 @@ description: "Verify process identity (cmdline marker match, fail-closed) before
 version: 1.2.0
 metadata:
   provenance: AIL
-  platforms: [claude-code, codex, gemini-cli]
 ---
 
 # Verify PID Before Signal

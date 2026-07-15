@@ -3,7 +3,6 @@ name: AIL-subagent-fanout-guard
 description: Guard rails for fanning work out across multiple subagents. Use when about to spawn several parallel or background Agent calls for research, surveys, audits, or any broad multi-part task. Prevents recursive agent explosions (agents spawning agents that return "I'll wait / will report" placeholders) that silently multiply into dozens of processes, burn tokens, and trip rate limits.
 version: 1.0.0
 metadata:
-  platforms: [claude-code, codex]
   provenance: AIL (session lesson — research fan-out that ballooned into dozens of nested agents)
 ---
 

@@ -4,7 +4,6 @@ description: "Verifies a codebase's features are genuinely tested rather than me
 version: 1.1.0
 metadata:
   provenance: AIL
-  platforms: [claude-code, codex, gemini-cli]
 ---
 
 # Verify Features Against Tests

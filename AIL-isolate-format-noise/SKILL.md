@@ -3,7 +3,6 @@ name: AIL-isolate-format-noise
 description: "Proves which files in a dirty working tree are pure formatter noise before committing: re-run the formatter on the HEAD version and compare with the working copy — the only no-op proof. Use when a diff's size contradicts the known work, or before committing a tree where a formatter may have run (inherited session, long-running branch)."
 version: 0.3.0
 metadata:
-  platforms: [claude-code, codex, gemini-cli]
   provenance: AIL
 ---
 

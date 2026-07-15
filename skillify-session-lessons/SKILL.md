@@ -2,8 +2,6 @@
 name: skillify-session-lessons
 description: "Turns reusable lessons from a difficult session into a durable English canonical SKILL.md, with Korean review rendering for user approval. Use when the user asks to make a skill from lessons learned, or at session close when there were repeated failures, user corrections, or a nontrivial workflow discovery that is clearly reusable."
 version: 1.4.0
-metadata:
-  platforms: [claude-code, codex, gemini-cli]
 ---
 
 # Skillify Session Lessons

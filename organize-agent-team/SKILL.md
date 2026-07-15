@@ -3,8 +3,6 @@ name: organize-agent-team
 description: "Organize a multi-agent team from the installed agent registry instead of ad-hoc generic spawns: enumerate typed definitions (plugin agents, .claude/agents), read their model/tools pins and role doctrine, place each role deliberately, and set the team's runtime ground rules. Invoke when the user asks to organize or assemble an agent team."
 version: 0.5.0
 disable-model-invocation: true
-metadata:
-  platforms: [claude-code]
 ---
 
 # Organize Agent Team
