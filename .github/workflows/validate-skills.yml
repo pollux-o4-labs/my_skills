@@ -41,3 +41,6 @@ jobs:
             echo "ok: $name"
           done
           exit $fail
+      - name: caps stay in the standard, not copied across .md
+        shell: bash
+        run: python3 skillify-session-lessons/scripts/check_cap_duplication.py
