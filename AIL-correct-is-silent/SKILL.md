@@ -3,7 +3,7 @@ name: AIL-correct-is-silent
 description: "Keeps living documents free of inline history — a corrected artifact states only its current state; the what-moved-where-and-why belongs in commits and ADRs. Use when annotating a fix or relocation with its history ('this used to be...') outside history-purposed docs, when transition banners spread across docs, or when writing a subagent prompt that tells it to mark changes in the artifact."
 version: 1.2.0
 metadata:
-  platforms: [claude-code, codex, gemini-cli]
+  platforms: [claude-code]
   provenance: AIL
 ---
 
