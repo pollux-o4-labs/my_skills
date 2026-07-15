@@ -5,7 +5,7 @@
 #   "PostToolUse": [{ "matcher": "Bash", "hooks": [{ "type": "command",
 #     "command": "bash '<이 파일의 절대경로>'" }] }]
 #
-# 근거: docs/history/worktree-cleanup-gate.md
+# 근거: docs/history/B-worktree-cleanup-gate.md
 
 set -uo pipefail
 
