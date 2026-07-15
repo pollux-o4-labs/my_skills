@@ -6,10 +6,10 @@ export const meta = {
     { title: 'Identify', detail: 'read draft + standards; maturity, budgets, directives, scenarios, siblings' },
     { title: 'Draft', detail: 'RAW notes only: form the skill per standards, then re-identify' },
     { title: 'Probe', detail: 'unaided sonnet probes → default/non-default per directive', model: 'sonnet' },
-    { title: 'Review', detail: 'replay and adversarial attack in parallel' },
+    { title: 'Review', detail: 'replay + two adversaries (diverse lenses) in parallel' },
     { title: 'Arbitrate', detail: 'BLOCKER / CHEAP accepted — NOISE rejected with reasons' },
     { title: 'Fix & Verify', detail: 'edit-only fixer ⇄ per-item verifier, ≤2 rounds, no commit' },
-    { title: 'Re-audit', detail: 'conditional second adversary — fires on noise ≥3, exhausted loop, or unresolved items' },
+    { title: 'Re-audit', detail: 'two adversaries re-check whenever fixes were applied or risk signals present' },
     { title: 'Land', detail: 'commit, push, undraft on clean pass, verdict comment' },
   ],
 }
@@ -211,7 +211,11 @@ Mark isDefault=true when the plan exhibits the directive (derivable), false when
   log(`derivability: ${derivable.length} directives derivable from the core → cut candidates; ${nonDefault.length} retained`)
 }
 
-let verdict, fixes = [], rulings = [], accepted = [], remaining = [], rounds = 0, replay = null, adversarial = null
+let verdict, fixes = [], rulings = [], accepted = [], remaining = [], rounds = 0, replay = null, adversarial = null, adversarial2 = null
+
+// Two adversaries per attack pass — distinct lenses beat redundant identical runs.
+const LENS_A = '\nLens: attack broadly — parsing traps, unreal mechanisms, internal contradictions, karpathy conflicts.'
+const LENS_B = '\nLens: focus on sibling overlap, standards/budget compliance, and the explicit-user-override boundary.'
 
 if (nonDefault.length === 0) {
   verdict = 'REJECT' // every directive is default behavior — the skill is a no-op
@@ -219,7 +223,9 @@ if (nonDefault.length === 0) {
 } else {
   phase('Review')
   const scenarioBlock = id.replayScenarios.map((s, i) => `SCENARIO ${i + 1} [${s.kind}]: ${s.prompt}`).join('\n\n')
-  ;[replay, adversarial] = await parallel([
+  const attackPrompt = lens =>
+    `Skill under attack: ./${skill}/SKILL.md (repo root = working directory).\nStandards: ./skillify-session-lessons/authoring-standards.md.\nSiblings to check: ${id.siblings.join(', ')}.\nKnown probe result (attack vector 4 context): non-default directives = ${JSON.stringify(nonDefault.map(c => c.directive))}.${lens}`
+  ;[replay, adversarial, adversarial2] = await parallel([
     () =>
       agent(`Skill under replay: ./${skill}/SKILL.md (repo root = working directory).\n\n${scenarioBlock}`, {
         agentType: 'skill-replayer',
@@ -229,17 +235,15 @@ if (nonDefault.length === 0) {
         model: 'opus',
         effort: 'high',
       }),
-    () =>
-      agent(
-        `Skill under attack: ./${skill}/SKILL.md (repo root = working directory).\nStandards: ./skillify-session-lessons/authoring-standards.md.\nSiblings to check: ${id.siblings.join(', ')}.\nKnown probe result (attack vector 4 context): non-default directives = ${JSON.stringify(nonDefault.map(c => c.directive))}.`,
-        { agentType: 'skill-adversary', schema: FIX_SCHEMA, label: `adversarial:${skill}`, phase: 'Review', model: 'opus', effort: 'high' }
-      ),
+    () => agent(attackPrompt(LENS_A), { agentType: 'skill-adversary', schema: FIX_SCHEMA, label: `adversarial-a:${skill}`, phase: 'Review', model: 'opus', effort: 'high' }),
+    () => agent(attackPrompt(LENS_B), { agentType: 'skill-adversary', schema: FIX_SCHEMA, label: `adversarial-b:${skill}`, phase: 'Review', model: 'opus', effort: 'high' }),
   ])
 
   const order = { 'FIX-FIRST': 0, SHOULD: 1, NIT: 2 }
   fixes = [
     ...(replay ? replay.fixes.map(f => ({ ...f, source: 'replay' })) : []),
     ...(adversarial ? adversarial.fixes.map(f => ({ ...f, source: 'adversarial' })) : []),
+    ...(adversarial2 ? adversarial2.fixes.map(f => ({ ...f, source: 'adversarial' })) : []),
   ].sort((x, y) => (order[x.severity] ?? 3) - (order[y.severity] ?? 3))
 
   phase('Arbitrate')
@@ -293,16 +297,20 @@ Also check load-bearing loss: compare against the finding list's implied origina
 // Conditional re-audit — only on risk signals (rejection-overturn risk, unstable fix loop, human-pending items)
 let reaudit = null
 const noiseCount = rulings.filter(r => !r.accept).length
-if (verdict !== 'REJECT' && (noiseCount >= 3 || rounds >= 2 || remaining.length || derivable.length)) {
+// Re-audit whenever fixes were applied (problems were there) or a risk signal fired — two adversaries, distinct lenses.
+if (verdict !== 'REJECT' && (accepted.length || noiseCount >= 3 || rounds >= 2 || remaining.length || derivable.length)) {
   phase('Re-audit')
-  reaudit = await agent(
+  const reauditPrompt = lens =>
     `Second-opinion audit of ./${skill}/SKILL.md AFTER fixes were applied (repo root = working directory). Standards: ./skillify-session-lessons/authoring-standards.md.
 APPLIED FIXES (audit each is genuinely resolved, not cosmetic):\n${accepted.map(f => `- [${f.severity}] ${f.finding} → ${f.fix}`).join('\n') || '(none)'}
 ARBITER'S NOISE REJECTIONS (audit each: wrongly dismissed? NOTE especially where an applied fix changed the calculus — new concrete code can invalidate a rejection that was sound against the old abstract text):\n${rulings.filter(r => !r.accept).map(r => `- ${fixes[r.index].finding} | rejected because: ${r.reason}`).join('\n') || '(none)'}
 DERIVABILITY CUTS (content removed because a hinted probe derived it from the core — audit each cut: was anything load-bearing lost that one probe under-sampled?):\n${derivable.map(c => `- ${c.directive} | probe evidence: ${c.evidence}`).join('\n') || '(none)'}
-Also fresh-attack the newly added material for contradictions and self-sufficiency. Report only findings that survive scrutiny.`,
-    { agentType: 'skill-adversary', schema: FIX_SCHEMA, label: 're-audit', phase: 'Re-audit', model: 'opus', effort: 'high' }
-  )
+Also fresh-attack the newly added material for contradictions and self-sufficiency. Report only findings that survive scrutiny.${lens}`
+  const reaudits = (await parallel([
+    () => agent(reauditPrompt(LENS_A), { agentType: 'skill-adversary', schema: FIX_SCHEMA, label: 're-audit-a', phase: 'Re-audit', model: 'opus', effort: 'high' }),
+    () => agent(reauditPrompt(LENS_B), { agentType: 'skill-adversary', schema: FIX_SCHEMA, label: 're-audit-b', phase: 'Re-audit', model: 'opus', effort: 'high' }),
+  ])).filter(Boolean)
+  reaudit = reaudits.length ? { fixes: reaudits.flatMap(r => r.fixes) } : null
   const blockers = reaudit ? reaudit.fixes.filter(f => f.severity === 'FIX-FIRST') : []
   if (blockers.length) {
     await agent(
