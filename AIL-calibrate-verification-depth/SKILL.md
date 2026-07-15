@@ -1,7 +1,7 @@
 ---
 name: AIL-calibrate-verification-depth
 description: "Calibrates verification depth before asserting a nontrivial inferred conclusion — confidence must be earned by argument (deduction, induction, contradiction) and checking depth matched to how firm that argument is. Use before asserting conclusions that rest on assumptions, partial evidence, or memory rather than direct observation."
-version: 1.1.0
+version: 1.2.0
 metadata:
   provenance: AIL
 ---
@@ -27,3 +27,6 @@ Before you assert, propose, or decide on something reached by **inference**, tre
 
 ## 3. Repeated pushback = you inferred it
 Asked "isn't it X?" / "did you actually look?" — especially twice — you fixed it by inference. Stop arguing; open the source, nearest first.
+
+## 4. Relaying to a subordinate raises the stakes
+A claim about another party's state ("someone else already started/owns this") handed down as settled fact is the same failure at one remove — the subordinate can't independently check what you told them, and now acts on your unearned confidence instead of their own. Verify against something checkable (a log, a direct look) before it gates someone else's scope.
