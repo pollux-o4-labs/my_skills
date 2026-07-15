@@ -1,7 +1,7 @@
 ---
 name: organize-agent-team
 description: "Organize a multi-agent team from the installed agent registry instead of ad-hoc generic spawns: enumerate typed definitions (plugin agents, .claude/agents), read their model/tools pins and role doctrine, place each role deliberately, and set the team's runtime ground rules. Invoke when the user asks to organize or assemble an agent team."
-version: 0.5.0
+version: 0.5.1
 disable-model-invocation: true
 ---
 
@@ -36,7 +36,7 @@ When a role runs as a named teammate with a message mailbox — not an Agent-too
 
 - **Tool-driven type choice silently dropping model config** — picking generic for one missing tool and letting session-model inheritance apply unexamined.
 - **Assuming built-ins run on cheap models** — inheritance is the rule; unset ≠ economical.
-- **Spawning a leader agent under active user steering** — every correction then transits a lossy relay hop (user → you → lead → teammates).
+- **Spawning a leader agent under active user steering** — every correction then transits a lossy relay hop (user → you → lead → teammates). Doesn't apply once the user has explicitly asked for that layer — Procedure 1 already governs an explicit user placement; comply, don't cite this pitfall as pushback.
 - **Adopting doctrine from memory** — naming the protocol without reading the definition file.
 - **Re-searching for a definition the enumeration already lists** — a plain typed spawn needs no file read; `find`-ing and opening it just to spawn typed burns round-trips. Read only to adopt or substitute.
 - **Relitigating a user pin** — the delta line is for transparency, not for arguing the registry back.
