@@ -7,7 +7,7 @@
 계약: stdin 은 hook JSON(.tool_input.command), stdout 은 hookSpecificOutput,
       exit 은 항상 0 — exit 2 는 stderr 를 에러로 전달하고 stdout JSON 을 무시시킨다.
 
-근거: docs/history/worktree-cleanup-gate.md
+근거: docs/history/B-worktree-cleanup-gate.md
 """
 
 import json
