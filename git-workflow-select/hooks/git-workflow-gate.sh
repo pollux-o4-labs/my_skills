@@ -26,8 +26,18 @@ set -euo pipefail
 
 input="$(cat)"
 
-# python 이 없으면 판정 불가 → 정상 작업을 막지 않도록 통과.
-if ! command -v python >/dev/null 2>&1; then
+# 인터프리터 해소: python3 를 먼저 본다. 리눅스·WSL 표준 설치엔 `python3` 만
+# 있고 `python` 은 없다 — `python` 만 찾으면 그 머신에서 게이트가 통째로
+# 무력화된다(실측: exit 0 만 반환, 마커 없는 repo 도 통과).
+# 둘 다 없으면 판정 불가 → 정상 작업을 막지 않도록 통과(fail-open).
+PY=""
+for cand in python3 python; do
+  if command -v "$cand" >/dev/null 2>&1; then
+    PY="$cand"
+    break
+  fi
+done
+if [ -z "$PY" ]; then
   exit 0
 fi
 
@@ -42,7 +52,7 @@ fi
 # 판정 코어. stdin JSON 을 받아 브랜치 생성 여부를 정하고,
 # 필요 시 CLAUDE.md 마커까지 검사해 exit code 로 결과를 낸다.
 #   exit 0 = 통과, exit 2 = 차단(+stderr 메시지)
-CLAUDE_MD_PATH="$claude_md" python - "$input" <<'PYEOF'
+CLAUDE_MD_PATH="$claude_md" "$PY" - "$input" <<'PYEOF'
 import sys, os, shlex, re
 
 # 차단 메시지가 어떤 콘솔 인코딩에서도 UTF-8 바이트로 나가도록 강제.
@@ -138,11 +148,34 @@ if not os.path.isfile(claude_md):
 
 # 마커 라인(`현재 워크플로:`) 존재 여부. SKILL.md 의 "기계 판독 대상은
 # `현재 워크플로: <id>` 라인 하나" 규율과 일치.
-try:
-    with open(claude_md, "r", encoding="utf-8", errors="replace") as f:
-        text = f.read()
-except OSError:
+#
+# `@경로` import 를 한 단계 따라간다 — Claude Code 는 CLAUDE.md 가 `@AGENTS.md`
+# 한 줄로 본문을 위임하는 형태를 지원하고, 그때 마커는 피대상 파일에 있다.
+# 안 따라가면 정상 설정된 repo 를 차단한다(실측: vector-graph-ontology 는
+# CLAUDE.md 가 `@AGENTS.md` 뿐이고 마커는 AGENTS.md 에 있어 오탐 차단됨).
+def _read(path):
+    try:
+        with open(path, "r", encoding="utf-8", errors="replace") as f:
+            return f.read()
+    except OSError:
+        return None
+
+text = _read(claude_md)
+if text is None:
     sys.exit(0)  # 읽기 실패 시 정상 작업 우선
+
+if "현재 워크플로:" not in text:
+    base = os.path.dirname(os.path.abspath(claude_md))
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("@") or len(line) < 2:
+            continue
+        target = os.path.expanduser(line[1:].strip())
+        if not os.path.isabs(target):
+            target = os.path.join(base, target)
+        imported = _read(target)
+        if imported and "현재 워크플로:" in imported:
+            sys.exit(0)
 
 if "현재 워크플로:" in text:
     sys.exit(0)
