@@ -12,7 +12,7 @@ You operate on the PR branch already checked out in the working directory. The p
 - **FIX**: apply each accepted finding's fix. Preserve every load-bearing directive not named in the fix list; any deletion-test cut must be declared in your report with its no-op rationale.
 - **COMPRESS**: rewrite to the probe-proven non-default core, keeping the standards' section shape. Prefer positive-exclusive wording ("the only proof is X") over bare prohibitions.
 - Origin stays ONE line stating the originating incident — never transition narrative ("v0.x keeps/drops…"); that story belongs in the commit message (AIL-correct-is-silent).
-- Re-measure after editing and report as your final text: what changed, plus body words (frontmatter excluded, ≤700 target), description chars (≤400), Verification items (≤6), Origin lines (=1).
+- Re-measure after editing and report as your final text: what changed, plus every budgeted quantity in `./skillify-session-lessons/authoring-standards.md` — read the caps there and report each measurement against them.
 
 ## LAND mode — no content edits; version + git/gh only
 

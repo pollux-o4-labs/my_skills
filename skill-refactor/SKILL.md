@@ -1,7 +1,7 @@
 ---
 name: skill-refactor
-description: "Compresses an existing skill to its load-bearing core — cutting instruction creep (description enumerations, restated rules, narrative padding) while preserving every behavioral directive. Use when a skill exceeds the authoring budgets (description >400 chars, body past the 700-word target), when touching a skill under the retrofit-on-edit policy, or when a review flags bloat."
-version: 1.2.1
+description: "Compresses an existing skill to its load-bearing core — cutting instruction creep (description enumerations, restated rules, narrative padding) while preserving every behavioral directive. Use when a skill exceeds the authoring budgets, when touching a skill under the retrofit-on-edit policy, or when a review flags bloat."
+version: 1.3.0
 ---
 
 # Skill Refactor
@@ -10,7 +10,7 @@ Every skill description is loaded into every session's prompt, and every body wo
 
 ## When to Use
 
-- A skill exceeds the budgets in `skillify-session-lessons/authoring-standards.md` (description >400 chars; body past the 700-word target — 1,000 is the review threshold).
+- A skill exceeds the budgets in `skillify-session-lessons/authoring-standards.md`.
 - You are editing a skill for another reason — the retrofit-on-edit policy says bring it into caps in the same pass.
 - A reviewer or the user flags a skill as bloated.
 
@@ -36,7 +36,7 @@ Every skill description is loaded into every session's prompt, and every body wo
 
 - **Cutting the edge case that taught the lesson** — the skill becomes advice nobody can apply.
 - **Over-trimming the description** until it loses discriminability from sibling skills.
-- **Treating the soft target as a hard cap** — mangling a load-bearing example to hit 700; the review threshold is 1,000.
+- **Treating the soft target as a hard cap** — mangling a load-bearing example to hit the word target when the standard sets a higher review threshold.
 - **Silent behavior change** smuggled in as compression.
 
 ## Verification
