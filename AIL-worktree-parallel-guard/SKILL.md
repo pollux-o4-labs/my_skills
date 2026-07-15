@@ -55,7 +55,7 @@ Written rules don't summon themselves at cleanup time: "tidy up when done" fires
     "command": "bash \"<repo>/AIL-worktree-parallel-guard/hooks/worktree-cleanup-gate.sh\"",
     "timeout": 10 }] }
 ```
-Point settings.json at the repo script (no copies to drift). Reload via `/hooks` or restart.
+Point settings.json at the repo script (no copies to drift). Reload via `/hooks` or restart. Grounds: [docs/history/worktree-cleanup-gate.md](../docs/history/worktree-cleanup-gate.md).
 
 ---
 *Origin: a vgo supervision session (2026-07) that measured editable-install shadowing before its first parallel worktree pair, then watched both stewards (the worktree worker agents) hit — and correctly attribute — the same environment-inherent test failure. The cleanup hook came later, from 47GB of merged-but-unremoved worktrees in the same repo.*
