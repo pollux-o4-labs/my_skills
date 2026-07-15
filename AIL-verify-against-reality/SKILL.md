@@ -1,10 +1,9 @@
 ---
 name: AIL-verify-against-reality
 description: "Checks surprising verification results against the real execution path — stale intermediate layers and your own command or measurement — before re-debugging target code. Use when a fix looks correct but reality is unchanged, tests pass while reality fails, a rebuild shows no effect, a result looks suspicious, or you're about to cite a measured number in a commit message or report."
-version: 1.6.0
+version: 1.7.0
 metadata:
   provenance: AIL
-  platforms: [claude-code, codex, gemini-cli]
 ---
 
 # Verify Against Reality
