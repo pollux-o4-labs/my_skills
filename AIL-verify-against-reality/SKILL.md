@@ -1,7 +1,7 @@
 ---
 name: AIL-verify-against-reality
 description: "Checks surprising verification results against the real execution path — stale intermediate layers and your own command or measurement — before re-debugging target code. Use when a fix looks correct but reality is unchanged, tests pass while reality fails, a rebuild shows no effect, a result looks suspicious, or you're about to cite a measured number in a commit message or report."
-version: 1.5.0
+version: 1.6.0
 metadata:
   provenance: AIL
   platforms: [claude-code, codex, gemini-cli]
@@ -39,4 +39,4 @@ If a fix works in code and tests but not in reality, the bug is **usually not in
 - **Citing a pre-edit measurement**: true when measured, stale when committed — a commit message said 949w, the final file held 955w. Measure, then write, nothing in between.
 
 ---
-*Origin: frontend sessions where "fixed but reality unchanged" kept tracing to hidden staleness (cache, double divergence, version shadow), and a supervision session where a false exit-0 harness — not the code — was the bug.*
+*Origin: frontend sessions where "fixed but reality unchanged" kept tracing to hidden staleness (cache, double divergence, version shadow), a supervision session where a false exit-0 harness — not the code — was the bug, and a review session where a commit cited a pre-edit word count (949 vs the final 955).*
