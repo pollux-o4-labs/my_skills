@@ -19,7 +19,7 @@ Discriminator: does the user know *when* to invoke (→ user-invoked) or must th
 
 ## AIL skills (session-lesson provenance)
 
-- Name prefix `AIL-`; frontmatter `version` (semver, bump on every edit), `metadata.provenance: AIL`, `metadata.platforms`.
+- Name prefix `AIL-`; frontmatter `version` (semver, bump on every edit), `metadata.provenance: AIL`. (No `metadata.platforms` — nothing consumes it; sync is by provenance + manifest. Strip it on edit; don't add it.)
 - Section shape: `When to Use → Procedure → Pitfalls → Verification`, at least one concrete example, closing one-line `*Origin:*`.
 - Replay before registration: original case, ≥1 analogue from another domain, and ≥1 boundary case where the skill's advice must NOT apply — boundary replays catch misleads, not just misses (2026-07-13, AIL-prefer-incremental-over-full 검증에서 MISLEADS 결함 적발 근거).
 - Standard boundary scenario — **explicit user override**: verify the draft complies (with a one-line transparency delta) when the user explicitly instructs against the skill's rule; absolutist wording that reads as outranking the user failed this twice in a row (2026-07-13, organize-agent-team · AIL-caveman-docs).
