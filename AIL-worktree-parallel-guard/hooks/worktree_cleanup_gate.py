@@ -17,7 +17,8 @@ import shlex
 import sys
 
 NOTE = ("[worktree-cleanup-gate] `gh pr merge` 직후다 — 머지한 브랜치와 관련 워크트리 정리 요망 "
-        "(개당 수 GB). 정리하지 않을 거라면 그 이유를 한 줄로 말하라.")
+        "(용량은 repo 마다 다르다 — 무거운 repo 는 개당 수 GB, 경량 repo 는 수백 KB. 실제 크기 보고 판단). "
+        "정리하지 않을 거라면 그 이유를 한 줄로 말하라.")
 
 # heredoc 본문은 명령이 아니라 데이터다.
 _HEREDOC = re.compile(r"<<-?\s*(['\"]?)([A-Za-z_][A-Za-z0-9_]*)\1.*?^\s*\2\s*$", re.S | re.M)
