@@ -1,4 +1,4 @@
-@~/.claude/skills/karpathy-guidelines/SKILL.md
+@~/.claude/CLAUDE.md
 @~/.claude/skills/AIL-calibrate-verification-depth/SKILL.md
 
 # my_skills
