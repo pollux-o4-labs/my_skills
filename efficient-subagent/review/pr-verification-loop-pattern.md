@@ -1,7 +1,7 @@
 # Review: PR 검증 루프 패턴 — root 공유 vs worktree isolation
 
 > 작성 배경: 2026-05-22, build/torch-cuda-index 세션에서 발견.
-> PR #198~#202 전부 worktree 안에서 만들어져 사용자이 매번 `gh pr checkout` 필요 → 손 부담.
+> PR #198~#202 전부 worktree 안에서 만들어져 사용자가 매번 `gh pr checkout` 필요 → 손 부담.
 > 사용자 결론 + 트레이드오프 기반 정리. 본 파일은 SKILL.md 반영 전 review draft.
 
 ---
@@ -11,7 +11,7 @@
 `isolation: "worktree"` 를 기본값처럼 박으면:
 
 - sub-agent 가 별도 worktree 에서 branch 를 체크아웃 → 사용자 root 에서 같은 branch 못 잡음
-- `gh pr checkout <N>` 을 사용자이 직접 실행해야 검증 가능
+- `gh pr checkout <N>` 을 사용자가 직접 실행해야 검증 가능
 - 봇 띄운 채로 PR 검증하려면 root 에 두 번 branch switch 발생 → 봇 재기동 필요
 
 ---
@@ -110,7 +110,7 @@ SKILL.md 의 `## Model selection` 섹션 아래에 `## Worktree isolation 기준
 
 - 동시 multi-branch 작업 (물리 파일 충돌 위험)
 - 대량 삭제·rename — rollback 필요
-- 사용자이 봇 실행 중이 아니고 격리 우선 선택
+- 사용자가 봇 실행 중이 아니고 격리 우선 선택
 
 기본 패턴: `git switch -c <branch>` 후 root 에서 작업.
 branch switch 시 사용자에게 한 줄 알림 (`봇 떠있으면 재기동 필요`).
