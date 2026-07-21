@@ -2,8 +2,8 @@
 
 > 작성 배경: 2026-05-22, build/torch-cuda-index 세션에서 확정.
 > ADR-0011 Rev1~7 (7 amendment PR) + GPU 진단 #199~#202 (4 시행착오 PR) 회고.
-> main commit history 오염 + 사장이 회귀 발견자 되는 패턴 직접 차단 목적.
-> 사장 확정 사항 기반 정리. 본 파일은 SKILL.md 반영 전 review draft.
+> main commit history 오염 + 사용자이 회귀 발견자 되는 패턴 직접 차단 목적.
+> 사용자 확정 사항 기반 정리. 본 파일은 SKILL.md 반영 전 review draft.
 
 ---
 
@@ -13,7 +13,7 @@
 
 - main commit history 에 `fix: rev1`, `fix: rev2`, `fix: rev3` ... 누적 → 맥락 없이 더러워짐
 - 하나 고치면 다른 거 망가지는 연쇄 회귀 발생
-- 사장(운영자)이 회귀 발견자가 되는 패턴 반복 (CLAUDE.md 작업 규칙 12번 근본 동기)
+- 사용자(운영자)이 회귀 발견자가 되는 패턴 반복 (CLAUDE.md 작업 규칙 12번 근본 동기)
 - ADR-0011: 7개 amendment PR 이 main 에 낱개 squash → "ClickUp 알람 통합" 한 줄 기록 불가
 - GPU 진단: 4개 시행착오 PR 이 main 기록에 그대로 남음
 
@@ -66,7 +66,7 @@ middle-merge (영구, supervisor root 공유)
 
 ---
 
-## 사장(supervisor) 검증 단위
+## 사용자(supervisor) 검증 단위
 
 - sub-branch 마다 supervisor 검증 X. sub-agent 자체 test (pytest 등) 로 minimal 통과만 확인.
 - **integration/* 의 통합 결과를 supervisor 가 한 번에 검증** (회귀 + 신규 기능). middle-merge 머지 게이트.
@@ -92,12 +92,12 @@ middle-merge (영구, supervisor root 공유)
 
 ## main 머지 게이트 (체크리스트)
 
-middle-merge → main squash 전 사장이 직접 확인:
+middle-merge → main squash 전 사용자이 직접 확인:
 
 - [ ] 실 운영 Discord 서버에서 신규 기능 정상 작동
 - [ ] 기존 기능 회귀 없음 (봇 재기동 후 기본 흐름 확인)
 - [ ] `mise run prompt-eval` PASS (Claude prompt 영향 PR 한정)
-- [ ] 위 3개 통과 시 사장이 명시 "머지 OK" — 에이전트 단독 판단 X
+- [ ] 위 3개 통과 시 사용자이 명시 "머지 OK" — 에이전트 단독 판단 X
 
 ---
 
@@ -105,7 +105,7 @@ middle-merge → main squash 전 사장이 직접 확인:
 
 강제 금지 X. 단, sub-agent 가 cross-cutting 가능성 감지 시 아래 알림 템플릿 사용 후 동의 받기.
 
-**부작용 알림 템플릿 (sub-agent → 사장)**:
+**부작용 알림 템플릿 (sub-agent → 사용자)**:
 
 ```
 이 작업은 docs + code 양쪽에 걸쳐 있어 cross-cutting 가능성 있음.
@@ -183,4 +183,4 @@ main 직접 PR 은 **hotfix (긴급, 단발) 만** 예외.
 
 ---
 
-_이 파일은 review draft — 사장 검토 후 SKILL.md 반영 여부 결정._
+_이 파일은 review draft — 사용자 검토 후 SKILL.md 반영 여부 결정._

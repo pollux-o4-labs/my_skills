@@ -44,14 +44,14 @@ supervisor 검증 영역 PR 발생 시 cwd 잠깐 이동 = 자연 — 두 줄은
 
 ### 4 layer 검증 chain (PR 흐름)
 
-원 작업자 sub-agent 의 PR 을 main supervisor 가 받으면 **즉시 사장에게 보내지 말 것**. code review sub-agent 위임 후 결과 종합 → 사장 검증 게이트.
+원 작업자 sub-agent 의 PR 을 main supervisor 가 받으면 **즉시 사용자에게 보내지 말 것**. code review sub-agent 위임 후 결과 종합 → 사용자 검증 게이트.
 
 | Layer | 주체 | 책임 |
 |---|---|---|
 | 1 | 원 작업자 sub-agent | 코드 변경 + 자체 test + PR 생성 |
 | 2 | code review sub-agent | PR diff 객관 review — 보고와 실 변경 일치, scope, 로직, 부작용 점검 |
-| 3 | main supervisor | review 결과 종합 + 사장 보고 |
-| 4 | 사장 | 운영 실측 (cwd 이동 + 시나리오 확인) → 머지 |
+| 3 | main supervisor | review 결과 종합 + 사용자 보고 |
+| 4 | 사용자 | 운영 실측 (cwd 이동 + 시나리오 확인) → 머지 |
 
 code review 위임 prompt 예시:
 - 입력: PR 번호 또는 branch 이름
@@ -88,7 +88,7 @@ main
      └─ fix/<topic>         ← root 공유. 단순 1 PR 직속 (integration 우회)
 ```
 
-### 사장(supervisor) 검증 단위
+### 사용자(supervisor) 검증 단위
 
 - sub-branch 마다 supervisor 검증 X. sub-agent 자체 test 로 minimal 통과만 확인.
 - **integration/* 통합 결과를 supervisor 가 한 번에 검증** (회귀 + 신규 기능). middle-merge 머지 게이트.
@@ -145,7 +145,7 @@ issue 발행 시 main supervisor 가 자동으로 middle-merge 하위 branch 를
 | 단순 1 PR 예상 | `fix/<issue-topic>` 또는 `fix/<issue-N>` 예: `fix/123-emoji-encoding` | middle-merge |
 
 흐름:
-1. issue 발행 (사장 또는 AI)
+1. issue 발행 (사용자 또는 AI)
 2. main supervisor 가 위 패턴으로 branch 생성 + push (또는 local 만)
 3. sub-agent 발사 시 그 branch 를 base 로 박음. sub-branch (`<type>/<topic>`) 는 그 안에서 만듦
 4. sub-agent PR target = issue branch (main X, middle-merge X 도 X)
