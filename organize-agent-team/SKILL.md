@@ -1,7 +1,7 @@
 ---
 name: organize-agent-team
-description: "Organize a multi-agent team from the installed agent registry instead of ad-hoc generic spawns: enumerate typed definitions (plugin agents, .claude/agents), read their model/tools pins and role doctrine, place each role deliberately, and set the team's runtime ground rules. Invoke when the user asks to organize or assemble an agent team."
-version: 0.5.0
+description: "Organize a multi-agent team from the installed agent registry instead of ad-hoc generic spawns: enumerate typed definitions, read their model/tools pins and role doctrine, place each role deliberately, and set the team's runtime ground rules. Invoke when the user asks to organize or assemble an agent team."
+version: 0.6.0
 disable-model-invocation: true
 ---
 
@@ -15,13 +15,13 @@ A registered agent type (plugin agent, `.claude/agents` entry) is **configuratio
 
 1. **Honor user pins first.** An explicit user placement or model instruction supersedes registry pins — state the delta once ("plugin pins opus, you chose sonnet") and comply; skip the steps below for roles the user has already decided.
 2. **Enumerate before composing.** List available agent types *and* plugin commands; if a packaged command already covers the requested workflow (e.g. an installed `/team-feature`), propose or use it instead of hand-composing. `general-purpose` is the fallback, not the starting point.
-3. **Read the definition only when placement needs its body or model.** The registry enumeration already surfaces each type's name, tools, and role summary — enough to spawn it typed, since a typed spawn carries the pinned model automatically without your knowing its value. Open the file only to *adopt* its doctrine in-session or to *substitute* a generic (porting the model, injecting the body). Don't re-search the filesystem for a definition the listing already covers.
+3. **Read the definition only when placement needs its body or model.** The registry enumeration already surfaces each type's name, tools, and role summary — enough to spawn it typed, since a typed spawn carries its pinned model automatically without your knowing its value; `efficient-subagent`'s "always pass `model`" rule governs the generic/Agent-tool case, not this one. Open the file only to *adopt* its doctrine in-session or to *substitute* a generic (porting the model, injecting the body). Don't re-search the filesystem for a definition the listing already covers.
 4. **Place each role deliberately** (three-way):
    - **Spawn the typed agent** when its toolset suffices and the role is self-contained: user is away, multiple teams run, or the role's chatter would pollute the main context.
    - **Adopt its doctrine in-session** — at most one role, the one at the user interface (typically the lead); steering need wins any tie with the spawn criteria. Follow its protocol — you are not a relay; translate steering into directives.
    - **Substitute a generic type** for the gapped role only (e.g., the typed agent lacks a needed tool); the rest still spawn typed. Port the pinned model via the `model` parameter and inject the definition's body doctrine into the substitute's prompt; anything unportable (a pinned effort, a tool restriction) is named in the delta.
 5. **Announce before spawning**: for substitutions, one line stating which definition, what you kept, what you changed and why; otherwise one line naming the definition used.
-6. **No definition matches** → assign tiers per `AIL-subagent-fanout-guard`'s model table (the one home for that rule).
+6. **No definition matches** → assign tiers per the model table in `efficient-subagent`.
 
 ## Team Runtime (messaging-based teammates)
 
@@ -36,18 +36,14 @@ When a role runs as a named teammate with a message mailbox — not an Agent-too
 
 - **Tool-driven type choice silently dropping model config** — picking generic for one missing tool and letting session-model inheritance apply unexamined.
 - **Assuming built-ins run on cheap models** — inheritance is the rule; unset ≠ economical.
-- **Spawning a leader agent under active user steering** — every correction then transits a lossy relay hop (user → you → lead → teammates).
+- **Spawning a leader agent under active user steering** — every correction then transits a lossy relay hop (user → you → lead → teammates); if the user explicitly asked for that layer, Procedure 1 already governs — comply, and don't relitigate the pin afterward (the delta line is for transparency, not for arguing the registry back).
 - **Adopting doctrine from memory** — naming the protocol without reading the definition file.
-- **Re-searching for a definition the enumeration already lists** — a plain typed spawn needs no file read; `find`-ing and opening it just to spawn typed burns round-trips. Read only to adopt or substitute.
-- **Relitigating a user pin** — the delta line is for transparency, not for arguing the registry back.
 
 ## Verification
 
-- [ ] Registry enumerated, and definitions read *only* for roles being adopted or substituted (not for plain typed spawns the listing already covers)?
-- [ ] Placement (spawn / adopt / substitute) chosen for stated reasons — user pins honored, not relitigated?
-- [ ] Every substitution ports the model and carries (or names the loss of) the definition's doctrine?
-- [ ] Delta stated before invocation — would it survive "did you just ignore the plugin's settings?"
-- [ ] Every messaging-teammate prompt ends with the SendMessage-before-exit clause?
+- [ ] Would it survive "did you check the registry, or just default to generic"? — every non-typed spawn traces to a stated gap, not habit.
+- [ ] Would it survive "did you just ignore the plugin's settings"? — every substitution's delta (model ported, doctrine carried or its loss named) was stated before invocation.
+- [ ] Would it survive "why didn't you use what they specified"? — user pins were honored, not relitigated.
 
 ## Example
 
