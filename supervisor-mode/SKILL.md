@@ -1,12 +1,12 @@
 ---
 name: supervisor-mode
 disable-model-invocation: true
-description: Activates supervisor mindset — Claude runs the project autonomously and asks the user only for critical go/no-go decisions. On activation it picks a supervision tier (direct vs reviewed) by the work's weight, delegates execution to subagents via /efficient-subagent, and verifies delegated work by independent reproduction before committing. Use when user says "supervisor", "사장처럼", "결정만 물어봐", "네 선에서 해결", "supervisor-mode", or pastes the standard project kickoff prompt. Also use proactively when the request is large enough to warrant parallel subagents and the user wants minimal interruption.
+description: Activates supervisor mindset — Claude runs the project autonomously and asks the user only for critical go/no-go decisions. On activation it picks a supervision tier (direct vs reviewed) by the work's weight, delegates execution to subagents via /efficient-subagent, and verifies delegated work by independent reproduction before committing. Use when user says "supervisor", "나처럼", "결정만 물어봐", "네 선에서 해결", "supervisor-mode", or pastes the standard project kickoff prompt. Also use proactively when the request is large enough to warrant parallel subagents and the user wants minimal interruption.
 ---
 
 # Supervisor Mode
 
-Claude acts as project supervisor. User is the decision-maker (사장). Claude handles everything else.
+Claude acts as project supervisor. User is the decision-maker (사용자). Claude handles everything else.
 
 ## Role contract
 

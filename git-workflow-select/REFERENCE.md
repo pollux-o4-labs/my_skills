@@ -63,14 +63,14 @@ gh pr merge <N> --squash --delete-branch   # 하루 내 통합
 |---|---|
 | github-flow → middle-merge | `git switch -c middle-merge main`. 이후 `integration/<type>` 부터 시작 |
 | github-flow → git-flow | `git switch -c develop main`. 이후 feature 는 develop 기점 |
-| middle-merge → github-flow | 열린 `integration/*`·sub-branch 정리(머지 or 삭제). `middle-merge` 브랜치 보존 여부는 사장 판단. 이후 `feature/*` 는 main 기점 |
+| middle-merge → github-flow | 열린 `integration/*`·sub-branch 정리(머지 or 삭제). `middle-merge` 브랜치 보존 여부는 사용자 판단. 이후 `feature/*` 는 main 기점 |
 | git-flow → github-flow | `develop` 을 main 에 머지 후 develop 보존/삭제 결정. 이후 feature 는 main 기점 |
 | trunk-based → 기타 | trunk 는 그냥 main 이므로 위 main 기점 규칙 그대로 적용 |
 
 **공통 원칙**:
 - 표에 없는 조합은 **main 기점 공통 원칙** 적용 — 신 워크플로의 초기 브랜치를 main 기점으로 새로 세팅.
 - 열린 PR 있으면 전환 전 머지·클로즈. 안 그러면 target 브랜치 재지정 필요.
-- 영구 브랜치(develop, middle-merge) 삭제는 되돌리기 비싸니 사장 명시 확인 후.
+- 영구 브랜치(develop, middle-merge) 삭제는 되돌리기 비싸니 사용자 명시 확인 후.
 - 전환 후 첫 브랜치 생성 시 새 워크플로 규칙 준수 확인.
 
 ## CLAUDE.md 마커 템플릿
