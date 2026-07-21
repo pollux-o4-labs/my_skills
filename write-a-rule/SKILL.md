@@ -41,7 +41,7 @@ Connectors — not modalities; each carries its own modality inside:
 - One rule = one numbered article with a title, written in complete sentences.
 - Conditions and enumerable cases go in numbered noun-phrase lists — the governing sentence above the list carries the modality; items end in a noun or "~할 것", never a full sentence.
 - Nesting depth ≤2 (article → items). Needing a third level means the rule does too much; split it.
-- Metadata per rule file: status, date, a grounds backreference (the incident, ADR, or decision that created it), and an enforcement note (mechanical gate — validator, hook, test — or reviewer judgment only). Register every rule file as one line in the rules index.
+- Metadata per rule file: status, a grounds backreference (the incident, ADR, or decision that created it), and an enforcement note (mechanical gate — validator, hook, test — or reviewer judgment only). Register every rule file as one line in the rules index. No adoption or amendment date — version control holds it, and a hand-copied one goes false with nothing to flag it (`AIL-machine-knowable-rots`).
 
 ## Creep control
 
