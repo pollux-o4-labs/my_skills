@@ -130,43 +130,28 @@ link_host() {   # symlink-based host (claude, codex)
   done <<< "$WANTED"
 }
 
-copy_host() {   # gemini: physical copies
-  local dest="$1" src_root="$2"
-  [ -d "$dest" ] || run "mkdir -p '$dest'"
-  if [ "$PRUNE_MIRROR" = 1 ]; then
-    for entry in "$dest"/*/; do
-      [ -d "$entry" ] || continue
-      local name; name="$(basename "$entry")"
-      grep -qx "$name" <<< "$WANTED" || { echo "    prune (not in source): $name"; run "rm -rf '$entry'"; }
-    done
-  fi
-  while IFS= read -r name; do
-    [ -n "$name" ] || continue
-    local target="$src_root/$name" dst="$dest/$name"
-    [ -e "$target" ] || { echo "    skip $name: source missing"; continue; }
-    if copy_if_missing "$name" && [ -e "$dst" ]; then continue; fi
-    echo "    + copy $name"; run "rm -rf '$dst'; cp -RL '$target' '$dst'"
-  done <<< "$WANTED"
-}
-
 WANTED="$(wanted_names)"
 COUNT="$(grep -c . <<< "$WANTED" || true)"
 
 process() {
   local name="$1" dest="$2" src="$3" mode="$4"
   [ "$HOST" = all ] || [ "$HOST" = "$name" ] || return 0
-  # gemini/codex: only refresh if the host's own skills dir already exists
-  # (don't spin up a host that isn't installed). claude hub is always managed.
   if [ "$name" != claude ] && [ ! -d "$dest" ]; then return 0; fi
   echo "==> [$name/$mode] $dest  (<= $src, $COUNT skills)"
-  case "$mode" in
-    link) link_host "$dest" "$src" ;;
-    copy) copy_host "$dest" "$src" ;;
-  esac
+  link_host "$dest" "$src"
 }
 
-process claude "$HOME_DIR/.claude/skills"  "$REPO_ROOT"               link
-process codex  "$HOME_DIR/.codex/skills"   "$HOME_DIR/.claude/skills" link
-process gemini "$HOME_DIR/.gemini/skills"  "$HOME_DIR/.claude/skills" copy
+process claude "$HOME_DIR/.claude/skills" "$REPO_ROOT"               link
+process codex  "$HOME_DIR/.codex/skills"  "$HOME_DIR/.claude/skills" link
+
+if [ "$HOST" = "all" ] || [ "$HOST" = "gemini" ]; then
+  GEMINI_ARGS=()
+  [ ${#ONLY[@]} -gt 0 ] && GEMINI_ARGS+=(--only "$(IFS=,; echo "${ONLY[*]}")")
+  [ "$PRUNE_MIRROR" = 1 ] && GEMINI_ARGS+=(--prune-mirror)
+  [ "$DRY" = 1 ] && GEMINI_ARGS+=(--dry-run)
+  "$SCRIPT_DIR/sync-gemini.sh" "${GEMINI_ARGS[@]}"
+fi
 
 echo "sync-skills: done."
+
+
