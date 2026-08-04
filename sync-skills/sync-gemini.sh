@@ -1,44 +1,12 @@
 #!/usr/bin/env bash
-# sync-gemini.sh — Dedicated script to sync skills into Gemini / agy CLI paths.
-#
-# Gemini (agy) requires physical copies (not symlinks/junctions).
-# Source of truth for active skills: ~/.claude/skills (curated hub) + repo skills as fallback.
-#
-# Dests (only synced if parent dir exists):
-#   ~/.gemini/skills
-#   ~/.gemini/antigravity-cli/skills
-#   ~/.gemini/config/skills
+# sync-gemini.sh — Dedicated skill synchronization for Gemini / agy CLI paths.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(dirname "$SCRIPT_DIR")"
-HOME_DIR="${HOME}"
-SRC_ROOT="${HOME_DIR}/.claude/skills"
+source "$SCRIPT_DIR/common.sh"
+parse_args "$@"
 
-DRY=0
-PRUNE_MIRROR=0
-VERBOSE=0
-ONLY=()
-
-while [ $# -gt 0 ]; do
-  case "$1" in
-    --only) IFS=',' read -ra parts <<< "$2"; for p in "${parts[@]}"; do p="$(echo "$p" | xargs)"; [ -n "$p" ] && ONLY+=("$p"); done; shift 2 ;;
-    --prune-mirror) PRUNE_MIRROR=1; shift ;;
-    --verbose|-v) VERBOSE=1; shift ;;
-    --dry-run) DRY=1; shift ;;
-    -h|--help) echo "Usage: sync-gemini.sh [--only <name>] [--prune-mirror] [--verbose] [--dry-run]"; exit 0 ;;
-    *) echo "unknown arg: $1" >&2; exit 2 ;;
-  esac
-done
-
-NOT_SKILLS=(.git .github .claude .playwright-mcp .system review sync-skills docs node_modules md-ebook show-me)
-COPY_ONLY_IF_MISSING=(md2ebook)
-
-is_not_skill()   { local n="$1"; for x in "${NOT_SKILLS[@]}"; do [ "$n" = "$x" ] && return 0; done; return 1; }
-copy_if_missing(){ local n="$1"; for x in "${COPY_ONLY_IF_MISSING[@]}"; do [ "$n" = "$x" ] && return 0; done; return 1; }
-run() { if [ "$DRY" = 1 ]; then echo "    [dry] $*"; else eval "$@"; fi; }
-
-# Collect all valid skill names from ~/.claude/skills and REPO_ROOT
+# Collect valid skill names from ~/.claude/skills and REPO_ROOT
 gemini_wanted="$(
   {
     if [ -d "$SRC_ROOT" ]; then
@@ -65,10 +33,8 @@ fi
 SKILL_COUNT="$(grep -c . <<< "$gemini_wanted" || true)"
 
 sync_dir() {
-  local dest="$1"
-  [ -d "$dest" ] || run "mkdir -p '$dest'"
-
-  local copy_count=0
+  local dest="$1" copy_count=0
+  run "mkdir -p '$dest'"
 
   if [ "$PRUNE_MIRROR" = 1 ]; then
     for entry in "$dest"/*/; do
