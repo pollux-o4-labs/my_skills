@@ -1,5 +1,7 @@
 # B-worktree-cleanup-gate — 설계 근거
 
+> **BLUF:** 워크트리 정리 훅의 설계 근거와 폐기한 판정 방식에 관한 사항.
+
 2026-07-15. `AIL-worktree-parallel-guard/hooks/` 훅의 grounds. 훅 주석·SKILL.md 는 현재 상태만 말하고, 왜 그 형태인지는 여기를 참조한다.
 
 ## 문제: 규칙이 아니라 소환 시점이 없었다

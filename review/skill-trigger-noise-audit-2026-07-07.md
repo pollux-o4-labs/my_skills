@@ -1,5 +1,7 @@
 # Skill Trigger Noise Audit — 2026-07-07
 
+> **BLUF:** 자동 트리거 지향 스킬의 트리거 잡음 감사 기록.
+
 This audit records positive and negative trigger examples for automatic-trigger-oriented skills. It is a review aid only; it does not change skill behavior by itself.
 
 ## Noise Criteria

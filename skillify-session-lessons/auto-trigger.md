@@ -1,5 +1,7 @@
 # 자동 트리거 — 제안 A 적용됨 (2026-07-02, 크로스-host 정합 2026-07-13)
 
+> **BLUF:** 세션 종료 게이트 훅의 자동 등록 방식과 적용 상태에 관한 사항.
+
 > 상태: **적용 + 크로스-host 자동 등록**. Stop 훅 등록을 수동에서 부트스트랩 자동으로 전환.
 >
 > - 등록기 `hooks/register-hook.mjs` (단일 node, 멱등)를 `sync-skills/install.sh`·`install.ps1`이 sync 직후 호출 → Windows·WSL 각 머신에서 `~/.claude/settings.json` Stop 훅에 게이트를 병합(기존 사운드 훅·기타 설정 보존, timeout 15s).

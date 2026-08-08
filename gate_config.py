@@ -6,7 +6,8 @@ from __future__ import annotations
 DISABLED_GATES: tuple[str, ...] = ()
 
 # 예산 면제 문서 (실측 기록 및 대용량 레퍼런스 문서 면제)
-EXTRA_WHITELIST: tuple[str, ...] = (
+# core가 `WHITELIST | EXTRA_WHITELIST`로 합집합을 내므로 집합형이어야 한다.
+EXTRA_WHITELIST: frozenset[str] = frozenset({
     "docs/history/README.md",
     "skills-overview.html",
-)
+})

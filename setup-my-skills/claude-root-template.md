@@ -1,5 +1,7 @@
 # {PROJECT_NAME} — Claude 작업 가이드
 
+> **BLUF:** 신규 프로젝트 루트 CLAUDE.md 템플릿.
+
 > 이 파일은 **워크스페이스 공통 규칙**만 담는다. 영역별 상세는 하위 `CLAUDE.md`로 분리.
 > - {AREA} 작업 → [{area}/CLAUDE.md](./{area}/CLAUDE.md)
 

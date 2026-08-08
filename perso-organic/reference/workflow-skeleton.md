@@ -1,5 +1,7 @@
 # perso-organic — 실행 골격 (SKILL.md §3단계 참조)
 
+> **BLUF:** perso-organic 실행 골격 — 불변부 상수와 가변부 config 루프.
+
 > 실행 *모델*은 substrate 중립이다. 구현은 호스트에 따라 둘 중 하나(A=오케스트레이터 있음 / B=강등). 둘 다 1급 경로.
 
 ## 핵심 — 불변부 상수 1개 + 가변부 config 배열 + 루프 1개

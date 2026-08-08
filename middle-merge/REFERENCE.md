@@ -1,5 +1,7 @@
 # Middle-Merge Reference
 
+> **BLUF:** middle-merge 워크플로의 브랜치 구조·격리·검증·머지 상세.
+
 Detailed source rules moved out of SKILL.md to keep the loadable skill under the write-a-skill size guideline. Read this file only after the repo workflow marker is confirmed as `middle-merge`.
 
 # Middle-Merge Workflow

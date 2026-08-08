@@ -1,5 +1,7 @@
 # Supervisor mode 가 reference 한 efficient-subagent 본체를 안 읽음
 
+> **BLUF:** supervisor-mode가 참조한 스킬 본체를 읽지 않은 사례에 관한 회고.
+
 - 작성 CLI: Claude Code (main supervisor)
 - 작성일: 2026-05-24
 - 작업: oneul-nutri 메타레포에 nutri-skills 자동 셋업 (mise.toml + 심링크) — `/supervisor-mode` invoke 후 4건의 sub-agent (Explore 1 + general-purpose 3) 발사. 사용자가 "별도 호출 agent들은 sonnet 모델 맞지?" 지적 → 전부 parent (opus) 상속된 것이 드러남.

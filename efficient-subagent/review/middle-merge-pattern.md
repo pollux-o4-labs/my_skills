@@ -1,5 +1,7 @@
 # Review: Middle-Merge 통합 검증 패턴
 
+> **BLUF:** middle-merge 통합 검증 패턴의 검토 초안에 관한 사항.
+
 > 작성 배경: 2026-05-22, build/torch-cuda-index 세션에서 확정.
 > ADR-0011 Rev1~7 (7 amendment PR) + GPU 진단 #199~#202 (4 시행착오 PR) 회고.
 > main commit history 오염 + 사용자가 회귀 발견자가 되는 패턴을 차단하는 목적.

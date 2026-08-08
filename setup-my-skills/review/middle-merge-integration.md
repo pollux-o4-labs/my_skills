@@ -1,5 +1,7 @@
 # Review: setup-my-skills — Middle-Merge 협업 컨벤션 반영 안
 
+> **BLUF:** setup-my-skills에 middle-merge 협업 규약을 반영하는 안의 검토 초안.
+
 > 작성 배경: 2026-05-22, efficient-subagent SKILL.md 정정 세션.
 > efficient-subagent 의 middle-merge 패턴이 확정된 사용자 모델로 굳어짐에 따라,
 > 새 프로젝트에 setup-my-skills 를 적용할 때 이 패턴을 안내하는 절차가 필요.

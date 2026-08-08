@@ -1,3 +1,5 @@
+> **BLUF:** 신규 저장소 안내 문서에 삽입할 Agent skills 블록 원문.
+
 > These subsections coexist with any block produced by `setup-matt-pocock-skills` (Issue tracker / Triage labels / Domain docs). Merge under the same `## Agent skills` heading — do not create a second one. `Domain docs` from matt-pocock covers `CONTEXT.md` / `docs/adr/` consumer rules; the entry below adds the ADR write-side convention.
 
 ## Agent skills

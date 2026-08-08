@@ -1,5 +1,7 @@
 # Codex Skill Setup Review
 
+> **BLUF:** Codex CLI에 이 저장소 스킬을 연결하며 겪은 불편과 개선 제안.
+
 - 작성 CLI: Codex
 - 작성일: 2026-05-21
 - 작업: Claude Code에서 쓰던 `my_skills` 저장소를 Codex CLI 사용자 스킬 경로에 연결
