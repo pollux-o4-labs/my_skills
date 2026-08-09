@@ -18,3 +18,4 @@ format-response
 write-a-rule
 skill-refactor
 organize-agent-team
+restrict-line
