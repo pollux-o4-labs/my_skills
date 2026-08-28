@@ -5,7 +5,8 @@
 # Hosts (each processed only if its dir exists, except claude which is created):
 #   claude : ~/.claude/skills/<name>  -> symlink to repo/<name>        (curated hub)
 #   codex  : ~/.codex/skills/<name>   -> symlink to ~/.claude/skills/<name>
-#   gemini : ~/.gemini/skills/<name>  =  physical copy (agy skips symlinks)
+#   agy    : ~/.gemini/config/skills/<name> = physical copy
+#            (the official global discovery root)
 #
 # CURATED-HUB POLICY (matches the .ps1): a full run does NOT auto-add every repo
 # skill — some are deliberately kept out. EXCEPTION: AIL-* skills (AI-Learned,
@@ -19,23 +20,28 @@
 #
 # Usage:
 #   sync-skills.sh                 # all existing hosts (AIL auto + any --only)
-#   sync-skills.sh --host claude   # one host (claude|codex|gemini)
+#   sync-skills.sh --host claude   # one host (claude|codex|agy; gemini is an alias)
 #   sync-skills.sh --only foo      # also register repo skill 'foo' (comma-list ok)
 #   sync-skills.sh --all-skills    # link every repo skill, not just AIL-*
 #   sync-skills.sh --prune-mirror  # allow pruning gemini copies absent from source
 #   sync-skills.sh --dry-run       # show actions, change nothing
+#   ~/.config/my_skills/disabled-skills.txt  # local names excluded from sync
 # Idempotent; safe to run repeatedly.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 HOME_DIR="${HOME}"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME_DIR/.config}/my_skills"
+DISABLED_FILE="${MY_SKILLS_DISABLED_FILE:-$CONFIG_DIR/disabled-skills.txt}"
+AGY_DIR="$HOME_DIR/.gemini/config/skills"
 
 HOST=all
 DRY=0
 PRUNE_MIRROR=0
 ALL_SKILLS=0
 ONLY=()
+DISABLED=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -49,8 +55,14 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+if [ "$HOST" = gemini ]; then HOST=agy; fi
+case "$HOST" in
+  all|claude|codex|agy) ;;
+  *) echo "unknown host: $HOST" >&2; exit 2 ;;
+esac
+
 # Directories in the repo that are NOT skills (mirrors $NotSkills in the .ps1).
-NOT_SKILLS=(.git .github .claude .playwright-mcp .system review sync-skills docs node_modules md-ebook show-me)
+NOT_SKILLS=(.git .github .claude .playwright-mcp .system review sync-skills docs node_modules md-ebook show-me _legacy templates)
 # Skills whose gemini copy is refreshed only when absent (submodule-backed WIP).
 COPY_ONLY_IF_MISSING=(md2ebook)
 
@@ -65,9 +77,17 @@ if [ -f "$MANIFEST_FILE" ]; then
   done < "$MANIFEST_FILE"
 fi
 
+if [ -f "$DISABLED_FILE" ]; then
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%%#*}"; line="$(echo "$line" | xargs)"
+    [ -n "$line" ] && DISABLED+=("$line")
+  done < "$DISABLED_FILE"
+fi
+
 is_not_skill()   { local n="$1"; for x in "${NOT_SKILLS[@]}"; do [ "$n" = "$x" ] && return 0; done; return 1; }
 in_only()        { local n="$1"; for x in "${ONLY[@]:-}"; do [ "$n" = "$x" ] && return 0; done; return 1; }
 in_manifest()    { local n="$1"; for x in "${MANIFEST[@]:-}"; do [ "$n" = "$x" ] && return 0; done; return 1; }
+is_disabled()    { local n="$1"; for x in "${DISABLED[@]:-}"; do [ "$n" = "$x" ] && return 0; done; return 1; }
 copy_if_missing(){ local n="$1"; for x in "${COPY_ONLY_IF_MISSING[@]}"; do [ "$n" = "$x" ] && return 0; done; return 1; }
 
 run() { if [ "$DRY" = 1 ]; then echo "    [dry] $*"; else eval "$@"; fi; }
@@ -79,6 +99,7 @@ wanted_names() {
   for d in "$REPO_ROOT"/*/; do
     n="$(basename "$d")"
     is_not_skill "$n" && continue
+    is_disabled "$n" && continue
     [ -f "$REPO_ROOT/$n/SKILL.md" ] || continue
     if [ "$ALL_SKILLS" = 1 ] || [[ "$n" == AIL-* ]] || in_manifest "$n" || in_only "$n"; then
       echo "$n"
@@ -165,8 +186,8 @@ process() {
   esac
 }
 
-process claude "$HOME_DIR/.claude/skills"  "$REPO_ROOT"               link
-process codex  "$HOME_DIR/.codex/skills"   "$HOME_DIR/.claude/skills" link
-process gemini "$HOME_DIR/.gemini/skills"  "$HOME_DIR/.claude/skills" copy
+process claude "$HOME_DIR/.claude/skills" "$REPO_ROOT"               link
+process codex  "$HOME_DIR/.codex/skills"  "$HOME_DIR/.claude/skills" link
+process agy    "$AGY_DIR"                 "$HOME_DIR/.claude/skills" copy
 
 echo "sync-skills: done."

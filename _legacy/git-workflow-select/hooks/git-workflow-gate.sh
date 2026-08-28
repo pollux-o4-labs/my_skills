@@ -138,6 +138,46 @@ if not creates:
 # 신규 브랜치 생성 명령. CLAUDE.md 마커 검사.
 claude_md = os.environ.get("CLAUDE_MD_PATH", "./CLAUDE.md")
 
+# 대상 저장소는 셸의 cwd 가 아니라 **그 명령이 실제로 향하는 곳**이다.
+#
+#   실측(2026-08-11): 세션 cwd 가 git 저장소가 아닌 뷰 전용 디렉터리로 고정된
+#   구성에서, 위 CLAUDE_MD_PATH 는 그 디렉터리의 CLAUDE.md 를 가리켰다. 그
+#   파일에는 마커가 없으므로 **어느 저장소에서도 브랜치를 못 만들었다** —
+#   대상 저장소에는 마커가 제대로 박혀 있는데도 차단됐다. 게이트가 판정한 것은
+#   대상이 아니라 엉뚱한 디렉터리였다(규칙 01 제1조: 볼 수 있는 것만 판정한다).
+#
+#   그래서 명령에서 `cd <경로>` 와 `git -C <경로>` 를 뽑아 대상을 먼저 정한다.
+#   여러 개면 마지막 것이 이긴다 — 셸에서 뒤의 cd 가 앞의 것을 덮기 때문이다.
+#   못 찾으면 종전대로 cwd 기준 값을 쓴다(동작 변화 없음).
+def _target_dir(segs):
+    found = None
+    for seg in segs:
+        try:
+            toks = shlex.split(seg.strip())
+        except ValueError:
+            continue
+        for j, t in enumerate(toks):
+            if t == "cd" and j + 1 < len(toks) and not toks[j + 1].startswith("-"):
+                found = toks[j + 1]
+            elif t == "-C" and j + 1 < len(toks) and j > 0 and os.path.basename(toks[0]) == "git":
+                found = toks[j + 1]
+    return found
+
+_dir = _target_dir(segments)
+if _dir:
+    _dir = os.path.expanduser(_dir)
+    if os.path.isdir(_dir):
+        import subprocess
+        try:
+            _root = subprocess.run(
+                ["git", "-C", _dir, "rev-parse", "--show-toplevel"],
+                capture_output=True, text=True, timeout=5,
+            ).stdout.strip()
+        except Exception:
+            _root = ""
+        if _root:
+            claude_md = os.path.join(_root, "CLAUDE.md")
+
 # 안전판: CLAUDE.md 자체가 없으면 통과.
 #   이유 — 이 hook 은 전역(모든 프로젝트) 설정이다. 스킬로 관리하지 않는
 #   서드파티 repo·비-repo 디렉토리·스크래치 폴더에서 마커를 요구하면 정상

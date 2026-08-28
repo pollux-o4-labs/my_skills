@@ -1,7 +1,7 @@
 ---
 name: AIL-worktree-parallel-guard
 description: "Guard rails for verifying code inside a secondary checkout (git worktree, extra clone) and for parallelizing implementation agents across them — an editable-installed package silently imports the primary checkout, so a green suite may have tested the wrong code. Use before running tests in a worktree, spawning parallel worktree workers, or attributing a worktree-only test failure."
-version: 1.2.0
+version: 1.3.0
 metadata:
   provenance: AIL
 ---
@@ -35,6 +35,12 @@ A git worktree gives workers isolated *files*, but not an isolated *import path*
 - **Green-but-wrong suite**: worker reports "all pass" while the interpreter tested the primary checkout — probe-less parallel runs make every result unfalsifiable. Anchor: a supervisor session found `vgo.config.__file__` pointing at the main tree from inside a fresh worktree; one `PYTHONPATH` prefix flipped it.
 - **Blaming the diff for the location**: worktrees fail for reasons of *location* (sibling-path assumptions, untracked assets, missing `.env`) — stash the diff and rerun before blaming the change; a gate test once failed in every worktree because a sibling repo existed next to the primary checkout only.
 - **Resolving instead of preventing ledger conflicts**: letting N workers edit the shared status file "carefully" still collides; report-then-splice costs one paragraph per worker.
+- **Not just imports — product logic hardcodes stale paths too.**
+  A fixed "canonical sibling repo" constant pins one trunk copy as truth.
+  A worktree that already applied a fix still gets flagged against it.
+  Anchor: `prose_count.py`'s copy-check pinned a hardcoded trunk path.
+  A worktree with the landed fix was flagged "new prose" pre-merge.
+  Remedy: prefer the checkout you're standing in over any pinned sibling.
 - Surprising results *after* these guards are in place → switch to [[AIL-verify-against-reality]] (stale layer / measurement debugging); this skill is the pre-flight, that one is the post-mortem.
 
 ## Verification
