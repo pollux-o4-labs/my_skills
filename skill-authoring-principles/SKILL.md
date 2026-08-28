@@ -5,7 +5,7 @@ description: Apply skill-authoring principles. Use when work involves reusable a
 
 # Apply skill-authoring principles
 
-Use `templates/domain-principles-template/SKILL.md` as the source of truth when creating or revising a skill.
+Use `docs/templates/skill-format.md` as the source of truth when creating or revising a skill.
 
 Apply the template's principles together with the authoring principles below.
 

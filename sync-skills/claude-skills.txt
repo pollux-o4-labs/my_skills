@@ -8,4 +8,22 @@
 # Add a line here → it links on every machine on the next `git pull`.
 # Remove a line → the owned link is pruned on the next sync (safe: only this repo's links).
 
-# Current canonical skills remain unregistered while the new structure is reviewed.
+# Registered root skills. Keep this list explicit so the curated hub is deliberate.
+agent-orchestration-principles
+business--growth--growth-and-revenue
+business--operations--business-operations-and-governance
+computer-science--application--application-engineering
+computer-science--communication--technical-ecosystem
+computer-science--foundations--computing-data-and-intelligence
+computer-science--platform--systems-and-delivery
+computer-science--product--product-experience
+computer-science--quality--quality-and-security
+documentation-principles
+engineering-principles
+format-response
+git-workflow-principles
+research-principles
+resource-principles
+restrict-line
+skill-authoring-principles
+verification-principles

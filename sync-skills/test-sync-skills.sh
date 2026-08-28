@@ -12,9 +12,9 @@ export XDG_CONFIG_HOME="$TEST_HOME/config"
 export MY_SKILLS_DISABLED_FILE="$TEST_HOME/config/my_skills/disabled-skills.txt"
 mkdir -p "$HOME/.codex/skills" "$HOME/.gemini/config/skills"
 
-bash "$SYNC" --host claude --all-skills >/dev/null
-bash "$SYNC" --host codex --all-skills >/dev/null
-bash "$SYNC" --host agy --all-skills >/dev/null
+bash "$SYNC" --host claude >/dev/null
+bash "$SYNC" --host codex >/dev/null
+bash "$SYNC" --host agy >/dev/null
 
 [ -L "$HOME/.claude/skills/engineering-principles" ]
 [ -L "$HOME/.codex/skills/engineering-principles" ]
@@ -23,7 +23,9 @@ bash "$SYNC" --host agy --all-skills >/dev/null
 [ -L "$HOME/.claude/skills/research-principles" ]
 [ -L "$HOME/.codex/skills/research-principles" ]
 [ -d "$HOME/.gemini/config/skills/research-principles" ]
-[ ! -e "$HOME/.claude/skills/domain-principles-template" ]
+[ -L "$HOME/.claude/skills/format-response" ]
+[ -L "$HOME/.claude/skills/restrict-line" ]
+[ ! -e "$HOME/.claude/skills/skill-format" ]
 [ ! -e "$HOME/.claude/skills/_legacy" ]
 
 bash "$DESYNC" --only engineering-principles >/dev/null

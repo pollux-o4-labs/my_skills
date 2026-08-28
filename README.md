@@ -21,7 +21,7 @@ description: Apply {domain} principles. Use when work involves {triggers — inc
 - {Concrete task, artifact, or decision area.}
 ```
 
-기본 템플릿은 [`templates/domain-principles-template/SKILL.md`](templates/domain-principles-template/SKILL.md)다.
+스킬 형식은 [`docs/templates/skill-format.md`](docs/templates/skill-format.md)를 따른다.
 
 ## 정본 스킬
 
@@ -38,6 +38,6 @@ bash sync-skills/sync-skills.sh --dry-run
 bash sync-skills/sync-skills.sh --all-skills
 ```
 
-현재 정본 스킬은 `sync-skills/claude-skills.txt`에서 제외해 비등록 상태로 둔다. `templates/`와 `_legacy/`는 동기화 대상이 아니다.
+현재 등록 대상은 `sync-skills/claude-skills.txt`에 명시한다. `docs/`와 `_legacy/`는 동기화 대상이 아니며, 루트의 등록 대상 스킬만 동기화한다.
 
 agy의 공식 전역 스킬 경로는 `~/.gemini/config/skills`다. `~/.gemini/antigravity-cli`는 런타임 상태 경로이므로 동기화하지 않는다.
