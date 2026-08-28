@@ -11,11 +11,10 @@
                   (some are deliberately kept out). Register a non-AIL repo skill with
                   `-Only <name>` — it junctions repo\<name> -> hub\<name> if absent.
     Codex       : junction  ~\.codex\skills\<name>   ->  personal skills activated in ~\.claude\skills
-    Gemini/agy  : COPY (physical dir) from ~\.claude\skills, with junctions resolved
+    agy         : COPY (physical dir) to ~\.gemini\config\skills, with junctions resolved
 
-  Gemini roots are NOT pruned by default (we cannot tell a stale copy from a skill
-  installed by another tool). Pass -PruneMirror to delete gemini entries absent from
-  the union source.
+  agy's official global discovery root is ~/.gemini/config/skills. The legacy
+  ~/.gemini/skills root is not managed, and ~/.gemini/antigravity-cli is internal state.
 
   Why gemini MUST be physical copies: `agy` (Go) treats junctions as ReparsePoint files
   and skips them in ReadDir, so junction-linking gemini skills makes them invisible.
@@ -32,16 +31,17 @@
 
   Usage:
     pwsh -File sync-skills.ps1                 # sync all hosts
-    pwsh -File sync-skills.ps1 -Host gemini    # one host only (claude|codex|gemini)
+    pwsh -File sync-skills.ps1 -Host agy       # one host only (claude|codex|agy; gemini is an alias)
     pwsh -File sync-skills.ps1 -Only foo-skill # register repo skill 'foo-skill' into hub, then all hosts
     pwsh -File sync-skills.ps1 -WhatIf         # dry run, no changes
     pwsh -File sync-skills.ps1 -SkipPull       # accepted for backward compatibility (no-op)
+    %APPDATA%\my_skills\disabled-skills.txt   # local names excluded from sync
 
   Safe to run repeatedly (idempotent).
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
-  [ValidateSet('all','claude','codex','gemini')]
+  [ValidateSet('all','claude','codex','agy','gemini')]
   [string]$Host_ = 'all',
   [switch]$SkipPull,
   [switch]$PruneMirror,          # allow pruning gemini copies absent from union source
@@ -51,9 +51,12 @@ param(
 $ErrorActionPreference = 'Stop'
 # normalize -Only: `pwsh -File ... -Only a,b` arrives as one string "a,b" — split it
 $Only = @($Only | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+$Host_ = if ($Host_ -eq 'gemini') { 'agy' } else { $Host_ }
 $RepoRoot     = Split-Path -Parent $PSScriptRoot                  # ...\my_skills
 $ClaudeSkills = Join-Path $env:USERPROFILE '.claude\skills'      # union root gemini mirrors
 $Home_        = $env:USERPROFILE
+$ConfigBase   = if ($env:APPDATA) { $env:APPDATA } else { Join-Path $env:USERPROFILE '.config' }
+$DisabledFile = if ($env:MY_SKILLS_DISABLED_FILE) { $env:MY_SKILLS_DISABLED_FILE } else { Join-Path (Join-Path $ConfigBase 'my_skills') 'disabled-skills.txt' }
 $LegacyCodexSources = @(
   $RepoRoot,
   (Join-Path $env:USERPROFILE '.agents\my_skills')
@@ -66,7 +69,7 @@ $CopyOnlyIfMissing = @('md2ebook')
 # md-ebook / show-me are git SUBMODULES deployed via `npx skills add pollux-o4/<repo>` —
 # never junction/copy them from here (working tree may hold unmerged branches).
 $NotSkills = @('.git','.github','.claude','.playwright-mcp','.system','review','sync-skills','docs','node_modules',
-               'md-ebook','show-me')
+               'md-ebook','show-me','_legacy','templates')
 
 # Declarative manifest: non-AIL repo skills to link into the curated claude hub.
 # (AIL-* are auto by provenance and need not be listed.) One name per line; '#' comments.
@@ -74,6 +77,10 @@ $ManifestFile = Join-Path $PSScriptRoot 'claude-skills.txt'
 $Manifest = @()
 if (Test-Path $ManifestFile) {
   $Manifest = @(Get-Content $ManifestFile | ForEach-Object { ($_ -replace '#.*$','').Trim() } | Where-Object { $_ })
+}
+$DisabledNames = @()
+if (Test-Path $DisabledFile) {
+  $DisabledNames = @(Get-Content $DisabledFile | ForEach-Object { ($_ -replace '#.*$','').Trim() } | Where-Object { $_ })
 }
 
 # --- host registration table -------------------------------------------------
@@ -84,10 +91,9 @@ $Hosts = @(
   # kept out, e.g. git-workflow-select). Pass -Only <name> to register a repo skill here.
   @{ name='claude'; dest=(Join-Path $Home_ '.claude\skills');                 source=$RepoRoot;     mode='curated-junction' },
   @{ name='codex';  dest=(Join-Path $Home_ '.codex\skills');                  source=$ClaudeSkills; mode='personal-junction'; legacySources=$LegacyCodexSources },
-  # agy reads three roots; all must be physical copies (union source resolved per skill)
-  @{ name='gemini'; dest=(Join-Path $Home_ '.gemini\skills');                 source=$ClaudeSkills; mode='mirror-copy' },
-  @{ name='gemini'; dest=(Join-Path $Home_ '.gemini\antigravity-cli\skills'); source=$ClaudeSkills; mode='mirror-copy' },
-  @{ name='gemini'; dest=(Join-Path $Home_ '.gemini\config\skills');          source=$ClaudeSkills; mode='mirror-copy' }
+  # agy's official global discovery root. Legacy ~/.gemini/skills is not managed;
+  # ~/.gemini/antigravity-cli contains internal runtime state and is not a skill root.
+  @{ name='agy';    dest=(Join-Path $Home_ '.gemini\config\skills');          source=$ClaudeSkills; mode='mirror-copy' }
 )
 
 function Get-ResolvedSourceMap([string]$root) {
@@ -119,6 +125,8 @@ function Get-SkillNames([string]$root) {
 }
 
 function Test-IsReparse($item) { return ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 }
+
+function Test-IsDisabled([string]$name) { return $DisabledNames -contains $name }
 
 # A junction "belongs to" a source root iff its recorded target is a direct child of it.
 function Test-OwnedJunction($item, [string[]]$sourceRoots) {
@@ -167,7 +175,7 @@ foreach ($h in $Hosts) {
   if ($mode -in @('junction','personal-junction','mirror-copy','curated-junction')) {
     $srcMap = Get-ResolvedSourceMap $source
     if ($mode -eq 'personal-junction') { $srcMap = Select-PersonalSourceMap $srcMap $RepoRoot }
-    $wanted = @($srcMap.Keys)
+    $wanted = @($srcMap.Keys | Where-Object { -not (Test-IsDisabled $_) })
   }
   else {
     $wanted = @(Get-SkillNames $source)
@@ -182,7 +190,7 @@ foreach ($h in $Hosts) {
     # Full run registers AIL-* (auto by provenance) + claude-skills.txt manifest entries,
     # so `git pull` connects newly pulled AIL skills and any declared personal skills.
     # -Only adds ad-hoc names. Deliberate exclusions otherwise survive. (Mirrors sync-skills.sh.)
-    $allNames = @($srcMap.Keys)
+    $allNames = @($srcMap.Keys | Where-Object { -not (Test-IsDisabled $_) })
     $targets  = @($allNames | Where-Object { ($_ -like 'AIL-*') -or ($_ -in $Manifest) })
     if ($Only.Count -gt 0) {
       $targets = @($targets + @($allNames | Where-Object { $_ -in $Only }) | Select-Object -Unique)
