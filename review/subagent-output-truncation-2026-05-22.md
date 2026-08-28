@@ -1,5 +1,7 @@
 # Sub-agent 출력 축약 룰 회고
 
+> **BLUF:** 서브에이전트 출력 축약 규칙의 필요성에 관한 회고.
+
 - 작성 CLI: Claude Code (main supervisor)
 - 작성일: 2026-05-22
 - 작업: project_oneul/discord_chatbot — prompt eval test 인프라 (PR #170) 적용 후 baseline 실행에서 verbose pytest 출력이 main transcript 누적 → 사용자가 직접 "다른 프로젝트에선 필요한 결과만 보는 룰 있는데 여기도 필요?" 지적.

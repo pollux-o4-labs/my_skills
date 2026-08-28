@@ -1,5 +1,7 @@
 # perso-organic — 실측 교훈 (SKILL.md §참조)
 
+> **BLUF:** perso-organic 운용 회차별 누적 실측 교훈.
+
 > 1~4회차 누적 실측. 검증 설계·디버깅 때 Read.
 
 ## 1회차 — dev-workflow 온보딩 문서 (2026-06-05)

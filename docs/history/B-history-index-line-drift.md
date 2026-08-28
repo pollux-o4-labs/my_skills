@@ -1,5 +1,7 @@
 # B-history-index-line-drift — 실측 근거
 
+> **BLUF:** 인덱스 줄 길이 드리프트 실측과 규칙 01 제정 근거에 관한 사항.
+
 2026-07-16. `docs/rules/01-index-line-bluf-discipline.md` 의 grounds.
 
 ## 문제: 길이 규범 부재로 인덱스 줄이 본문을 흡수

@@ -1,5 +1,7 @@
 # Rationale — organize-agent-team
 
+> **BLUF:** organize-agent-team의 제정 근거와 대상 에이전트 등록부 실측에 관한 사항.
+
 Provenance: session lesson (launch-inspection team, prompt-gen, 2026-07-13) — four `general-purpose` teammates spawned for tool access, dropping the plugin definitions' pinned model tier (two user corrections); four idle-without-report incidents fixed by a SendMessage-before-exit prompt clause; two crossed-message stale verdicts fixed by fix-marker preconditions. Reshaped from an AIL auto-gate into a user-invoked workflow (2026-07-13 review): the user triggers organization explicitly ("organize a team"), so recall is on the user — `disable-model-invocation: true`, no `AIL-` prefix, registered via the `sync-skills/claude-skills.txt` manifest.
 
 ## The registry this skill targets (measured 2026-07-13)

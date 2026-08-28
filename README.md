@@ -1,119 +1,105 @@
 # my_skills
 
-Claude Code, Codex, Gemini CLI 에서 쓰는 커스텀 CLI 스킬 모음.
+> **BLUF:** Claude Code·Codex·Gemini CLI 공용 커스텀 스킬의 원본 저장소.
 
-## 경로
-
-- 원본 저장소: `~/.agents/my_skills`
-- 공통 user skill 경로: `~/.agents/skills`
-- Claude Code 등록 경로: `~/.claude/skills`
-- Codex user skill 경로: `~/.agents/skills`
-- Gemini CLI user skill 경로: `~/.gemini/skills` 또는 `~/.agents/skills`
-
-클론만으로는 스킬이 활성화되지 않는다.
-원본 저장소의 각 스킬 디렉토리를 사용할 CLI 의 user skill 경로에 링크하거나 설치해야 한다.
+클론만으로는 스킬이 활성화되지 아니한다.
+각 CLI 의 user skill 경로에 등록해야 하며, 등록은 `sync-skills/` 스크립트가 수행한다.
 
 ## 설치
 
-### Linux / macOS / WSL
-
 ```bash
-mkdir -p ~/.agents ~/.agents/skills
-git clone https://github.com/pollux-o4/my_skills.git ~/.agents/my_skills
-
-ln -s ~/.agents/my_skills/efficient-subagent ~/.agents/skills/efficient-subagent
-ln -s ~/.agents/my_skills/setup-my-skills   ~/.agents/skills/setup-my-skills
-ln -s ~/.agents/my_skills/call-other-cli    ~/.agents/skills/call-other-cli
-ln -s ~/.agents/my_skills/set-short-term     ~/.agents/skills/set-short-term
-ln -s ~/.agents/my_skills/cancel-short-term  ~/.agents/skills/cancel-short-term
+git clone --recursive https://github.com/pollux-o4-labs/my_skills.git
+cd my_skills
+bash sync-skills/install.sh           # Linux / macOS / WSL
+# pwsh -File sync-skills\install.ps1  # Windows
 ```
 
-### Windows PowerShell
+`--recursive` 를 빠뜨리면 서브모듈 폴더가 빈 채로 온다.
+그 경우 `git submodule update --init` 으로 보완한다.
 
-```powershell
-New-Item -ItemType Junction `
-  -Path "$env:USERPROFILE\.agents\skills\efficient-subagent" `
-  -Target "$env:USERPROFILE\.agents\my_skills\efficient-subagent"
-# setup-my-skills, call-other-cli, set-short-term, cancel-short-term 도 동일
-```
+`install.sh` 는 머신당 1회만 필요하다.
+이후로는 `git pull` 이 post-merge 훅으로 새 스킬을 자동 등록한다.
 
-## CLI 별 등록
+## 등록 대상과 경로
 
-### Claude Code
+호스트별 등록 경로·방식과 동기화 옵션의 정본은 [CLAUDE.md](./CLAUDE.md) 다.
 
-Claude Code 에서는 사용할 각 스킬을 `~/.claude/skills/` 에도 링크한다.
-
-```bash
-mkdir -p ~/.claude/skills
-ln -s ~/.agents/my_skills/set-short-term ~/.claude/skills/set-short-term
-```
-
-다른 스킬도 같은 방식으로 링크한다. Windows 에서는 같은 target 으로 junction 또는 symbolic link 를 만든다.
-
-### Codex
-
-Codex 는 user skills 를 `~/.agents/skills/` 에서 발견한다.
-위 공통 설치 경로를 쓰면 추가 등록 없이 같은 스킬 원본을 쓴다.
-
-이미 `$CODEX_HOME/skills` 연결을 쓰는 환경은 같은 스킬 디렉토리를 그 경로에도 링크할 수 있다.
-
-### Gemini CLI
-
-Gemini CLI 는 `~/.gemini/skills/` 와 `~/.agents/skills/` alias 를 user skill 경로로 본다.
-위 공통 설치 경로를 쓰거나 개별 skill 디렉토리에서 `gemini skills link .` 흐름을 쓴다.
+등록되는 집합은 `AIL-*` 전부와, [sync-skills/claude-skills.txt](./sync-skills/claude-skills.txt) 에 적힌 비-AIL 스킬이다.
+개인 스킬을 추가하려면 그 매니페스트에 한 줄을 더한다.
 
 ## 검증
 
 ```bash
-ls -l ~/.agents/skills/                        # Codex / Gemini 공통 user skills 확인
-cat ~/.agents/skills/set-short-term/SKILL.md  # 공통 진입점 접근 확인
-ls -l ~/.claude/skills/                        # Claude Code 링크 확인
+ls -l ~/.claude/skills/     # Claude Code 등록 확인
+ls -l ~/.agents/skills/     # Codex · Gemini 공통 경로 확인
 ```
 
-각 CLI 새 세션에서 skill discovery 와 명시 호출 흐름을 확인한다.
-명시 호출은 CLI 별 문법이 다르다.
+새 세션에서 스킬 발견과 명시 호출을 확인한다.
+명시 호출 문법은 CLI 마다 다르다.
 
-- Claude Code: `/set-short-term`, `/cancel-short-term`
-- Codex: `$set-short-term`, `$cancel-short-term` 또는 `/skills` 에서 mention
-- Gemini CLI: `/skills list` 로 로드 여부를 확인하고 skill 이름을 명시 요청한 뒤 activation consent 를 승인
+- Claude Code: `/<스킬명>`
+- Codex: `$<스킬명>` 또는 `/skills` 에서 mention
+- Gemini CLI: `/skills list` 로 적재를 확인한 뒤 스킬 이름을 명시하고 activation consent 를 승인
 
-> **WSL 주의**: WSL의 `~`는 `/home/<user>`이지 `/mnt/c/Users/<user>`가 아니다.
-> CLI 가 Windows 네이티브로 실행되면 Windows 쪽 user skill 경로에 링크해야 한다.
+> **WSL 주의**: WSL 의 `~` 는 `/home/<user>` 이지 `/mnt/c/Users/<user>` 가 아니다.
+> CLI 가 Windows 네이티브로 실행되면 Windows 쪽 user skill 경로에 등록해야 한다.
 
-## 스킬
+## 스킬 목록
 
-| 디렉토리 | 명시 호출 예 | 설명 |
-|---|---|---|
-| efficient-subagent | sub-agent가 자동 로드 | 컨텍스트 흡수 → 스코프 규율 → 간결 보고 |
-| setup-my-skills | Claude `/setup-my-skills` | efficient-subagent가 전제하는 레포 scaffold 생성 |
-| call-other-cli | Claude `/call-other-cli` | codex/gemini CLI에 작업 위임 후 요약 병합 |
-| set-short-term | Claude `/set-short-term`, Codex `$set-short-term` | 실행한 CLI 하나에 짧은 응답 톤 영속 설정 |
-| cancel-short-term | Claude `/cancel-short-term`, Codex `$cancel-short-term` | 현재 세션에서 short-term mode 해제 |
-| writing-templates | Claude `/writing-templates` (글쓰기 시 자동 트리거) | 12종 글 골격 라우터 + BLUF·불확실성 라벨 규약. `templates/` 에서 1개만 로드 |
-| md-ebook | Claude `/md-ebook` (md→책 변환) | `python build.py <md>` 로 오프라인 단일 HTML 책 리더 생성. `reader.html` 템플릿 + 자체 파서 |
-
-`set-short-term` 과 `cancel-short-term` 은 전역 지침 또는 세션 톤을 바꾸므로 자동 활성화를 막는다.
-Claude Code 는 skill frontmatter, Codex 는 `agents/openai.yaml` policy 로 manual-only 를 선언한다.
-Gemini CLI 는 activation 때마다 consent 를 요구하므로, 사용자가 skill 이름을 명시하고 승인하는 흐름을 따른다.
-
-## 이 레포와 외부 스킬의 관계
-
-```
-~/.agents/
-├── my_skills/          ← 이 레포 (커스텀 스킬 원본)
-├── skills/             ← 공통 user skill 링크 + 외부 설치 스킬
-└── .skill-lock.json    ← 외부 스킬 버전 관리
-```
-
-이 레포의 스킬은 원본 디렉토리에서 직접 수정하고 각 CLI user skill 경로는 링크로 연결한다.
+각 스킬의 목적은 이 문서 하단의 자동 인덱스가 정본이다.
+자동 활성화를 막은 스킬은 SKILL.md frontmatter 의 `disable-model-invocation` 으로 선언한다.
 
 ## 구조 컨벤션
 
 - 스킬 1개 = 디렉토리 1개, 진입점은 `SKILL.md`
 - 디렉토리명 = SKILL.md frontmatter `name` (kebab-case)
 - 보조 문서는 같은 디렉토리 안에 배치
+- 폴더마다 `README.md` 를 두고 상단 한 줄 BLUF 로 목적을 밝힌다
+
+## 서브모듈
+
+`md-ebook` 과 `show-me` 는 일반 폴더가 아니라 별도 공개 저장소를 가리키는 git submodule 이다.
+수정·clone 규칙의 정본은 [CLAUDE.md](./CLAUDE.md) 이며, 동기화 스크립트는 이 둘을 포함하지 아니한다.
 
 ## 리뷰
 
-`review/`는 Claude Code 외의 CLI가 이 스킬 저장소를 사용해 본 뒤 남기는 피드백 모음이다.
-설치, 등록, 문서 해석, 호출 방식에서 불편했던 점과 수정 제안을 Markdown 문서로 기록한다.
+`review/` 는 Claude Code 외의 CLI 가 이 저장소를 사용해 본 뒤 남기는 피드백 모음이다.
+설치·등록·문서 해석·호출 방식에서 불편했던 점과 개선 제안을 문서로 기록한다.
+
+<!-- BLUF-INDEX:START — auto-generated by ai-harness gen-readmes; 이 블록은 수기 편집 금지 -->
+### 하위 폴더
+- `AIL-calibrate-agent-spend/` — 다중 에이전트·노력수준 호출의 비용 인자를 실측 과업 규모에 맞춰 산정하는 규율에 관한 사항.
+- `AIL-calibrate-verification-depth/` — 추론으로 얻은 결론을 단언하기 전 논증 강도에 맞춰 검증 깊이를 정하는 규율에 관한 사항.
+- `AIL-caveman-docs/` — 에이전트가 반복 열람하는 문서·메시지의 압축 규율에 관한 사항.
+- `AIL-correct-is-silent/` — 상시 문서에서 인라인 이력 서술을 배제하는 문서 위생에 관한 사항.
+- `AIL-design-for-extension/` — 반복 조짐이 보이는 규칙·사례를 선언형으로 전환하는 확장 설계에 관한 사항.
+- `AIL-durable-rules-in-repo/` — 재사용 규칙의 정본을 git 동기화 저장소에 두는 보존 위치 결정에 관한 사항.
+- `AIL-ground-before-structuring/` — 구조를 제안하기 전 기존 산출물에 근거를 두는 선행 조사에 관한 사항.
+- `AIL-handoff-topic-index/` — 인계 문서를 주제별 상세 파일과 목록형 인덱스로 구성하는 방식에 관한 사항.
+- `AIL-isolate-format-noise/` — 커밋 전 포매터 잡음과 실제 변경을 가르는 판별 절차에 관한 사항.
+- `AIL-living-decision-doc/` — 장기 과업 중 확정 결정을 즉시 적립하는 생동 결정 문서에 관한 사항.
+- `AIL-pilot-before-scale/` — 항목 수에 비례해 비용이 커지는 작업 전 소규모 시범 검증에 관한 사항.
+- `AIL-prefer-incremental-over-full/` — 전체 재작업을 택하기 전 증분 경로의 존재 여부를 확인하는 규율에 관한 사항.
+- `AIL-subagent-fanout-guard/` — 서브에이전트 병렬 확산 시의 재귀 폭발 방지 난간에 관한 사항.
+- `AIL-verify-against-reality/` — 예상 밖 검증 결과를 실제 실행 경로에 대조하는 절차에 관한 사항.
+- `AIL-verify-features-against-tests/` — 기능이 실제로 시험되는지를 불변식과 대응 시험으로 확인하는 감사에 관한 사항.
+- `AIL-verify-pid-before-signal/` — 기록된 pid에 신호를 보내기 전 프로세스 동일성을 확인하는 절차에 관한 사항.
+- `AIL-worktree-parallel-guard/` — 부 체크아웃에서의 검증과 병렬 작업 배치의 난간에 관한 사항.
+- `docs/` — 이 저장소 자체의 운영 문서(규칙·이력·인계) 거처에 관한 사항.
+- `efficient-subagent/` — 서브에이전트 착수 전 브리핑 — 맥락 흡수·범위 규율·간결 보고에 관한 사항.
+- `format-response/` — CLI 응답을 스캔 가능한 구조로 배치하는 서식 패턴에 관한 사항.
+- `git-workflow-select/` — 저장소의 git 브랜치 워크플로를 선택·고정하는 게이트에 관한 사항.
+- `md-ebook/` — (README 없음)
+- `middle-merge/` — middle-merge 워크플로의 브랜치 격리·검토 계층·머지 방향에 관한 사항.
+- `organize-agent-team/` — 설치된 에이전트 등록부에서 역할을 배치해 팀을 편성하는 절차에 관한 사항.
+- `perso-organic/` — 미지 도메인 과업을 임시 전문가 조직에 위임하는 동적 편성에 관한 사항.
+- `review/` — 타 CLI가 이 저장소를 사용한 뒤 남긴 피드백 기록의 거처에 관한 사항.
+- `setup-my-skills/` — 이 스킬군이 전제하는 저장소 골격을 신규 프로젝트에 부설하는 절차에 관한 사항.
+- `show-me/` — (README 없음)
+- `skill-refactor/` — 기존 스킬을 지시문 증식 없이 핵심만 남기도록 압축하는 절차에 관한 사항.
+- `skillify-session-lessons/` — 세션에서 얻은 재사용 교훈을 정본 스킬 문서로 승격하는 절차에 관한 사항.
+- `supervisor-mode/` — 감독자 시점으로 프로젝트를 자율 진행하고 중대 판단만 문의하는 운용에 관한 사항.
+- `sync-skills/` — 스킬을 각 CLI 사용자 경로에 등록·동기화하는 스크립트의 거처에 관한 사항.
+- `write-a-rule/` — 저장소 운영 규칙·정책 문서의 저작 표준에 관한 사항.
+
+<!-- BLUF-INDEX:END -->

@@ -1,5 +1,7 @@
 # Review: PR 검증 루프 패턴 — root 공유 vs worktree isolation
 
+> **BLUF:** PR 검증 루프에서 루트 공유와 워크트리 격리의 대비에 관한 사항.
+
 > 작성 배경: 2026-05-22, build/torch-cuda-index 세션에서 발견.
 > PR #198~#202 전부 worktree 안에서 만들어져 사용자가 매번 `gh pr checkout` 필요 → 손 부담.
 > 사용자 결론 + 트레이드오프 기반 정리. 본 파일은 SKILL.md 반영 전 review draft.

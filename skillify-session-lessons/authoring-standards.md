@@ -1,5 +1,7 @@
 # Skill Authoring Standards
 
+> **BLUF:** 이 저장소 SKILL.md 저작 규약의 정본에 관한 사항.
+
 Canonical conventions for creating or editing any SKILL.md in this repo. This file lives inside a skill folder so it travels to every host with the junction/copy — the repo `CLAUDE.md` does not. Other docs point here; don't restate these rules elsewhere. Why each rule exists: `skill-refactor/RATIONALE.md`.
 
 ## Budgets (English-calibrated; Korean ≈ half the words — RATIONALE §3)

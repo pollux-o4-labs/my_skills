@@ -1,5 +1,7 @@
 # Rationale — where these authoring standards come from
 
+> **BLUF:** 스킬 저작 표준의 제정 근거와 기각한 대안에 관한 사항.
+
 Provenance: user-provided research synthesis (2026-07-12) mapping encyclopedia governance standards, statutory drafting practice, and cognitive-load research onto rule and knowledge authoring. This file grounds `skill-refactor`, `write-a-rule`, and the quantitative caps in `skillify-session-lessons/authoring-standards.md`. It records **why** those rules exist and **what was deliberately rejected**, so future edits argue against the source, not against a bare number.
 
 ## 1. Instruction creep (Wikipedia governance)

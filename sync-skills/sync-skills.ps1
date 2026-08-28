@@ -83,11 +83,7 @@ $Hosts = @(
   # claude hub is CURATED: a full run never auto-adds repo skills (some are deliberately
   # kept out, e.g. git-workflow-select). Pass -Only <name> to register a repo skill here.
   @{ name='claude'; dest=(Join-Path $Home_ '.claude\skills');                 source=$RepoRoot;     mode='curated-junction' },
-  @{ name='codex';  dest=(Join-Path $Home_ '.codex\skills');                  source=$ClaudeSkills; mode='personal-junction'; legacySources=$LegacyCodexSources },
-  # agy reads three roots; all must be physical copies (union source resolved per skill)
-  @{ name='gemini'; dest=(Join-Path $Home_ '.gemini\skills');                 source=$ClaudeSkills; mode='mirror-copy' },
-  @{ name='gemini'; dest=(Join-Path $Home_ '.gemini\antigravity-cli\skills'); source=$ClaudeSkills; mode='mirror-copy' },
-  @{ name='gemini'; dest=(Join-Path $Home_ '.gemini\config\skills');          source=$ClaudeSkills; mode='mirror-copy' }
+  @{ name='codex';  dest=(Join-Path $Home_ '.codex\skills');                  source=$ClaudeSkills; mode='personal-junction'; legacySources=$LegacyCodexSources }
 )
 
 function Get-ResolvedSourceMap([string]$root) {
@@ -166,6 +162,12 @@ foreach ($h in $Hosts) {
 
   if ($mode -in @('junction','personal-junction','mirror-copy','curated-junction')) {
     $srcMap = Get-ResolvedSourceMap $source
+    if ($mode -eq 'mirror-copy') {
+      $repoMap = Get-ResolvedSourceMap $RepoRoot
+      foreach ($k in $repoMap.Keys) {
+        if (-not $srcMap.ContainsKey($k)) { $srcMap[$k] = $repoMap[$k] }
+      }
+    }
     if ($mode -eq 'personal-junction') { $srcMap = Select-PersonalSourceMap $srcMap $RepoRoot }
     $wanted = @($srcMap.Keys)
   }
@@ -268,29 +270,15 @@ foreach ($h in $Hosts) {
       }
     }
   }
-  elseif ($mode -eq 'mirror-copy') {
-    if ($PruneMirror) {
-      Get-ChildItem -Path $dest -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object {
-        if ($_.Name -notin $wanted) {
-          Write-Host "    prune (not in union source): $($_.Name)" -ForegroundColor DarkYellow
-          if ($PSCmdlet.ShouldProcess($_.FullName, 'remove stale copy')) {
-            Remove-Item $_.FullName -Force -Recurse -ErrorAction SilentlyContinue
-          }
-        }
-      }
-    }
-    foreach ($name in $wanted) {
-      $src = $srcMap[$name]
-      if (-not $src) { Write-Warning "    skip ${name}: source unresolved."; continue }
-      $dst = Join-Path $dest $name
-      if (($name -in $CopyOnlyIfMissing) -and (Test-Path $dst)) { continue }  # submodule-backed; don't overwrite
-      if ($PSCmdlet.ShouldProcess($dst, "copy <- $src")) {
-        if (Test-Path $dst) { Remove-Item $dst -Force -Recurse -ErrorAction SilentlyContinue }
-        Copy-Item -Path $src -Destination $dst -Recurse -Force
-        Write-Host "    + copy $name" -ForegroundColor Gray
-      }
-    }
-  }
+}
+
+if ($Host_ -eq 'all' -or $Host_ -eq 'gemini') {
+  $geminiScript = Join-Path $ScriptDir 'sync-gemini.ps1'
+  $params = @{}
+  if ($Only.Count -gt 0) { $params['Only'] = $Only }
+  if ($PruneMirror) { $params['PruneMirror'] = $true }
+  if ($DryRun) { $params['DryRun'] = $true }
+  & $geminiScript @params
 }
 
 Write-Host "sync-skills: done." -ForegroundColor Cyan
