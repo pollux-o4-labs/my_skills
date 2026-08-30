@@ -25,13 +25,35 @@ try {
   $agy = Join-Path $TestHome '.gemini\config\skills'
   $skill = 'engineering-principles'
   $repoSkill = Join-Path $RepoRoot $skill
+  $defaultSkills = @(
+    'agent-orchestration-principles',
+    'business--growth--growth-and-revenue',
+    'business--operations--business-operations-and-governance',
+    'computer-science--application--application-engineering',
+    'computer-science--communication--technical-ecosystem',
+    'computer-science--foundations--computing-data-and-intelligence',
+    'computer-science--platform--systems-and-delivery',
+    'computer-science--product--product-experience',
+    'computer-science--quality--quality-and-security',
+    'documentation-principles',
+    'engineering-principles',
+    'git-workflow-principles',
+    'research-principles',
+    'resource-principles',
+    'skill-authoring-principles',
+    'verification-principles'
+  )
 
   New-Item -ItemType Directory -Path $claude, $codex, $agy -Force | Out-Null
-  & (Join-Path $ScriptDir 'sync-skills.ps1') -AllSkills 6>$null
+  & (Join-Path $ScriptDir 'sync-skills.ps1') 6>$null
 
-  Assert-JunctionTarget (Join-Path $custom $skill) $repoSkill
-  Assert-JunctionTarget (Join-Path $claude $skill) (Join-Path $custom $skill)
-  Assert-JunctionTarget (Join-Path $codex $skill) (Join-Path $custom $skill)
+  Assert-True (@(Get-ChildItem -LiteralPath $custom -Directory).Count -eq $defaultSkills.Count) 'default profile did not register every canonical skill'
+  foreach ($defaultSkill in $defaultSkills) {
+    $repoDefaultSkill = Join-Path $RepoRoot $defaultSkill
+    Assert-JunctionTarget (Join-Path $custom $defaultSkill) $repoDefaultSkill
+    Assert-JunctionTarget (Join-Path $claude $defaultSkill) (Join-Path $custom $defaultSkill)
+    Assert-JunctionTarget (Join-Path $codex $defaultSkill) (Join-Path $custom $defaultSkill)
+  }
   Assert-True (Test-Path (Join-Path $agy "$skill\SKILL.md")) 'agy copy missing'
 
   & (Join-Path $ScriptDir 'desync-skills.ps1') -Only $skill -RemoveGemini 6>$null
@@ -40,7 +62,7 @@ try {
   Assert-True (-not (Get-Item -LiteralPath (Join-Path $codex $skill) -Force -ErrorAction SilentlyContinue)) 'Codex link was not removed by desync'
   Assert-True (-not (Test-Path (Join-Path $agy $skill))) 'agy copy was not removed by desync'
   Remove-Item -LiteralPath (Join-Path $env:APPDATA 'my_skills') -Recurse -Force
-  & (Join-Path $ScriptDir 'sync-skills.ps1') -AllSkills 6>$null
+  & (Join-Path $ScriptDir 'sync-skills.ps1') 6>$null
 
   New-Item -ItemType Directory -Path (Join-Path $TestHome 'foreign\skill') -Force | Out-Null
   New-Item -ItemType Junction -Path (Join-Path $claude 'foreign-skill') -Target (Join-Path $TestHome 'foreign\skill') | Out-Null

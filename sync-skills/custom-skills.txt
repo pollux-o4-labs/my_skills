@@ -7,4 +7,21 @@
 # Add a line here → it links on every machine on the next `git pull`.
 # Remove a line → the owned link is pruned on the next sync (safe: only this repo's links).
 
-# Current canonical skills remain unregistered while the new structure is reviewed.
+# Default profile: every current canonical skill. This makes a fresh clone
+# converge after its initial sync; local opt-outs belong in disabled-skills.txt.
+agent-orchestration-principles
+business--growth--growth-and-revenue
+business--operations--business-operations-and-governance
+computer-science--application--application-engineering
+computer-science--communication--technical-ecosystem
+computer-science--foundations--computing-data-and-intelligence
+computer-science--platform--systems-and-delivery
+computer-science--product--product-experience
+computer-science--quality--quality-and-security
+documentation-principles
+engineering-principles
+git-workflow-principles
+research-principles
+resource-principles
+skill-authoring-principles
+verification-principles
