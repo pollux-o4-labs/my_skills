@@ -37,9 +37,11 @@ try {
     'computer-science--quality--quality-and-security',
     'documentation-principles',
     'engineering-principles',
+    'format-response',
     'git-workflow-principles',
     'research-principles',
     'resource-principles',
+    'restrict-line',
     'skill-authoring-principles',
     'verification-principles'
   )

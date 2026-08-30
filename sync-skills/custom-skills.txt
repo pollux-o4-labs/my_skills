@@ -7,8 +7,8 @@
 # Add a line here → it links on every machine on the next `git pull`.
 # Remove a line → the owned link is pruned on the next sync (safe: only this repo's links).
 
-# Default profile: every current canonical skill. This makes a fresh clone
-# converge after its initial sync; local opt-outs belong in disabled-skills.txt.
+# Default profile: every canonical skill plus retained response utilities. This makes
+# a fresh clone converge after its initial sync; local opt-outs belong in disabled-skills.txt.
 agent-orchestration-principles
 business--growth--growth-and-revenue
 business--operations--business-operations-and-governance
@@ -20,8 +20,10 @@ computer-science--product--product-experience
 computer-science--quality--quality-and-security
 documentation-principles
 engineering-principles
+format-response
 git-workflow-principles
 research-principles
 resource-principles
+restrict-line
 skill-authoring-principles
 verification-principles
