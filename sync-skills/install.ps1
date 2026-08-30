@@ -3,7 +3,7 @@
 
   Git does NOT ship hook activation with a clone (security). So core.hooksPath must
   be set once per clone. This sets it, then runs an initial sync so skills are linked
-  immediately. After this, every `git pull` auto-links newly pulled AIL skills via the
+  immediately. After this, every `git pull` refreshes the declared skill set via the
   OS-dispatching post-merge hook.
 
     pwsh -File sync-skills\install.ps1

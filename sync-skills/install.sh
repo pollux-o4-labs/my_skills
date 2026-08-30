@@ -7,7 +7,7 @@
 #
 #   bash sync-skills/install.sh
 #
-# After this, every `git pull` auto-links newly pulled AIL skills via the post-merge hook.
+# After this, every `git pull` refreshes the declared skill set via the post-merge hook.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
