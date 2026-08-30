@@ -198,39 +198,40 @@ foreach ($h in $Hosts) {
     if ($targets.Count -eq 0) {
       Write-Host "    curated: nothing to register (no AIL-* skills, empty manifest, no -Only)." -ForegroundColor Gray
     }
-    else {
-      # prune owned junctions that left the target set (dropped from manifest) or dangle.
-      # Foreign junctions / plain dirs are never touched. -Only limits pruning to named skills.
-      Get-ChildItem -Path $dest -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object {
-        $entry = $_
-        if (-not (Test-OwnedJunction $entry @($RepoRoot))) { return }
-        if ($Only.Count -gt 0 -and $entry.Name -notin $Only) { return }
-        $targetGone = -not (Test-Path $entry.Target)
-        $notWanted  = $entry.Name -notin $targets
-        if ($targetGone -or $notWanted) {
-          $why = if ($targetGone) { 'dangling' } else { 'dropped from manifest' }
-          Write-Host "    prune ($why): $($entry.Name)" -ForegroundColor DarkYellow
-          if ($PSCmdlet.ShouldProcess($entry.FullName, "remove ($why)")) { [IO.Directory]::Delete($entry.FullName) }
-        }
+    # Prune even when the curated target set is empty. This keeps migrations from
+    # leaving repo-owned dangling junctions behind after the last skill is removed.
+    # Foreign junctions / plain dirs are never touched. -Only limits pruning to named skills.
+    Get-ChildItem -Path $dest -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object {
+      $entry = $_
+      if (-not (Test-OwnedJunction $entry @($RepoRoot))) { return }
+      if ($Only.Count -gt 0 -and $entry.Name -notin $Only) { return }
+      $targetGone = -not (Test-Path $entry.Target)
+      $notWanted  = $entry.Name -notin $targets
+      if ($targetGone -or $notWanted) {
+        $why = if ($targetGone) { 'dangling' } else { 'dropped from manifest' }
+        Write-Host "    prune ($why): $($entry.Name)" -ForegroundColor DarkYellow
+        if ($PSCmdlet.ShouldProcess($entry.FullName, "remove ($why)")) { [IO.Directory]::Delete($entry.FullName) }
       }
-      foreach ($name in $targets) {
-        $src = $srcMap[$name]
-        $dst = Join-Path $dest $name
-        $existing = Get-Item $dst -ErrorAction SilentlyContinue
-        if ($existing) {
-          if ((Test-IsReparse $existing) -and ($existing.Target -ieq $src)) {
-            Write-Host "    = already registered: $name" -ForegroundColor Gray; continue
-          }
-          if (-not (Test-OwnedJunction $existing @($RepoRoot))) {
-            Write-Warning "    skip ${name}: hub slot occupied by foreign entry ($($existing.Target ?? 'plain dir')) — resolve manually."; continue
-          }
-          if ($PSCmdlet.ShouldProcess($dst, 'replace stale owned junction')) { [IO.Directory]::Delete($dst) }
+    }
+    foreach ($name in $targets) {
+      $src = $srcMap[$name]
+      $dst = Join-Path $dest $name
+      $existing = Get-Item $dst -ErrorAction SilentlyContinue
+      if ($existing) {
+        if ((Test-IsReparse $existing) -and ($existing.Target -ieq $src)) {
+          Write-Host "    = already registered: $name" -ForegroundColor Gray; continue
         }
-        if ($PSCmdlet.ShouldProcess($dst, "junction -> $src")) {
-          New-Item -ItemType Junction -Path $dst -Target $src | Out-Null
-          Write-Host "    + junction $name" -ForegroundColor Gray
+        if (-not (Test-OwnedJunction $existing @($RepoRoot))) {
+          Write-Warning "    skip ${name}: hub slot occupied by foreign entry ($($existing.Target ?? 'plain dir')) — resolve manually."; continue
         }
+        if ($PSCmdlet.ShouldProcess($dst, 'replace stale owned junction')) { [IO.Directory]::Delete($dst) }
       }
+      if ($PSCmdlet.ShouldProcess($dst, "junction -> $src")) {
+        New-Item -ItemType Junction -Path $dst -Target $src | Out-Null
+        Write-Host "    + junction $name" -ForegroundColor Gray
+      }
+    }
+    if ($targets.Count -gt 0) {
       foreach ($n in $Only) {
         if ($n -notin $allNames) { Write-Warning "    ${n}: not a repo skill (no $RepoRoot\$n\SKILL.md) — nothing to register." }
       }
