@@ -6,10 +6,9 @@
 
   Hosts differ in registration mechanism (see CLAUDE.md "스킬 등록 경로" table):
 
-    personal hub: curated links at ~\.agents\custom-skills. A full run auto-registers AIL-*
-                  skills (AI-Learned, always-on guidance) but NOT other repo skills
-                  (some are deliberately kept out). Register a non-AIL repo skill with
-                  `-Only <name>` — it junctions repo\<name> -> hub\<name> if absent.
+    personal hub: curated links at ~\.agents\custom-skills. A full run links the
+                  skills declared in custom-skills.txt. Register an additional skill
+                  with `-Only <name>` — it junctions repo\<name> -> hub\<name> if absent.
     Claude Code : junction  ~\.claude\skills\<name>  ->  personal hub
     Codex       : junction  ~\.codex\skills\<name>   ->  personal hub
     agy         : COPY (physical dir) to ~\.gemini\config\skills, with junctions resolved
@@ -21,7 +20,7 @@
   and skips them in ReadDir, so junction-linking gemini skills makes them invisible.
 
   SAFETY RULES (learned the hard way — do not "simplify" these away):
-   - Claude/Codex hosts contain junctions from OTHER sources (~\.agents\skills\*) and
+  - Claude/Codex hosts contain junctions from OTHER sources (~\.agents\skills\*) and
      plain local dirs (kcaveman, hatch-pet, .system). NEVER prune those. We only prune
      a junction when its recorded target is a DIRECT CHILD of this host's own source
      root (i.e. it was created by this script / this repo) and it is dangling or the
@@ -61,11 +60,11 @@ $CustomSkills = Join-Path $Home_ '.agents\custom-skills'
 $ClaudeSkills = Join-Path $Home_ '.claude\skills'
 $ConfigBase   = if ($env:APPDATA) { $env:APPDATA } else { Join-Path $env:USERPROFILE '.config' }
 $DisabledFile = if ($env:MY_SKILLS_DISABLED_FILE) { $env:MY_SKILLS_DISABLED_FILE } else { Join-Path (Join-Path $ConfigBase 'my_skills') 'disabled-skills.txt' }
-$LegacyClaudeSources = @(
+$MigrationClaudeSources = @(
   $RepoRoot,
   (Join-Path $env:USERPROFILE '.agents\my_skills')
 )
-$LegacyCodexSources = @($LegacyClaudeSources)
+$MigrationCodexSources = @($MigrationClaudeSources)
 
 # Skills whose gemini copy is refreshed ONLY when absent (submodule-backed; may hold unmerged WIP)
 $CopyOnlyIfMissing = @('md2ebook')
@@ -76,8 +75,8 @@ $CopyOnlyIfMissing = @('md2ebook')
 $NotSkills = @('.git','.github','.claude','.playwright-mcp','.system','review','sync-skills','docs','node_modules',
                'md-ebook','show-me','_legacy','templates')
 
-# Declarative manifest: non-AIL repo skills to link into the personal hub.
-# (AIL-* are auto by provenance and need not be listed.) One name per line; '#' comments.
+# Declarative manifest: repo skills to link into the personal hub.
+# One name per line; '#' comments.
 $ManifestFile = Join-Path $PSScriptRoot 'custom-skills.txt'
 $Manifest = @()
 if (Test-Path $ManifestFile) {
@@ -93,8 +92,8 @@ if (Test-Path $DisabledFile) {
 # mode 'mirror-copy': dest\<name> = physical copy of resolved source\<name>
 $Hosts = @(
   @{ name='custom'; dest=$CustomSkills;                                        source=$RepoRoot;      mode='curated-junction' },
-  @{ name='claude'; dest=$ClaudeSkills;                                        source=$CustomSkills;  mode='junction'; legacySources=$LegacyClaudeSources },
-  @{ name='codex';  dest=(Join-Path $Home_ '.codex\skills');                  source=$CustomSkills;  mode='junction'; legacySources=$LegacyCodexSources },
+  @{ name='claude'; dest=$ClaudeSkills;                                        source=$CustomSkills;  mode='junction'; legacySources=$MigrationClaudeSources },
+  @{ name='codex';  dest=(Join-Path $Home_ '.codex\skills');                  source=$CustomSkills;  mode='junction'; legacySources=$MigrationCodexSources },
   # agy's official global discovery root. Legacy ~/.gemini/skills is not managed;
   # ~/.gemini/antigravity-cli contains internal runtime state and is not a skill root.
   @{ name='agy';    dest=(Join-Path $Home_ '.gemini\config\skills');          source=$CustomSkills;  mode='mirror-copy' }
@@ -145,13 +144,13 @@ function Test-OwnedJunction($item, [string[]]$sourceRoots) {
 # The previous Codex topology used Claude as an intermediate hub. It is owned
 # only when that Claude entry can itself be proved repo-owned; arbitrary Claude
 # links must remain foreign.
-function Test-OwnedLegacyCodexJunction($item) {
+function Test-OwnedMigratedCodexJunction($item) {
   if (-not (Test-IsReparse $item)) { return $false }
   $target = $item.Target
   if (-not $target) { return $false }
   if ((Split-Path -Parent $target).TrimEnd('\') -ine $ClaudeSkills.TrimEnd('\')) { return $false }
   $claudeEntry = Get-Item -LiteralPath $target -Force -ErrorAction SilentlyContinue
-  return $claudeEntry -and (Test-OwnedJunction $claudeEntry $LegacyClaudeSources)
+  return $claudeEntry -and (Test-OwnedJunction $claudeEntry $MigrationClaudeSources)
 }
 
 # Resolve a personal-hub entry (junction or plain dir) to its physical path.
@@ -194,15 +193,15 @@ foreach ($h in $Hosts) {
     Write-Host "    source-only: no changes; this root controls the active skill set." -ForegroundColor Gray
   }
   elseif ($mode -eq 'curated-junction') {
-    # Full run registers AIL-* (auto by provenance) + custom-skills.txt manifest entries.
-    # -Only adds ad-hoc names; -AllSkills registers every repo skill.
+    # Full run registers custom-skills.txt manifest entries. -Only adds ad-hoc
+    # names; -AllSkills registers every repo skill.
     $allNames = @($srcMap.Keys | Where-Object { -not (Test-IsDisabled $_) })
-    $targets  = @($allNames | Where-Object { $AllSkills -or ($_ -like 'AIL-*') -or ($_ -in $Manifest) })
+    $targets  = @($allNames | Where-Object { $AllSkills -or ($_ -in $Manifest) })
     if ($Only.Count -gt 0) {
       $targets = @($targets + @($allNames | Where-Object { $_ -in $Only }) | Select-Object -Unique)
     }
     if ($targets.Count -eq 0) {
-      Write-Host "    curated: nothing to register (no AIL-* skills, empty manifest, no -Only/-AllSkills)." -ForegroundColor Gray
+      Write-Host "    curated: nothing to register (empty manifest, no -Only/-AllSkills)." -ForegroundColor Gray
     }
     # Prune even when the curated target set is empty. This keeps migrations from
     # leaving repo-owned dangling junctions behind after the last skill is removed.
@@ -246,7 +245,7 @@ foreach ($h in $Hosts) {
     #    Plain dirs and junctions pointing elsewhere are other installers' property — leave them.
     Get-ChildItem -Path $dest -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object {
       $entry = $_
-      $owned = (Test-OwnedJunction $entry $ownedSources) -or ($h.name -eq 'codex' -and (Test-OwnedLegacyCodexJunction $entry))
+      $owned = (Test-OwnedJunction $entry $ownedSources) -or ($h.name -eq 'codex' -and (Test-OwnedMigratedCodexJunction $entry))
       if (-not $owned) { return }
       if ($Only.Count -gt 0 -and $entry.Name -notin $Only) { return }
       $targetGone = -not (Test-Path $entry.Target)
@@ -268,7 +267,7 @@ foreach ($h in $Hosts) {
       $existing = Get-Item $dst -ErrorAction SilentlyContinue
       if ($existing) {
         if ((Test-IsReparse $existing) -and ($existing.Target -ieq $src)) { continue }  # already correct
-        $existingOwned = (Test-OwnedJunction $existing $ownedSources) -or ($h.name -eq 'codex' -and (Test-OwnedLegacyCodexJunction $existing))
+        $existingOwned = (Test-OwnedJunction $existing $ownedSources) -or ($h.name -eq 'codex' -and (Test-OwnedMigratedCodexJunction $existing))
         if (-not $existingOwned) {
           Write-Warning "    skip ${name}: dest occupied by foreign entry ($($existing.Target ?? 'plain dir')) — resolve manually."
           continue

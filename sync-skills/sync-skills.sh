@@ -9,21 +9,19 @@
 #   agy    : ~/.gemini/config/skills/<name> = physical copy
 #            (the official global discovery root)
 #
-# CURATED-HUB POLICY (matches the .ps1): a full run does NOT auto-add every repo
-# skill — some are deliberately kept out. EXCEPTION: AIL-* skills (AI-Learned,
-# always-on guidance) ARE auto-linked on a full run, so `git pull` + this script
-# connects newly pulled AIL skills automatically. Register any non-AIL repo skill
-# explicitly with --only <name>. Use --all-skills to link every repo skill.
+# CURATED-HUB POLICY (matches the .ps1): a full run links only skills named in
+# custom-skills.txt. Register an additional repo skill with --only <name>.
+# Use --all-skills to link every repo skill.
 #
 # SAFETY: only ever prune a symlink this sync owns (its target resolves to a direct
 # child of the current or legacy source root) and is dangling or left the hub.
 # Foreign symlinks and plain dirs (other installers' property) are never touched.
 #
 # Usage:
-#   sync-skills.sh                 # all existing hosts (AIL auto + any --only)
+#   sync-skills.sh                 # all existing hosts (manifest + any --only)
 #   sync-skills.sh --host claude   # one host (claude|codex|agy; gemini is an alias)
 #   sync-skills.sh --only foo      # also register repo skill 'foo' (comma-list ok)
-#   sync-skills.sh --all-skills    # link every repo skill, not just AIL-*
+#   sync-skills.sh --all-skills    # link every repo skill
 #   sync-skills.sh --prune-mirror  # allow pruning gemini copies absent from source
 #   sync-skills.sh --dry-run       # show actions, change nothing
 #   ~/.config/my_skills/disabled-skills.txt  # local names excluded from sync
@@ -70,8 +68,7 @@ NOT_SKILLS=(.git .github .claude .playwright-mcp .system review sync-skills docs
 # Skills whose gemini copy is refreshed only when absent (submodule-backed WIP).
 COPY_ONLY_IF_MISSING=(md2ebook)
 
-# Declarative manifest: non-AIL repo skills to link into the personal hub.
-# (AIL-* are auto by provenance and need not be listed.)
+# Declarative manifest: repo skills to link into the personal hub.
 MANIFEST_FILE="$SCRIPT_DIR/custom-skills.txt"
 MANIFEST=()
 if [ -f "$MANIFEST_FILE" ]; then
@@ -96,8 +93,8 @@ copy_if_missing(){ local n="$1"; for x in "${COPY_ONLY_IF_MISSING[@]}"; do [ "$n
 
 run() { if [ "$DRY" = 1 ]; then echo "    [dry] $*"; else eval "$@"; fi; }
 
-# The wanted set for a full run: AIL-* (auto by provenance) + manifest entries +
-# any --only names. --all-skills overrides and takes every repo skill with a SKILL.md.
+# The wanted set for a full run is manifest entries plus any --only names.
+# --all-skills overrides and takes every repo skill with a SKILL.md.
 wanted_names() {
   local n
   for d in "$REPO_ROOT"/*/; do
@@ -105,7 +102,7 @@ wanted_names() {
     is_not_skill "$n" && continue
     is_disabled "$n" && continue
     [ -f "$REPO_ROOT/$n/SKILL.md" ] || continue
-    if [ "$ALL_SKILLS" = 1 ] || [[ "$n" == AIL-* ]] || in_manifest "$n" || in_only "$n"; then
+    if [ "$ALL_SKILLS" = 1 ] || in_manifest "$n" || in_only "$n"; then
       echo "$n"
     fi
   done
@@ -147,7 +144,7 @@ link_host() {   # symlink-based host (claude, codex)
   local owned_roots=("$@")
   [ -d "$dest" ] || run "mkdir -p '$dest'"
   # 1) prune ONLY links this repo owns (target resolves under REPO_ROOT) that are
-  #    dangling OR no longer wanted (AIL dir removed, or dropped from the manifest).
+  #    dangling OR no longer wanted (removed from the manifest).
   #    Foreign links and plain dirs (other installers') are never touched. With --only,
   #    limit pruning to the named skills so an ad-hoc run can't clear the hub.
   for entry in "$dest"/*; do

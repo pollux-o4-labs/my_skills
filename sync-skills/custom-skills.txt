@@ -1,10 +1,9 @@
 # custom-skills.txt — declarative registration manifest for the personal skill hub.
 #
-# AIL-* skills are auto-linked by provenance and do not need to be listed here.
-# List a canonical non-AIL skill here when it is ready for local registration.
+# List a canonical skill here when it is ready for local registration.
 # One skill name (= directory name) per line. '#' starts a comment. Blank lines ignored.
 #
-# sync-skills.sh / sync-skills.ps1 link = AIL-* (auto) ∪ the names below.
+# sync-skills.sh / sync-skills.ps1 link the names below.
 # Add a line here → it links on every machine on the next `git pull`.
 # Remove a line → the owned link is pruned on the next sync (safe: only this repo's links).
 
