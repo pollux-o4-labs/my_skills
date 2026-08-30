@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # desync-skills.sh — disable this repo's skills on the local machine.
 #
-# Claude/Codex entries are removed only when their link ownership can be proved.
+# Personal-hub/Claude/Codex entries are removed only when their link ownership can be proved.
 # agy's official global root is a physical-copy location. Legacy Gemini copies
 # are preserved unless --remove-legacy-gemini is explicitly requested.
 set -euo pipefail
@@ -9,6 +9,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 HOME_DIR="${HOME}"
+CUSTOM_DIR="$HOME_DIR/.agents/custom-skills"
 CLAUDE_DIR="$HOME_DIR/.claude/skills"
 CODEX_DIR="$HOME_DIR/.codex/skills"
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME_DIR/.config}/my_skills"
@@ -64,17 +65,22 @@ is_repo_skill_name() {
   [ -f "$REPO_ROOT/$n/SKILL.md" ]
 }
 
-owned_claude_link() {
-  local path="$1"
+owned_link_to() {
+  local path="$1"; shift
   [ -L "$path" ] || return 1
   local target; target="$(readlink "$path")"
-  case "$target" in
-    "$REPO_ROOT"/*) [ "$(dirname "$target")" = "$REPO_ROOT" ] ;;
-    *) return 1 ;;
-  esac
+  local root
+  for root in "$@"; do
+    case "$target" in
+      "$root"/*) [ "$(dirname "$target")" = "$root" ] && return 0 ;;
+    esac
+  done
+  return 1
 }
 
-owned_codex_link() {
+owned_custom_link() { owned_link_to "$1" "$REPO_ROOT"; }
+owned_claude_link() { owned_link_to "$1" "$CUSTOM_DIR" "$REPO_ROOT" "$HOME_DIR/.agents/my_skills"; }
+owned_legacy_codex_link() {
   local path="$1"
   [ -L "$path" ] || return 1
   local target; target="$(readlink "$path")"
@@ -82,8 +88,9 @@ owned_codex_link() {
     "$CLAUDE_DIR"/*) [ "$(dirname "$target")" = "$CLAUDE_DIR" ] || return 1 ;;
     *) return 1 ;;
   esac
-  owned_claude_link "$target"
+  owned_link_to "$target" "$REPO_ROOT" "$HOME_DIR/.agents/my_skills"
 }
+owned_codex_link()  { owned_link_to "$1" "$CUSTOM_DIR" "$REPO_ROOT" "$HOME_DIR/.agents/my_skills" || owned_legacy_codex_link "$1"; }
 
 candidate_names() {
   local d name
@@ -91,6 +98,10 @@ candidate_names() {
     [ -f "$d/SKILL.md" ] || continue
     name="$(basename "$d")"
     is_repo_skill_name "$name" && printf '%s\n' "$name"
+  done
+  for d in "$CUSTOM_DIR"/*; do
+    [ -e "$d" ] || [ -L "$d" ] || continue
+    owned_custom_link "$d" && printf '%s\n' "$(basename "$d")"
   done
   for d in "$CLAUDE_DIR"/*; do
     [ -e "$d" ] || [ -L "$d" ] || continue
@@ -142,6 +153,11 @@ while IFS= read -r name; do
   claude_link="$CLAUDE_DIR/$name"
   if owned_claude_link "$claude_link"; then
     remove_link "$claude_link" claude
+  fi
+
+  custom_link="$CUSTOM_DIR/$name"
+  if owned_custom_link "$custom_link"; then
+    remove_link "$custom_link" personal-hub
   fi
 
   agy_copy="$AGY_DIR/$name"

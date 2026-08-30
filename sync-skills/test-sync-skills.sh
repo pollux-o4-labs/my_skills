@@ -16,10 +16,13 @@ bash "$SYNC" --host claude --all-skills >/dev/null
 bash "$SYNC" --host codex --all-skills >/dev/null
 bash "$SYNC" --host agy --all-skills >/dev/null
 
+[ -L "$HOME/.agents/custom-skills/engineering-principles" ]
 [ -L "$HOME/.claude/skills/engineering-principles" ]
 [ -L "$HOME/.codex/skills/engineering-principles" ]
-[ "$(readlink "$HOME/.codex/skills/engineering-principles")" = "$HOME/.claude/skills/engineering-principles" ]
+[ "$(readlink "$HOME/.claude/skills/engineering-principles")" = "$HOME/.agents/custom-skills/engineering-principles" ]
+[ "$(readlink "$HOME/.codex/skills/engineering-principles")" = "$HOME/.agents/custom-skills/engineering-principles" ]
 [ -d "$HOME/.gemini/config/skills/engineering-principles" ]
+[ -L "$HOME/.agents/custom-skills/research-principles" ]
 [ -L "$HOME/.claude/skills/research-principles" ]
 [ -L "$HOME/.codex/skills/research-principles" ]
 [ -d "$HOME/.gemini/config/skills/research-principles" ]
@@ -27,6 +30,7 @@ bash "$SYNC" --host agy --all-skills >/dev/null
 [ ! -e "$HOME/.claude/skills/_legacy" ]
 
 bash "$DESYNC" --only engineering-principles >/dev/null
+[ ! -e "$HOME/.agents/custom-skills/engineering-principles" ]
 [ ! -e "$HOME/.claude/skills/engineering-principles" ]
 [ ! -e "$HOME/.codex/skills/engineering-principles" ]
 [ -d "$HOME/.gemini/config/skills/engineering-principles" ]

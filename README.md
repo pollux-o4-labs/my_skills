@@ -38,6 +38,6 @@ bash sync-skills/sync-skills.sh --dry-run
 bash sync-skills/sync-skills.sh --all-skills
 ```
 
-현재 정본 스킬은 `sync-skills/claude-skills.txt`에서 제외해 비등록 상태로 둔다. `templates/`와 `_legacy/`는 동기화 대상이 아니다.
+현재 정본 스킬은 `sync-skills/custom-skills.txt`에서 제외해 비등록 상태로 둔다. 개인 허브 `~/.agents/custom-skills`가 선택된 스킬을 Claude, Codex, agy에 배포한다. `templates/`와 `_legacy/`는 동기화 대상이 아니다.
 
 agy의 공식 전역 스킬 경로는 `~/.gemini/config/skills`다. `~/.gemini/antigravity-cli`는 런타임 상태 경로이므로 동기화하지 않는다.

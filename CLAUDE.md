@@ -17,13 +17,14 @@ Claude Code, Codex, Gemini CLI 공용 커스텀 스킬 레포. 각 스킬 동작
 - 기존 스킬은 `_legacy/`에 보존하고, 현재 정본은 도메인별 원칙 스킬로 관리한다.
 - CLI 별 등록 경로와 전역 지침 파일 차이를 섞지 말고 대상 host 를 먼저 식별
 
-## 스킬 등록 경로 (host별 — 2026-07-13 sync-skills.ps1 실측: repo → 허브 → codex·gemini)
+## 스킬 등록 경로 (host별 — repo → 개인 허브 → 각 CLI)
 
 | Host | 경로 | 방식 | 주의 |
 |---|---|---|---|
-| Claude Code | `~/.claude/skills/<name>` | 이 repo로 **정션** (curated 허브) | 즉시 반영 |
-| Codex | `~/.codex/skills/<name>` | 허브 등재 항목 중 타깃이 이 repo 하위인 것만 선별해 **repo 물리 경로로 재정션** | 로컬 sync 로 반영. `~/.agents/my_skills` clone 은 legacy 소스(정리 대상) |
-| agy (Antigravity) | `~/.gemini/config/skills/<name>` | 허브에서 **복사본** | 최신 공식 전역 탐색 경로. `~/.gemini/skills`는 레거시로 기본 보존, `~/.gemini/antigravity-cli`는 내부 상태라 건드리지 않음 |
+| 개인 허브 | `~/.agents/custom-skills/<name>` | 이 repo로 **정션** | manifest/AIL 정책의 단일 적용 지점 |
+| Claude Code | `~/.claude/skills/<name>` | 개인 허브로 **정션** | 즉시 반영 |
+| Codex | `~/.codex/skills/<name>` | 개인 허브로 **정션** | 로컬 sync 로 반영. `~/.agents/my_skills` clone 은 legacy 소스(정리 대상) |
+| agy (Antigravity) | `~/.gemini/config/skills/<name>` | 개인 허브에서 **복사본** | 최신 공식 전역 탐색 경로. `~/.gemini/skills`는 레거시로 기본 보존, `~/.gemini/antigravity-cli`는 내부 상태라 건드리지 않음 |
 
 새 스킬 등록 시 세 host 모두 처리하고, repo에서 스킬 삭제 시 각 host의 정션·복사본도 제거(dangling 정션 방지).
 
@@ -31,9 +32,9 @@ Claude Code, Codex, Gemini CLI 공용 커스텀 스킬 레포. 각 스킬 동작
 - **Windows**: `sync-skills/sync-skills.ps1` (구 `~/.gemini/antigravity-cli/sync-skills.ps1` 대체). `-Host claude|codex|gemini`, `-Only <스킬명>`, `-WhatIf`(드라이런), Gemini prune 은 `-PruneMirror` 명시 시.
 - **Linux/macOS**: `sync-skills/sync-skills.sh` (동일 의미). `--host`, `--only a,b`, `--all-skills`, `--dry-run`, `--prune-mirror`. host 는 심볼릭 링크(claude·codex)·복사(gemini)로 등록하며, **해당 host 의 skills 디렉토리가 이미 있을 때만** 갱신한다(미설치 host 는 새로 만들지 않음).
 
-**로컬 비활성화**: `sync-skills/desync-skills.sh --all` 또는 `desync-skills.ps1 -All`은 저장소 소유 Claude/Codex 링크를 제거하고, 머신별 제외 목록(`~/.config/my_skills/disabled-skills.txt` 또는 Windows `%APPDATA%\my_skills\disabled-skills.txt`)에 기록한다. 이후 sync/pull에서도 해당 스킬은 다시 연결하지 않는다. 특정 스킬은 `--only <name>`/`-Only <name>`을 사용하고, 재활성화는 해당 목록에서 줄을 지운 뒤 sync한다. agy 공식 경로의 물리 복사본은 기본 보존하며, 명시적으로 `--remove-gemini`/`-RemoveGemini`를 지정한 경우에만 제거한다. 레거시 `~/.gemini/skills` 복사본은 `--remove-legacy-gemini`/`-RemoveLegacyGemini`를 별도로 지정해야 하며, `~/.gemini/antigravity-cli`는 절대 건드리지 않는다.
+**로컬 비활성화**: `sync-skills/desync-skills.sh --all` 또는 `desync-skills.ps1 -All`은 저장소 소유 개인 허브·Claude·Codex 링크를 제거하고, 머신별 제외 목록(`~/.config/my_skills/disabled-skills.txt` 또는 Windows `%APPDATA%\my_skills\disabled-skills.txt`)에 기록한다. 이후 sync/pull에서도 해당 스킬은 다시 연결하지 않는다. 특정 스킬은 `--only <name>`/`-Only <name>`을 사용하고, 재활성화는 해당 목록에서 줄을 지운 뒤 sync한다. agy 공식 경로의 물리 복사본은 기본 보존하며, 명시적으로 `--remove-gemini`/`-RemoveGemini`를 지정한 경우에만 제거한다. 레거시 `~/.gemini/skills` 복사본은 `--remove-legacy-gemini`/`-RemoveLegacyGemini`를 별도로 지정해야 하며, `~/.gemini/antigravity-cli`는 절대 건드리지 않는다.
 
-**커스텀 정책 — 선언적 매니페스트 + AIL 자동**: 전체 실행이 링크하는 집합 = **루트의 `AIL-*` 스킬** ∪ **`sync-skills/claude-skills.txt` 매니페스트에 적힌 비-AIL 스킬**. `_legacy/`와 `templates/`는 정본 스킬 탐색에서 제외한다. 현재 정본 스킬은 매니페스트에서 제외해 비등록 상태로 둔다. 등록할 스킬은 매니페스트에 한 줄 추가하거나 `--only`/`-Only`로 지정한다.
+**커스텀 정책 — 선언적 매니페스트 + AIL 자동**: 개인 허브가 링크하는 집합 = **루트의 `AIL-*` 스킬** ∪ **`sync-skills/custom-skills.txt` 매니페스트에 적힌 비-AIL 스킬**. `_legacy/`와 `templates/`는 정본 스킬 탐색에서 제외한다. 현재 정본 스킬은 매니페스트에서 제외해 비등록 상태로 둔다. 등록할 스킬은 매니페스트에 한 줄 추가하거나 `--only`/`-Only`로 지정한다.
 
 **pull 시 자동 연결 (git hook)**: `sync-skills/git-hooks/post-merge` 가 `git pull`/merge 직후 `sync-skills.sh` 를 돌려 새로 받은 AIL 스킬을 자동 링크한다. (GitHub Actions 는 로컬 `~/.claude` 에 접근 불가 — 자동 연결은 반드시 로컬 hook 으로 한다. Actions 는 repo 쪽 검증 용도로만.)
 
